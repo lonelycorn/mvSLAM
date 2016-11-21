@@ -1,0 +1,14 @@
+Import("env")
+targets = []
+
+#=========================#
+#     REGULAR TARGETS     #
+#=========================#
+source_files = ['time.cpp',
+                'event.cpp',
+                'mutex.cpp',
+               ]    
+targets += env.mvSLAM_Library('mvSLAM_os', source_files)
+
+
+Return(["targets"])

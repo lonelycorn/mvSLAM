@@ -1,0 +1,12 @@
+Import("env")
+targets = []
+
+#=========================#
+#     REGULAR TARGETS     #
+#=========================#
+source_files = ['math.cpp',
+               ]    
+targets += env.mvSLAM_Library('mvSLAM_base', source_files)
+
+
+Return(["targets"])

@@ -1,0 +1,16 @@
+Import("env")
+targets = []
+
+#=========================#
+#     LIBRARY TARGETS     #
+#=========================#
+mvSLAM_base = SConscript('base/SConscript', exports=['env'])
+targets += mvSLAM_base
+
+mvSLAM_os = SConscript('os/SConscript', exports=['env'])
+targets += mvSLAM_os
+
+mvSLAM_vision= SConscript('vision/SConscript', exports=['env'])
+targets += mvSLAM_vision
+
+Return(["targets"])
