@@ -67,7 +67,7 @@ load_camera_intrinsics(const std::string &filename,
         intrinsics(r, c) = value;
         ++next;
     }
-    return in && (next == 9);
+    return (next == 9);
 }
 
 }

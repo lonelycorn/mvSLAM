@@ -1,5 +1,6 @@
 #pragma once
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <cmath>
 #include <system-config.hpp>
 
@@ -9,6 +10,7 @@ using Matrix3Type = Eigen::Matrix<ScalarType, 3, 3>;
 using Vector3Type = Eigen::Matrix<ScalarType, 3, 1>;
 using Matrix6Type = Eigen::Matrix<ScalarType, 6, 6>;
 using Vector6Type = Eigen::Matrix<ScalarType, 6, 1>;
+using Matrix3x4Type = Eigen::Matrix<ScalarType, 3, 4>;
 
 /** square of the give value
  */
@@ -86,7 +88,7 @@ public:
     SO3 &operator=(const SO3 &) = default;
     SO3 &operator=(SO3 &&) = default;
 
-    const Matrix3Type &get_matrx() const
+    const Matrix3Type &get_matrix() const
     {
         return _R;
     }
@@ -137,6 +139,11 @@ public:
     Matrix3Type adjoint() const
     {
         return _R;
+    }
+
+    void reset()
+    {
+        _R = Matrix3Type::Identity();
     }
 
     /** Get the angle-axis representation of the SO3.
@@ -213,6 +220,12 @@ public:
         //return SE3(_R.inverse(), -(_R.get_matrix().transpose() * _t));
     }
 
+    void reset()
+    {
+        _R.reset();
+        _t = Vector3Type::Zero();
+    }
+
     Vector3Type operator*(const Vector3Type &v) const
     {
         return _R * v + _t;
@@ -286,4 +299,8 @@ private:
     SO3 _R;
     Vector3Type _t;
 };
+
+SE3 Matrix3x4Type_to_SE3(const Matrix3x4Type &m);
+Matrix3x4Type SE3_to_Matrix3x4Type(const SE3 &s);
+
 }

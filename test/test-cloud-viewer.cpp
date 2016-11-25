@@ -1,10 +1,13 @@
 #include <pcl/visualization/cloud_viewer.h>
-#include <os/mutex.hpp>
-#include <os/event.hpp>
 #include <iostream>
 #include <sstream>
 #include <random>
 #include <functional>
+
+#include <system-config.hpp>
+#include <os/mutex.hpp>
+#include <os/event.hpp>
+
 using namespace std;
 int value_shared;
 mvSLAM::Mutex mutex;
@@ -19,11 +22,36 @@ viewerOneOff(pcl::visualization::PCLVisualizer &viewer)
     viewer.setBackgroundColor(0.0, 0.0, 0.0);
     viewer.addCoordinateSystem(1.0);
     viewer.initCameraParameters();
+
+    // draw a sphere
     pcl::PointXYZ p;
     p.x = 1.0;
     p.y = 0.0;
     p.z = 0.0;
     viewer.addSphere(p, 0.25, "sphere", 0);
+
+    // draw a tetrahedron to represent a camera pose
+    /*
+    pcl::PointCloud<pcl::PointXYZ>::Ptr camera_symbol(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointXYZ pinhole(-1.0, 0.0, 0.0);
+    pcl::PointXYZ tl(-2.0, -1.0, -1.0);
+    pcl::PointXYZ tr(-2.0, -1.0, +1.0);
+    pcl::PointXYZ bl(-2.0, +1.0, +1.0);
+    pcl::PointXYZ br(-2.0, +1.0, -1.0);
+    camera_symbol->push_back(tl);
+    camera_symbol->push_back(tr);
+    camera_symbol->push_back(bl);
+    camera_symbol->push_back(br);
+    camera_symbol->push_back(tl);
+    camera_symbol->push_back(pinhole);
+    camera_symbol->push_back(tr);
+    camera_symbol->push_back(pinhole);
+    camera_symbol->push_back(bl);
+    camera_symbol->push_back(pinhole);
+    camera_symbol->push_back(br);
+    viewer.addPolygon<pcl::PointXYZ>(camera_symbol, 1.0, 1.0, 1.0, "camera", 0);
+    */
+
     std::cout<<"PCLVisualizer initialized."<<std::endl;
     {
         mvSLAM::Lock lock(event_mutex);
@@ -53,13 +81,13 @@ get_random_point_xyzrgb()
 {
     static std::default_random_engine generator;
     static std::uniform_int_distribution<int> uniform_dist(0, 255);
-    static std::normal_distribution<double> normal_dist(0.0, 1.0);
+    static std::normal_distribution<mvSLAM::ScalarType> normal_dist(0.0, 1.0);
     uint8_t r = uniform_dist(generator); 
     uint8_t g = uniform_dist(generator); 
     uint8_t b = uniform_dist(generator); 
-    double x = normal_dist(generator);
-    double y = normal_dist(generator);
-    double z = normal_dist(generator);
+    mvSLAM::ScalarType x = normal_dist(generator);
+    mvSLAM::ScalarType y = normal_dist(generator);
+    mvSLAM::ScalarType z = normal_dist(generator);
     pcl::PointXYZRGB p(r, g, b);
     p.x = x;
     p.y = y;
@@ -71,10 +99,10 @@ pcl::PointXYZ
 get_random_point_xyz()
 {
     static std::default_random_engine generator;
-    static std::normal_distribution<double> normal_dist(0.0, 1.0);
-    double x = normal_dist(generator);
-    double y = normal_dist(generator);
-    double z = normal_dist(generator);
+    static std::normal_distribution<mvSLAM::ScalarType> normal_dist(0.0, 1.0);
+    mvSLAM::ScalarType x = normal_dist(generator);
+    mvSLAM::ScalarType y = normal_dist(generator);
+    mvSLAM::ScalarType z = normal_dist(generator);
     pcl::PointXYZ p(x, y, z);
     std::cout<<"("<<p.x<<", "<<p.y<<", "<<p.z<<")"<<std::endl;
     return p;

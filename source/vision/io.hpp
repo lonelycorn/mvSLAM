@@ -1,5 +1,6 @@
 #pragma once
 #include <base/image.hpp>
+#include <base/space.hpp>
 #include <string>
 
 namespace mvSLAM

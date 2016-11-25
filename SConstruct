@@ -9,9 +9,9 @@ def build_and_install_mvSLAM_library(env, libname, sources):
 def build_and_install_mvSLAM_program(env, target, source):
     env1 = env.Clone()
     internal_libs = [
-                "mvSLAM_base",
-                "mvSLAM_os",
                 "mvSLAM_vision",
+                "mvSLAM_os",
+                "mvSLAM_base",
                 ]
     libs = internal_libs + env["mvSLAM_external_dependency"]
     env1.Append(LIBS=libs)
@@ -111,8 +111,8 @@ MVSLAM_EXTERNAL_DEPENDENCY = [
                 #"opencv_text",
                 #"opencv_tracking",
                 #"opencv_xfeatures2d",
-                #"opencv_calib3d",
-                #"opencv_features2d",
+                "opencv_calib3d",
+                "opencv_features2d",
                 #"opencv_shape",
                 #"opencv_video",
                 #"opencv_ml",

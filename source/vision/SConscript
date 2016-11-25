@@ -5,7 +5,8 @@ targets = []
 #     REGULAR TARGETS     #
 #=========================#
 source_files = ['io.cpp',
-                #'sfm.cpp',
+                'visual-feature.cpp',
+                'sfm.cpp',
                ]    
 targets += env.mvSLAM_Library('mvSLAM_vision', source_files)
 

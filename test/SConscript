@@ -21,5 +21,11 @@ targets += test_cloud_viewer
 test_image_io = env.mvSLAM_Program('test-image-io', ['test-image-io.cpp'])
 targets += test_image_io
 
+test_visual_feature = env.mvSLAM_Program('test-visual-feature', ['test-visual-feature.cpp'])
+targets += test_visual_feature
+
+test_sfm_reconstruction = env.mvSLAM_Program('test-sfm-reconstruction', ['test-sfm-reconstruction.cpp'])
+targets += test_sfm_reconstruction
+
 Return(['targets'])
 

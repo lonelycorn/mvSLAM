@@ -31,4 +31,20 @@ Matrix3Type rodrigues(const Vector3Type &v)
     return Matrix3Type::Identity() + A * K + B * K * K;
 }
 
+Matrix3x4Type SE3_to_Matrix3x4Type(const SE3 &s)
+{
+    Matrix3x4Type m;
+    m.block<3, 3>(0, 0) = s.rotation().get_matrix();
+    m.block<3, 1>(0, 3) = s.translation();
+    return m;
+}
+
+SE3 Matrix3x4Type_to_SE3(const Matrix3x4Type &m)
+{
+    Matrix3Type R = m.block<3, 3>(0, 0);
+    Vector3Type t = m.block<3, 1>(0, 3);
+    SE3 s(SO3(R), t);
+    return s;
+}
+
 }

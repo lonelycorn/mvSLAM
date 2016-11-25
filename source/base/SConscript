@@ -5,6 +5,7 @@ targets = []
 #     REGULAR TARGETS     #
 #=========================#
 source_files = ['math.cpp',
+                'image.cpp',
                ]    
 targets += env.mvSLAM_Library('mvSLAM_base', source_files)
 
