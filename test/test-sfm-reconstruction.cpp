@@ -1,10 +1,12 @@
 #include <pcl/visualization/cloud_viewer.h>
 #include <base/error.hpp>
 #include <base/image.hpp>
+#include <base/visualization.hpp>
 #include <vision/io.hpp>
 #include <vision/visual-feature.hpp>
 #include <vision/sfm.hpp>
 #include <cstdio>
+#include <iostream>
 #include <vector>
 
 void print_help(const char *cmdline)
@@ -48,23 +50,36 @@ int main(int argc, char **argv)
         std::printf("Reconstruction failed.\n");
         return mvSLAM::ApplicationErrorCode::AEC_BAD_DATA;
     }
-        
-    // visualization
-    pcl::visualization::CloudViewer viewer("3D Reconstruction");
-    pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
-    size_t point_count = pointsin1_scaled.size();
-    for (size_t i = 0; i < point_count; ++i)
+    std::cout<<"scaled translation="<<std::endl;
+    std::cout<<pose2in1_scaled.translation()<<std::endl;
+    std::cout<<"scaled rotation="<<std::endl;
+    std::cout<<pose2in1_scaled.rotation().get_matrix()<<std::endl;
+    /*
+    std::printf("pointsin1_scaled =\n");
+    for (const auto &p : pointsin1_scaled)
     {
-        const auto &p = pointsin1_scaled[i];
-        pc->push_back(pcl::PointXYZ(p.x(), p.y(), p.z()));
+        std::cout<< p.x() <<", "<<p.y()<<","<<p.z()<<std::endl;
     }
+    */
+        
+    // visualize points
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pc =
+        mvSLAM::Point3D_to_PointCloud(pointsin1_scaled);
 
-    viewer.showCloud(pc);
+    pcl::visualization::PCLVisualizer viewer("3D Reconstruction");
+    viewer.addPointCloud(pc, "triangulated points");
+    viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
+                                            1, "triangulated points");
+
+    // visualize camera poses
+    mvSLAM::add_camera_representation(mvSLAM::SE3(), "1", viewer);
+    mvSLAM::add_camera_representation(pose2in1_scaled, "2", viewer);
+
+    mvSLAM::initialize_visualizer(viewer);
+
     while (!viewer.wasStopped())
     {
-        // do some IO here to avoid busy waiting.
-        std::string s;
-        std::getline(std::cin, s);
+        viewer.spinOnce(100);
     }
 
     return mvSLAM::ApplicationErrorCode::AEC_NONE;

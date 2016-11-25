@@ -1,4 +1,4 @@
-#include <pcl/visualization/cloud_viewer.h>
+#include <pcl/visualization/pcl_visualizer.h>
 #include <iostream>
 #include <sstream>
 #include <random>
@@ -11,12 +11,6 @@
 #include <base/math.hpp>
 
 using namespace std;
-int value_shared;
-mvSLAM::Mutex mutex;
-
-mvSLAM::Mutex event_mutex;
-mvSLAM::Event event;
-bool ready = false;
 
 void
 viewerOneOff(pcl::visualization::PCLVisualizer &viewer)
@@ -34,27 +28,6 @@ viewerOneOff(pcl::visualization::PCLVisualizer &viewer)
     mvSLAM::add_camera_representation(mvSLAM::SE3(), "camera", viewer);
 
     std::cout<<"PCLVisualizer initialized."<<std::endl;
-    {
-        mvSLAM::Lock lock(event_mutex);
-        ready = true;
-        event.trigger_all();
-    }
-}
-
-void
-viewerPsycho(pcl::visualization::PCLVisualizer &viewer)
-{
-    std::stringstream ss;
-    int value;
-    {
-        mvSLAM::Lock lock(mutex);
-        value = value_shared;
-    }
-    ss<<"[Once per viewer loop] value = "<<value;
-    viewer.removeShape("text", 0);
-    viewer.addText(ss.str(), 200, 300, "text", 0);
-
-    mvSLAM::Lock lock(mutex);
 }
 
 pcl::PointXYZRGB
@@ -91,43 +64,22 @@ get_random_point_xyz()
 
 int main()
 {
-    pcl::visualization::CloudViewer viewer("Cloud Viewer");
+    pcl::visualization::PCLVisualizer viewer("PCL Visualizer");
+    viewerOneOff(viewer);
+
     const int point_count = 2000;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc(new pcl::PointCloud<pcl::PointXYZRGB>);
     for (int i = 0; i < point_count; ++i)
     {
         pc->push_back(get_random_point_xyzrgb());
     }
-    /*
-    pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
-    for (int i = 0; i < point_count; ++i)
-    {
-        pc->push_back(get_random_point_xyz());
-    }
-    */
-    viewer.showCloud(pc);
+    viewer.addPointCloud<pcl::PointXYZRGB>(pc, "example points");
+    //(void) pc;
 
 
-    // called once when starting the thread
-    viewer.runOnVisualizationThreadOnce(viewerOneOff);
-
-    // called every iteration 
-    viewer.runOnVisualizationThread(viewerPsycho);
-
-    {
-        mvSLAM::Lock lock(event_mutex);
-        while (!ready)
-            event.wait(event_mutex);
-    }
     while (!viewer.wasStopped())
     {
-        int value;
-        std::cout<<"input value = ";
-        std::cin>>value;
-        {
-            mvSLAM::Lock lock(mutex);
-            value_shared = value;
-        }
+        viewer.spinOnce(100);
     }
 
     return 0;

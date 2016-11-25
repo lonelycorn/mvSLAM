@@ -8,40 +8,6 @@ namespace mvSLAM
 {
 
 /**
- * @brief Estimate the camera pose of image 2 relative to that
-          of image 1.
- *        This is done by dissecting the Essential matrix.
- * @param [in] image1   image taken at camera pose 1.
- * @prarm [in] image2   image taken at camera pose 2.
- * @param [in] intrinsics   intrinsics of the camera
- * @param [out] pose2in1    camera pose 2 in camera pose 1 ref frame.
- * @return whether the estimation was successful.
- */
-/*
-bool estimate_relative_pose(const VisualFeature &vf1,
-                            const VisualFeature &vf2,
-                            const CameraIntrinsics &K,
-                            Pose &pose2in1);
-*/
-
-/**
- * @brief
- * @param [in] vf1      visual feature extracted from image 1.
- * @param [in] vf2      visual feature extracted from image 2.
- * @prarm [in] pose2in1 camera pose 2 in camera pose 1 ref frame.
- * @param [in] intrinsics intrinsics of the camera.
- * @param [out] points  triangulated points, in camera pose 1 ref frame.
- * @return whether the triangulation was successful.
- */
-/*
-bool triangulate_points(const VisualFeature &vf1,
-                        const VisualFeature &vf2,
-                        const CameraIntrinsics &K,
-                        const Pose &pose2in1,
-                        std::vector<Point3D> &pointsin1);
-*/
-
-/**
  * @brief
  * @param [in] image1   image taken at camera pose 1.
  * @prarm [in] image2   image taken at camera pose 2.

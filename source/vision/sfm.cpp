@@ -72,7 +72,7 @@ bool reconstruct_scene(const ImageGrayscale &image1,
         ERROR("not enough inliers when computing fundamental matrix.");
         return false;
     }
-    //std::cout<<"Fundamental matrix:\n"<<F_Mat<<std::endl;
+    std::cout<<"Fundamental matrix:\n"<<F_Mat<<std::endl;
 
     // compute essential matrix
     LOG("Computing essential matrix.");
@@ -81,7 +81,7 @@ bool reconstruct_scene(const ImageGrayscale &image1,
     K_Mat = Matrix3Type_to_Mat(K);
     cv::transpose(K_Mat, K_T_Mat);
     cv::Mat E_Mat = K_T_Mat * F_Mat * K_Mat;
-    //std::cout<<"Essential matrix:\n"<<E_Mat<<std::endl;
+    std::cout<<"Essential matrix:\n"<<E_Mat<<std::endl;
 
     // recover pose by decomposing essential matrix
     LOG("Recovering relative pose.");
@@ -99,12 +99,14 @@ bool reconstruct_scene(const ImageGrayscale &image1,
                     center,
                     inlier_mask); // as input: marks points that should be used
                                   // as output: marks points passed cheirality checks
-    //R_Mat.convertTo(R_Mat, CV_32FC1);
-    //t_Mat.convertTo(t_Mat, CV_32FC1);
+    R_Mat.convertTo(R_Mat, CV_32FC1); // NOTE
+    t_Mat.convertTo(t_Mat, CV_32FC1); // NOTE
     cv::Mat pose2in1_Mat(3, 4, CV_32FC1);
     R_Mat.copyTo(pose2in1_Mat(cv::Range(0, 3), cv::Range(0, 3)));
     t_Mat.copyTo(pose2in1_Mat(cv::Range(0, 3), cv::Range(3, 4)));
-    //std::cout<<"pose2in1 =\n"<<pose2in1_Mat<<std::endl;
+    std::cout<<"R_Mat = \n"<<R_Mat<<std::endl;
+    std::cout<<"t_Mat = \n"<<t_Mat<<std::endl;
+    std::cout<<"pose2in1 =\n"<<pose2in1_Mat<<std::endl;
 
     LOG("Checking inliers.");
     inlier_count = 0;
@@ -132,8 +134,8 @@ bool reconstruct_scene(const ImageGrayscale &image1,
     cv::Mat camera_matrix2(3, 4, CV_32FC1);
     K_Mat.copyTo(camera_matrix1(cv::Range(0, 3), cv::Range(0, 3)));
     K_Mat.copyTo(camera_matrix2(cv::Range(0, 3), cv::Range(0, 3)));
-    //std::cout<<"camera_matrix1 =\n"<<camera_matrix1<<std::endl;
-    //std::cout<<"camera_matrix2 =\n"<<camera_matrix2<<std::endl;
+    std::cout<<"camera_matrix1 =\n"<<camera_matrix1<<std::endl;
+    std::cout<<"camera_matrix2 =\n"<<camera_matrix2<<std::endl;
     camera_matrix2 = K_Mat * pose2in1_Mat;
     cv::Mat points(4, inlier_count, CV_32FC1);
     cv::triangulatePoints(camera_matrix1,
@@ -146,6 +148,8 @@ bool reconstruct_scene(const ImageGrayscale &image1,
     LOG("Preparing output");
     Matrix3Type R = Mat_to_Matrix3Type(R_Mat);
     Vector3Type t = Mat_to_Vector3Type(t_Mat);
+    std::cout<<"R =\n"<<R<<std::endl;
+    std::cout<<"t =\n"<<t<<std::endl;
     pose2in1 = SE3(SO3(R), t);
 
     pointsin1.clear();
