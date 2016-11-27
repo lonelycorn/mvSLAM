@@ -61,7 +61,7 @@ int main(int argc, char **argv)
         std::cout<< p.x() <<", "<<p.y()<<","<<p.z()<<std::endl;
     }
     */
-        
+#if 0
     // visualize points
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc =
         mvSLAM::Point3D_to_PointCloud(pointsin1_scaled);
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 
     // visualize camera poses
     mvSLAM::add_camera_representation(mvSLAM::SE3(), "1", viewer);
-    mvSLAM::add_camera_representation(pose2in1_scaled, "2", viewer);
+    mvSLAM::add_camera_representation(pose2in1_scaled, "2", viewer, true);
 
     mvSLAM::initialize_visualizer(viewer);
 
@@ -81,6 +81,6 @@ int main(int argc, char **argv)
     {
         viewer.spinOnce(100);
     }
-
+#endif    
     return mvSLAM::ApplicationErrorCode::AEC_NONE;
 }

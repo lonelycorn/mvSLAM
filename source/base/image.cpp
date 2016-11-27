@@ -2,6 +2,40 @@
 
 namespace mvSLAM
 {
+/// actual conversion from ImagePoint to NormalizedPoint
+static NormalizedPoint
+convert_ip_to_np(const ImagePoint &ip,
+                 const Matrix3Type &K_inv)
+{
+    Vector3Type v_image; // homogeneous representation
+    v_image << ip.x, 
+               ip.y, 
+               (ScalarType) 1.0;
+    Vector3Type v_ideal = K_inv * v_image;
+    return v_ideal;
+}
+
+NormalizedPoint
+ImagePoint_to_NormalizedPoint(const ImagePoint &ip,
+                              const CameraIntrinsics &K)
+{
+    Matrix3Type K_inv = K.inverse();
+    return convert_ip_to_np(ip, K_inv);
+}
+
+std::vector<NormalizedPoint>
+ImagePoint_to_NormalizedPoint(const std::vector<ImagePoint> &ips,
+                              const CameraIntrinsics &K)
+{
+    Matrix3Type K_inv = K.inverse();
+    std::vector<NormalizedPoint> result;
+    result.reserve(ips.size());
+    for (auto ip : ips)
+    {
+        result.push_back(convert_ip_to_np(ip, K_inv));
+    }
+    return result;
+}
 
 bool operator==(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2)
 {
@@ -11,48 +45,6 @@ bool operator==(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2)
 bool operator!=(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2)
 {
     return !operator==(kp1, kp2);
-}
-
-template <typename EigenMatrixType>
-static
-EigenMatrixType Mat_to_Matrix(const cv::Mat &m)
-{
-    EigenMatrixType result;
-    for (int i = 0; i < result.rows(); ++i)
-        for (int j = 0; j < result.cols(); ++j)
-            result(i, j) = m.at<ScalarType>(i, j);
-    return result;
-}
-
-template <typename EigenMatrixType>
-static
-cv::Mat Matrix_to_Mat(const EigenMatrixType &m)
-{
-    cv::Mat result(m.rows(), m.cols(), CV_32FC1);
-    for (int i = 0; i < m.rows(); ++i)
-        for (int j = 0; j < m.cols(); ++j)
-            result.at<ScalarType>(i, j) = m(i, j);
-    return result;
-}
-
-Matrix3Type Mat_to_Matrix3Type(const cv::Mat &m)
-{
-    return Mat_to_Matrix<Matrix3Type>(m);
-}
-
-cv::Mat Matrix3Type_to_Mat(const Matrix3Type &m)
-{
-    return Matrix_to_Mat<Matrix3Type>(m);
-}
-
-Vector3Type Mat_to_Vector3Type(const cv::Mat &v)
-{
-    return Mat_to_Matrix<Vector3Type>(v);
-}
-
-cv::Mat Vector3Type_to_Mat(const Vector3Type &v)
-{
-    return Matrix_to_Mat<Vector3Type>(v);
 }
 
 }

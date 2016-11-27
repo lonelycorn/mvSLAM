@@ -67,18 +67,10 @@ public:
     /// get all keypoints.
     const VisualFeatureConfig::DetectorResultType &
         get_keypoints() const;
-
-    /** Get the ideal image points corresponding to the keypoints.
-     *  The ideal image point corresponding to a key point is where
-     *  the ray that originates from the pinhole and bypasses the
-     *  keypoint intersects z = 1.0
-     */
-    /*
-    std::vector<IdealImagePoint>
-        get_ideal_image_point();
-    */
-
-    std::vector<ImagePoint> get_image_points() const;
+    
+    /// get all image points
+    std::vector<ImagePoint>
+        get_image_points() const;
 
 private:
     VisualFeatureConfig::DetectorResultType m_keypoints;

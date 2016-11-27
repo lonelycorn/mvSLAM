@@ -118,25 +118,6 @@ VisualFeature::get_keypoints() const
     return m_keypoints;
 }
 
-/*
-std::vector<IdealImagePoint>
-VisualFeature::get_ideal_image_points(const CameraIntrinsics &intrinsics)
-{
-    CameraIntrinsics intrinsics_inv = intrinsics.inverse();
-    std::vector<IdealImagePoint> result;
-    for (auto kp : m_keypoints)
-    {
-        Vector3Type v_image;
-        v_image << kp.pt.x, 
-                   kp.pt.y, 
-                   (ScalarType) 1.0;
-        Vector3Type v_ideal = intrinsics_inv * v;
-        result.push_back(IdealImagePoint(v_ideal[0], v_idea[1]));
-    }
-    return result;
-}
-*/
-
 std::vector<ImagePoint>
 VisualFeature::get_image_points() const
 {

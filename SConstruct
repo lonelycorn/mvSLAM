@@ -1,3 +1,4 @@
+import os
 
 def build_and_install_mvSLAM_library(env, libname, sources):
     libs = env["mvSLAM_external_dependency"]
@@ -16,17 +17,32 @@ def build_and_install_mvSLAM_program(env, target, source):
     libs = internal_libs + env["mvSLAM_external_dependency"]
     env1.Append(LIBS=libs)
     env1.Append(LIBPATH=["#/variant-dir/lib",
+                         "/usr/lib",
                          "/usr/local/lib"])
     build_util = env1.Program(target, source)
     install_util = env1.Install('#/result/', build_util)
     return install_util
 
 def build_and_run_mvSLAM_unit_test(env, target, source):
-    build_unit_test = env.Program(target, source)
-    exe_dir = build_unit_test.dir
+    env1 = env.Clone()
+    internal_libs = [
+                "mvSLAM_vision",
+                "mvSLAM_os",
+                "mvSLAM_base",
+                ]
+    libs = internal_libs + env["mvSLAM_external_dependency"]
+    env1.Append(LIBS=libs)
+    env1.Append(LIBPATH=["#/variant-dir/lib",
+                         "/usr/local/lib"])
+    build_unit_test = env1.Program(target, source)
+    assert(len(build_unit_test) == 1)
+    build_unit_test = build_unit_test[0]
+    exe_dir = os.path.dirname(build_unit_test.path)
     exe_name = build_unit_test.name
-    tag_name = "%s.passed" % (executable_name)
-    run_unit_test = env.Command("cd %s;"\
+    tag_name = "%s.passed" % (exe_name)
+    run_unit_test = env.Command(tag_name, \
+                                exe_name, \
+                                "cd %s;"\
                                 "rm -rf %s &> /dev/null;"\
                                 "if ./%s; then touch %s; fi" \
                                 % (exe_dir, tag_name, exe_name, tag_name))
@@ -42,11 +58,11 @@ MVSLAM_EXTERNAL_DEPENDENCY = [
                 #     pcl     #
                 #=============#
                 #"pcl_apps",
-                "pcl_common",
+                ##"pcl_common",
                 #"pcl_features",
                 #"pcl_filters",
                 #"pcl_io_ply",
-                "pcl_io",
+                ##"pcl_io",
                 #"pcl_kdtree",
                 #"pcl_keypoints",
                 #"pcl_octree",
@@ -59,7 +75,7 @@ MVSLAM_EXTERNAL_DEPENDENCY = [
                 #"pcl_segmentation",
                 #"pcl_surface",
                 #"pcl_tracking",
-                "pcl_visualization",
+                ##"pcl_visualization",
  
                 #=============#
                 #     vtk     #
@@ -122,7 +138,7 @@ MVSLAM_EXTERNAL_DEPENDENCY = [
                 #"opencv_xphoto",
                 "opencv_highgui",
                 #"opencv_videoio",
-                "opencv_imgcodecs",
+                ##"opencv_imgcodecs",
                 #"opencv_photo",
                 #"opencv_imgproc",
                 "opencv_core",
@@ -141,12 +157,13 @@ env["CCFLAGS"] = "-g -Wall -Werror -Wno-deprecated -pthread"
 env["CXXFLAGS"] = "-std=c++11"
 env["mvSLAM_external_dependency"] = MVSLAM_EXTERNAL_DEPENDENCY
 env["CPPPATH"] = ["#/source/", 
+                  "/usr/include/",
                   "/usr/include/pcl-1.7/",
                   "/usr/include/eigen3/",
                   "/usr/include/vtk-5.8/",
                   "/usr/include/boost/",
-                  "/usr/include/flann/",
                  ]
+#env.Append(CPPDEFINES=["VERBOSE_LOGGING"])
 
 env.AddMethod(build_and_run_mvSLAM_unit_test, 'mvSLAM_UnitTest')
 env.AddMethod(build_and_install_mvSLAM_library, 'mvSLAM_Library')

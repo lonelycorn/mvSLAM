@@ -6,7 +6,8 @@ targets = []
 #=========================#
 source_files = ['math.cpp',
                 'image.cpp',
-                'visualization.cpp',
+                'opencv.cpp',
+                #'visualization.cpp',
                ]    
 targets += env.mvSLAM_Library('mvSLAM_base', source_files)
 

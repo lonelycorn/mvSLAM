@@ -44,16 +44,21 @@ Point3D_to_PointCloud(std::vector<Point3D> &points)
 
 void add_camera_representation(const Pose &camera_pose,
                                const char *title,
-                               pcl::visualization::PCLVisualizer &viewer)
+                               pcl::visualization::PCLVisualizer &viewer,
+                               bool shrink)
 {
     std::vector<Vector3Type> points;
     std::string prefix(title);
 
+    ScalarType camera_size = CAMERA_SIZE;
+    if (shrink)
+        camera_size *= (ScalarType) 0.5;
+
     Vector3Type center; center << 0.0, 0.0, 0.0;
-    Vector3Type maxmax; maxmax << 1.0, 1.0, 1.0; maxmax *= CAMERA_SIZE;
-    Vector3Type maxmin; maxmin << 1.0,-1.0, 1.0; maxmin *= CAMERA_SIZE;
-    Vector3Type minmin; minmin <<-1.0,-1.0, 1.0; minmin *= CAMERA_SIZE;
-    Vector3Type minmax; minmax <<-1.0, 1.0, 1.0; minmax *= CAMERA_SIZE;
+    Vector3Type maxmax; maxmax << 1.0, 1.0, 1.0; maxmax *= camera_size;
+    Vector3Type maxmin; maxmin << 1.0,-1.0, 1.0; maxmin *= camera_size;
+    Vector3Type minmin; minmin <<-1.0,-1.0, 1.0; minmin *= camera_size;
+    Vector3Type minmax; minmax <<-1.0, 1.0, 1.0; minmax *= camera_size;
 
     {
         points.clear();
@@ -107,6 +112,14 @@ void initialize_visualizer(pcl::visualization::PCLVisualizer &viewer)
     viewer.setBackgroundColor(0.0, 0.0, 0.0);
     viewer.addCoordinateSystem(1.0);
     viewer.initCameraParameters();
+    {
+        pcl::PointXYZ p(1.0, 0.0, 0.0);
+        viewer.addSphere(p, 0.2, "sphere_x", 0);
+    }
+    {
+        pcl::PointXYZ p(0.0, 1.0, 0.0);
+        viewer.addSphere(p, 0.1, "sphere_y", 0);
+    }
 }
 
 }

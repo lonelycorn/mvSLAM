@@ -5,8 +5,11 @@ targets = []
 #     REGULAR TARGETS     #
 #=========================#
 source_files = ['io.cpp',
-                'visual-feature.cpp',
+                'camera.cpp',
+                #'visual-feature.cpp',
                 'sfm.cpp',
+                'estimator-RANSAC.cpp',
+                'fundamental-matrix.cpp',
                ]    
 targets += env.mvSLAM_Library('mvSLAM_vision', source_files)
 

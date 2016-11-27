@@ -47,4 +47,18 @@ SE3 Matrix3x4Type_to_SE3(const Matrix3x4Type &m)
     return s;
 }
 
+std::ostream &operator<<(std::ostream &out, const SO3 &instance)
+{
+    out<<"[Rotation]\n"<<instance._R;
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const SE3 &instance)
+{
+    out<<"[translation]\n"<<instance._t;
+    out<<std::endl; // delimeter
+    out<<instance._R;
+    return out;
+}
+
 }

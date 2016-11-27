@@ -18,9 +18,19 @@ namespace mvSLAM
  *      scaled by the same factor as @p pose2in1_scaled
  * @return whether the reconstruction was successful.
 */
+/*
 bool reconstruct_scene(const ImageGrayscale &image1,
                        const ImageGrayscale &image2,
                        const CameraIntrinsics &K,
+                       Pose &pose2in1_scaled,
+                       std::vector<Point3D> &pointsin1_scaled);
+*/
+
+// pose2in1: the pose of camera 2, expressed in camera 1 ref frame. This is the
+// transform from camera 2 ref frame to camera 1 ref frame, and is the inverse
+// of the camera 2 matrix.
+bool reconstruct_scene(const std::vector<NormalizedPoint> &normalized_points1,
+                       const std::vector<NormalizedPoint> &normalized_points2,
                        Pose &pose2in1_scaled,
                        std::vector<Point3D> &pointsin1_scaled);
                        

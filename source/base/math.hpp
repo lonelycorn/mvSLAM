@@ -1,8 +1,9 @@
 #pragma once
+#include <system-config.hpp>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <cmath>
-#include <system-config.hpp>
+#include <iostream>
 
 namespace mvSLAM
 {
@@ -11,6 +12,7 @@ using Vector3Type = Eigen::Matrix<ScalarType, 3, 1>;
 using Matrix6Type = Eigen::Matrix<ScalarType, 6, 6>;
 using Vector6Type = Eigen::Matrix<ScalarType, 6, 1>;
 using Matrix3x4Type = Eigen::Matrix<ScalarType, 3, 4>;
+using Vector4Type = Eigen::Matrix<ScalarType, 4, 1>;
 
 /** square of the give value
  */
@@ -93,10 +95,10 @@ public:
         return _R;
     }
 
-    SO3 inverse()
+    SO3 inverse() const
     {
-        assert(false);
-        return *this; // SO3(_R.transpose());
+        Matrix3Type R = _R.transpose();
+        return SO3(R);
     }
 
     /** Make sure this is a valid SO3, i.e. orthonormal.
@@ -185,9 +187,12 @@ public:
         return SO3(so3);
     }
 
+    friend std::ostream &operator<<(std::ostream &out, const SO3 &instance);
+
 private:
     Matrix3Type _R;
 };
+
 
 class SE3
 {
@@ -215,9 +220,7 @@ public:
 
     SE3 inverse() const
     {
-        assert(false);
-        return *this;
-        //return SE3(_R.inverse(), -(_R.get_matrix().transpose() * _t));
+        return SE3(_R.inverse(), -(_R.get_matrix().transpose() * _t));
     }
 
     void reset()
@@ -295,10 +298,16 @@ public:
         return SE3(R, V * u);
     }
 
+    friend std::ostream &operator<<(std::ostream &out, const SE3 &instance);
+
 private:
     SO3 _R;
     Vector3Type _t;
 };
+
+std::ostream &operator<<(std::ostream &out, const SO3 &instance);
+
+std::ostream &operator<<(std::ostream &out, const SE3 &instance);
 
 SE3 Matrix3x4Type_to_SE3(const Matrix3x4Type &m);
 Matrix3x4Type SE3_to_Matrix3x4Type(const SE3 &s);

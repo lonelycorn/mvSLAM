@@ -2,8 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <cassert>
-#include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
+#include <opencv2/opencv.hpp>
 
 namespace mvSLAM
 {
@@ -50,7 +49,7 @@ save_camera_intrinsics(const std::string &filename,
         if (i < 9)
             out<<" ";
     }
-    return out;
+    return bool(out);
 }
 
 bool

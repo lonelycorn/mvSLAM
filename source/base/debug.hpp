@@ -2,7 +2,7 @@
 namespace mvSLAM
 {
 #ifdef VERBOSE_LOGGING
-    #define __WRITE_TRACE(out) std::fprintf(out, "[%s:%s] ", __FILE__, __func__);
+    #define __WRITE_TRACE(out) std::fprintf(out, "[%s:%s()] ", __FILE__, __func__);
 #else
     #define __WRITE_TRACE(out)
 #endif

@@ -18,7 +18,8 @@ Point3D_to_PointCloud(std::vector<Point3D> &points);
  */
 void add_camera_representation(const Pose &camera_pose,
                                const char *title,
-                               pcl::visualization::PCLVisualizer &viewer);
+                               pcl::visualization::PCLVisualizer &viewer,
+                               bool shrink=false);
 
 void initialize_visualizer(pcl::visualization::PCLVisualizer &viewer);
 

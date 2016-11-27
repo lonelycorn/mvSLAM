@@ -1,12 +1,12 @@
 #pragma once
-#include <opencv2/core.hpp>
-#include <opencv2/features2d.hpp>
+#include <base/opencv.hpp>
 #include <base/math.hpp>
 #include <vector>
 
 namespace mvSLAM
 {
 
+using CameraExtrinsics = SE3;
 using CameraIntrinsics = Matrix3Type;
 using ImageRGB = cv::Mat;
 using ImageGrayscale = cv::Mat;
@@ -24,16 +24,19 @@ struct VisualFeatureConfig
     using MatchResultType = std::vector<cv::DMatch>; // queryIdx, trainIdx, distance
 };
 
-using ImagePoint = cv::Point2f;
-using IdealImagePoint = cv::Point2f;
+using ImagePoint = cv::Point_<ScalarType>; // for points on the real camera image
+using NormalizedPoint = Vector3Type; // for points in the normalized camera
+using HomogeneousImagePoint = Vector3Type;
+using HomogeneousNormalizedPoint = Vector4Type;
+
+NormalizedPoint
+ImagePoint_to_NormalizedPoint(const ImagePoint &ip,
+                              const CameraIntrinsics &K);
+
+std::vector<NormalizedPoint>
+ImagePoint_to_NormalizedPoint(const std::vector<ImagePoint> &ips,
+                              const CameraIntrinsics &K);
 
 bool operator==(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2);
 bool operator!=(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2);
-
-Matrix3Type Mat_to_Matrix3Type(const cv::Mat &m);
-cv::Mat Matrix3Type_to_Mat(const Matrix3Type &m);
-
-Vector3Type Mat_to_Vector3Type(const cv::Mat &v);
-cv::Mat Vector3Type_to_Mat(const Vector3Type &v);
-
 }
