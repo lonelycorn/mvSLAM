@@ -11,6 +11,7 @@ using Matrix3Type = Eigen::Matrix<ScalarType, 3, 3>;
 using Vector3Type = Eigen::Matrix<ScalarType, 3, 1>;
 using Matrix6Type = Eigen::Matrix<ScalarType, 6, 6>;
 using Vector6Type = Eigen::Matrix<ScalarType, 6, 1>;
+using Matrix4Type = Eigen::Matrix<ScalarType, 4, 4>;
 using Matrix3x4Type = Eigen::Matrix<ScalarType, 3, 4>;
 using Vector4Type = Eigen::Matrix<ScalarType, 4, 1>;
 
@@ -62,7 +63,7 @@ public:
     /** Construct using Tait-Bryan angles.
      *  Sequence of rotation: z-y-x'', i.e. yaw, pitch then roll
      */
-    SO3(float roll, float pitch, float yaw): _R()
+    SO3(ScalarType roll, ScalarType pitch, ScalarType yaw): _R()
     {
         Matrix3Type Rx;
         Rx << 1.0, 0.0, 0.0,
@@ -118,17 +119,17 @@ public:
         _R.row(2) = u2;
     }
 
-    float get_roll() const
+    ScalarType get_roll() const
     {
         return std::atan2(_R(2, 1), _R(2, 2));
     }
 
-    float get_pitch() const
+    ScalarType get_pitch() const
     {
         return std::asin(-_R(2, 0));
     }
 
-    float get_yaw() const
+    ScalarType get_yaw() const
     {
         return std::atan2(_R(1, 0), _R(0, 0));
     }
@@ -218,6 +219,15 @@ public:
         return _t;
     }
 
+    Matrix4Type get_matrix() const
+    {
+        Matrix4Type result = Matrix4Type::Zero();
+        result.block<3, 3>(0, 0) = _R.get_matrix();
+        result.block<3, 1>(0, 3) = _t;
+        result(3, 3) = static_cast<ScalarType>(1);
+        return result;
+    }
+
     SE3 inverse() const
     {
         return SE3(_R.inverse(), -(_R.get_matrix().transpose() * _t));
@@ -276,7 +286,7 @@ public:
     {
         const Vector3Type u = se3.block<3, 1>(0, 0); // translation part
         const Vector3Type w = se3.block<3, 1>(3, 0); // rotation part
-        const ScalarType theta = se3.norm();
+        const ScalarType theta = w.norm();
         ScalarType A; // sin(theta) / theta
         ScalarType B; // (1 - cos(theta)) / (theta * theta)
         ScalarType C; // (1 - A) / (theta * theta)
