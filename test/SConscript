@@ -4,45 +4,34 @@ targets = []
 #===================#
 #     UNIT TEST     #
 #===================#
-"""
-env1 = env.Clone()
-test_unit_test = env1.Program('test-unit-test', ['test-unit-test.cpp'])
-run_test_unit_test = env1.UnitTest('test-unit-test.passed', 'test-unit-test')
-targets += run_test_unit_test
-Alias('test_unit_test', run_test_unit_test)
-"""
-#test_camera = env.mvSLAM_UnitTest('test-camera', ['test-camera.cpp'])
-#targets += test_camera
-#
-#test_sfm = env.mvSLAM_UnitTest('test-sfm', ['test-sfm.cpp'])
-#targets += test_sfm
+#env1 = env.Clone()
+#test_unit_test = env1.Program('test-unit-test', ['test-unit-test.cpp'])
+#run_test_unit_test = env1.UnitTest('test-unit-test.passed', 'test-unit-test')
+#targets += run_test_unit_test
+#Alias('test_unit_test', run_test_unit_test)
 
-test_math = env.mvSLAM_UnitTest('test-math', ['test-math.cpp'])
+test_math = env.mvSLAM_UnitTest('test-math',
+                                ['test-math.cpp',
+                                 env.Object('../source/base/math.cpp'),
+                                ])
 targets += test_math
 
-#====================#
-#     TEST UTILS     #
-#====================#
-'''
-test_cloud_viewer = env.mvSLAM_Program('test-cloud-viewer', ['test-cloud-viewer.cpp'])
-targets += test_cloud_viewer
+test_camera = env.mvSLAM_UnitTest('test-camera',
+                                  ['test-camera.cpp',
+                                   env.Object('../source/vision/camera.cpp'), # depends on the object file, so that it is only compiled once
+                                   env.Object('../source/base/math.cpp'),
+                                  ])
+targets += test_camera
 
-test_pcl_visualizer = env.mvSLAM_Program('test-pcl-visualizer', ['test-pcl-visualizer.cpp'])
-targets += test_pcl_visualizer 
+test_sfm = env.mvSLAM_UnitTest('test-sfm',
+                               ['test-sfm.cpp',
+                                env.Object('../source/vision/sfm.cpp'),
+                                env.Object('../source/vision/camera.cpp'), 
+                                env.Object('../source/base/opencv.cpp'),
+                                env.Object('../source/base/math.cpp'),
+                               ])
+targets += test_sfm
 
-test_image_io = env.mvSLAM_Program('test-image-io', ['test-image-io.cpp'])
-targets += test_image_io
-
-test_svd = env.mvSLAM_Program('test-svd', ['test-svd.cpp'])
-targets += test_svd
-
-test_visual_feature = env.mvSLAM_Program('test-visual-feature', ['test-visual-feature.cpp'])
-targets += test_visual_feature
-
-
-reconstruct_scene = env.mvSLAM_Program('reconstruct-scene', ['reconstruct-scene.cpp'])
-targets += reconstruct_scene
-'''
 
 Return(['targets'])
 

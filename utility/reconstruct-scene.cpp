@@ -43,7 +43,6 @@ int main(int argc, char **argv)
     std::vector<mvSLAM::Point3D> pointsin1_scaled;
     if (!reconstruct_scene(image1,
                            image2,
-                           K,
                            pose2in1_scaled,
                            pointsin1_scaled))
     {

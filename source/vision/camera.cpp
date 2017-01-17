@@ -15,7 +15,7 @@ PinholeCamera::~PinholeCamera()
 ImagePoint
 PinholeCamera::project_point(const Point3D &point_in_world_frame) const
 {
-    Vector3Type p_in_camera_frame = P * point_in_world_frame.get_vector();
+    Vector3Type p_in_camera_frame = P * point_in_world_frame;
     assert(p_in_camera_frame[2] > 0); // must be in front of the camera
 
     Vector3Type p_normalized;

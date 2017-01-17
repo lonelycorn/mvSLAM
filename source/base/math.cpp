@@ -19,8 +19,8 @@ Matrix3Type rodrigues(const Vector3Type &v)
     ScalarType B; // (1 - cos(theta)) / sqr(theta)
     if (theta < epsilon) // Taylor expansion
     {
-        A = 1.0 - sqr(theta) / 6.0;
-        B = -0.5 + sqr(theta) / 24.0;
+        A = 1.0 - sqr(theta) / 6.0; // + pow(x, 4) / 120
+        B = 0.5 - sqr(theta) / 24.0; // + pow(x, 4) / 720
     }
     else // regular formula
     {

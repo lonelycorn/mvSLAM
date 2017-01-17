@@ -36,7 +36,7 @@ Point3D_to_PointCloud(std::vector<Point3D> &points)
     pcl::PointCloud<pcl::PointXYZ>::Ptr result(new pcl::PointCloud<pcl::PointXYZ>);
     for (const auto &p : points)
     {
-        result->push_back(pcl::PointXYZ(p.x(), p.y(), p.z()));
+        result->push_back(pcl::PointXYZ(p[0], p[1], p[2]));
     }
     
     return result;

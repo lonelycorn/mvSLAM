@@ -13,9 +13,9 @@ check_matrix_equal(const MatrixType &m1,
                    mvSLAM::ScalarType tolerance)
 {
     assert((m1.rows() == m2.rows()) && (m1.cols() == m2.cols()));
-    for (size_t i = 0; i < m1.rows(); ++i)
-        for (size_t j = 0; j < m1.cols(); ++j)
-            ASSERT_EQUAL(m1(i, j), m2(i, j), tolerance);
+    for (auto i = m1.rows(); i > 0; --i)
+        for (auto j = m1.cols(); j > 0; --j)
+            ASSERT_EQUAL(m1(i-1, j-1), m2(i-1, j-1), tolerance);
     return true;
 }
 

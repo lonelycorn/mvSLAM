@@ -122,7 +122,12 @@ std::vector<ImagePoint>
 VisualFeature::get_image_points() const
 {
     std::vector<ImagePoint> result;
-    cv::KeyPoint::convert(m_keypoints, result);
+    result.reserve(m_keypoints.size());
+    for (const auto &kp : m_keypoints)
+    {
+        result.emplace_back(kp.pt.x, kp.pt.y);
+    }
     return result;
 }
+
 }

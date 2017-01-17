@@ -1,4 +1,6 @@
 result
 variant-dir
-media
+resource
 .sconsign.dblite
+.unit-test
+*.pyc

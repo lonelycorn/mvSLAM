@@ -100,7 +100,7 @@ bool run_all_tests()
     } \
 }
 
-#define EQUAL_TO(lhs, rhs, tolerance) \
+#define ASSERT_EQUAL(lhs, rhs, tolerance) \
 {\
     if (((lhs) < (rhs) - (tolerance)) || ((lhs) > (rhs) + (tolerance))) \
     { \

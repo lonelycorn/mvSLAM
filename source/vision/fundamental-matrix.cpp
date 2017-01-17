@@ -38,10 +38,7 @@ find_normalization_transform(const std::vector<Vector3Type> &points,
     ScalarType scale = 0;
     for (size_t i = 0; i < point_count; ++i)
     {
-        for (size_t j = 0; j < 3; ++j)
-        {
-            normalized_points[i][j] = points[i][j] - mean[j];
-        }
+        normalized_points[i] = points[i] - mean;
         scale += normalized_points[i].norm();
     }
     scale *= point_count_inv; // now this is the average distance towards center
@@ -91,51 +88,36 @@ find_fundamental_matrix_8point(const std::vector<Vector3Type> &normalized_p1,
     std::cout<<"A =\n"<<A<<std::endl;
 
     // solve A * f == 0
+    // A = U * S * V.T
+    // We want to get square U and square V. Since A is 8-by-9, U would be 8-by-8,
+    // V would be 9-by-9, and S would be 8-by-9, which means the last singular value is 0.
+    // f then is the right signular vector corresponding to that singular value of 0.
     Eigen::Matrix<ScalarType, 9, 1> f;
-#if 0
     {
-        // A = U * S * V.T
-        // We want to get square U and square V. Since A is 8-by-9, U would be 8-by-8,
-        // V would be 9-by-9, and S would be 8-by-9, which means the last singular value is 0.
-        // f then is the right signular vector corresponding to that singular value of 0.
-        Eigen::JacobiSVD<MatrixAType> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
-        std::cout<<"S =\n"<<svd.singularValues()<<std::endl;
-        std::cout<<"U =\n"<<svd.matrixU()<<std::endl;
-        std::cout<<"V =\n"<<svd.matrixV()<<std::endl;
-        /*
-        const auto &s = svd.singularValues();
-        for (size_t i = 0; i < POINT_COUNT_8POINT; ++i) // must have rank of 8
-            if (fabs(s[i]) < epsilon)
-            {
-                std::cerr<<"Ill-conditioned system."<<std::endl;
-                return false;
-            }
-        */
-        const auto &V = svd.matrixV(); 
-        f = V.block<9, 1>(0, 8);
-    }
-#else
-    // for some reaseon Eigen::JacobiSVD() gives very wrong results, compared to opencv::SVD
-    {
-        cv::Mat A_Mat(POINT_COUNT_8POINT, 9, cv_Mat_traits<ScalarType>::DataType);
-        for (size_t i = 0; i < POINT_COUNT_8POINT; ++i)
+        // NOTE 1: Eigen::JacobiSVD() seems to suffer a lot from floating point inaccuracy.
+        // we have to use the SVD routine provided by OpenCV
+        // NOTE 2: SVD of A.T * A seems to have better accuracy than decomposing A, as 
+        // shown by MATLAB
+        // NOTE 3: OpenCV::run8Point() computes eigenvalues and eigenvectors, as opposed
+        // to SVD, which gives very good (too good to believe) results in unit test. I
+        // tried to do the same here, but the results are far worse.
+        cv::Mat AT_A_Mat(9, 9, cv_Mat_traits<ScalarType>::DataType);
+        for (size_t i = 0; i < 9; ++i)
             for (size_t j = 0; j < 9; ++j)
-                A_Mat.at<ScalarType>(i, j) = A(i, j);
-        cv::Mat u, w, vt;
+            {
+                AT_A_Mat.at<ScalarType>(i, j) = 0;
+                for (size_t k = 0; k < POINT_COUNT_8POINT; ++k)
+                    AT_A_Mat.at<ScalarType>(i, j) += A(k, i) * A(k, j);
+            }
+        std::cout<<"AT_A_Mat = \n"<<AT_A_Mat<<std::endl;
 
-        cv::SVDecomp(A_Mat, w, u, vt, cv::SVD::MODIFY_A | cv::SVD::FULL_UV);
-        /*
-        std::cout<<"U =\n"<<u<<std::endl;
-        cv::Mat v;
-        cv::transpose(vt, v);
-        std::cout<<"V =\n"<<v<<std::endl;
-        std::cout<<"w =\n"<<w<<std::endl;
-        */
+        cv::Mat u, w, vt;
+        cv::SVDecomp(AT_A_Mat, w, u, vt, cv::SVD::MODIFY_A | cv::SVD::FULL_UV);
         // column of V == row of V.transpose
         for (size_t i = 0; i < 9; ++i)
             f[i] = vt.at<ScalarType>(POINT_COUNT_8POINT, i);
     }
-#endif
+
     // convert to Matrix3Type
     F21 << f[0], f[1], f[2],
            f[3], f[4], f[5],
@@ -143,24 +125,6 @@ find_fundamental_matrix_8point(const std::vector<Vector3Type> &normalized_p1,
     std::cout<<"F21 = \n"<<F21<<std::endl;
         
     // singular constraint
-#if 0
-    {
-        // due to the noise in the image point measurements, F may have more than 2
-        // singular values, i.e. rank is 3.
-        // to rectify the fundamental matrix, we need to reconstruct the matrix with
-        // the first 2 singular values;
-        Eigen::JacobiSVD<Matrix3Type> svd(F21, Eigen::ComputeFullU | Eigen::ComputeFullV);
-        const auto &U = svd.matrixU();
-        const auto &V = svd.matrixV();
-        const auto &s = svd.singularValues();
-        std::cout<<"Singular values of F:\n"<<s<<std::endl;
-        Matrix3Type S(Matrix3Type::Zero());
-        S(0, 0) = s[0];
-        S(1, 1) = s[1];
-        S(2, 2) = static_cast<ScalarType>(0);
-        F21 = U * S * V.transpose();
-    }
-#else
     {
         cv::Mat Fpre = Matrix3Type_to_Mat(F21);
         cv::Mat u, w, vt;
@@ -170,7 +134,6 @@ find_fundamental_matrix_8point(const std::vector<Vector3Type> &normalized_p1,
         cv::Mat F21_Mat = u * cv::Mat::diag(w) * vt;
         F21 = Mat_to_Matrix3Type(F21_Mat);
     }
-#endif
     std::cout<<"After applying the singular constraint, F = \n"<<F21<<std::endl;
 
     return true;
@@ -246,8 +209,8 @@ find_fundamental_matrix(const std::vector<Vector3Type> &sample_p1,
     (void) find_fundamental_matrix_8point;
     (void) find_fundamental_matrix_orbslam;
 
-    //auto ffm = find_fundamental_matrix_8point;
-    auto ffm = find_fundamental_matrix_orbslam;
+    auto ffm = find_fundamental_matrix_8point;
+    //auto ffm = find_fundamental_matrix_orbslam;
 
     /* For every image, the points are first normalized.
      * See Hartley and Zisserman, Multiple View Geometry in Computer Vision, p104

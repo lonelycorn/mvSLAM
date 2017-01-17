@@ -1,5 +1,6 @@
 #pragma once
 #include <base/math.hpp>
+#include <iostream>
 
 namespace mvSLAM
 {
@@ -55,6 +56,7 @@ using Pose = SE3;
 using PoseUncertainty = Matrix6Type;
 using PoseEstimate = StateEstimate<Pose, PoseUncertainty>;
 
+/*
 class Point3D
 {
 public:
@@ -70,9 +72,17 @@ public:
     Vector3Type get_vector() const { return _coordinates; }
     ScalarType operator()(size_t index) const { return _coordinates[index]; }
     ScalarType &operator()(size_t index) { return _coordinates[index]; }
+
 private:
     Vector3Type _coordinates;
 };
+std::ostream &operator<<(std::ostream &out, const Point3D &p)
+{
+    out<<"[Point3D] ("<<p.x()<<", "<<p.y()<<", "<<p.z()<<")";
+    return out;
+}
+*/
+using Point3D = Vector3Type;
 using Point3DUncertainty = Matrix3Type;
 using Point3DEstimate = StateEstimate<Point3D, Point3DUncertainty>;
 

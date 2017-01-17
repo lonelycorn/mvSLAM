@@ -167,7 +167,7 @@ public:
              _R(1, 0) - _R(0, 1);
 
         ScalarType A; // theta / sin(theta) / 2
-        if (theta < epsilon) // Taylor expansion. sin(theta) < theta
+        if (theta < taylor_threshold) // Taylor expansion. sin(theta) < theta
         {
             A = (1.0 + sqr(theta) / 6.0) * 0.5;
         }
@@ -260,7 +260,7 @@ public:
         // ScalarType A; // sin(theta) / theta
         // ScalarType B; // (1 - cos(theta)) / (theta * theta)
         ScalarType G; // (1 - A / B / 2) / (theta * theta)
-        if (theta < epsilon) // Taylor expansion
+        if (theta < taylor_threshold) // Taylor expansion
         {
             G = 1.0 / 12.0 + sqr(theta) / 720.0;
         }
@@ -290,11 +290,11 @@ public:
         ScalarType A; // sin(theta) / theta
         ScalarType B; // (1 - cos(theta)) / (theta * theta)
         ScalarType C; // (1 - A) / (theta * theta)
-        if (theta < epsilon) // Taylor expansion
+        if (theta < taylor_threshold) // Taylor expansion
         {
-            A = 1.0 - sqr(theta) / 6.0;
-            B = 0.5 - sqr(theta) / 24.0;
-            C = 1.0 / 6.0 - sqr(theta) / 120.0;
+            A = 1.0 - sqr(theta) / 6.0; // + pow(x, 4) / 120
+            B = 0.5 - sqr(theta) / 24.0; // + pow(x, 4) / 720
+            C = 1.0 / 6.0 - sqr(theta) / 120.0; // + pow(x, 4) / 5040
         }
         else
         {

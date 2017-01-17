@@ -46,11 +46,12 @@ FundamentalMatrixEstimatorRANSAC::compute(const std::vector<Vector3Type> &p1,
             p1_sample.push_back(p1[index[j]]);
             p2_sample.push_back(p2[index[j]]);
         }
-
+#if DEBUG_RANSAC 
         std::cout<<"sampled indexes:";
         for (size_t j = 0; j < MIN_DATA_POINT_COUNT; ++j)
             std::cout<<" "<<index[j];
         std::cout<<std::endl;
+#endif
 
         // make a proposal based on the subset
         Matrix3Type F21_proposal;
@@ -107,7 +108,7 @@ FundamentalMatrixEstimatorRANSAC::count_inliers(const std::vector<Vector3Type> &
     size_t inlier_count = 0;
     residual = static_cast<ScalarType>(0);
     inlier_mask.clear();
-    inlier_mask.resize(pair_count);
+    inlier_mask.reserve(pair_count);
     for (size_t i = 0; i < pair_count; ++i)
     {
         ScalarType r = p2[i].transpose() * F21 * p1[i];

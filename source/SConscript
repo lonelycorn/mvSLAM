@@ -1,16 +1,35 @@
 Import("env")
+
+mvSLAM_base_files = [
+    './base/math.cpp',
+    './base/image.cpp',
+    './base/opencv.cpp',
+    './base/visualization.cpp',
+]
+
+mvSLAM_os_files = [
+    './os/time.cpp',
+    './os/event.cpp',
+    './os/mutex.cpp',
+]
+
+mvSLAM_vision_files = [
+    './vision/io.cpp',
+    './vision/camera.cpp',
+    './vision/visual-feature.cpp',
+    './vision/sfm.cpp',
+    './vision/estimator-RANSAC.cpp',
+    './vision/fundamental-matrix.cpp',
+]
+
+source_files = \
+    mvSLAM_base_files + \
+    mvSLAM_os_files + \
+    mvSLAM_vision_files
+
 targets = []
-
-#=========================#
-#     LIBRARY TARGETS     #
-#=========================#
-mvSLAM_base = SConscript('base/SConscript', exports=['env'])
-targets += mvSLAM_base
-
-mvSLAM_os = SConscript('os/SConscript', exports=['env'])
-targets += mvSLAM_os
-
-mvSLAM_vision= SConscript('vision/SConscript', exports=['env'])
-targets += mvSLAM_vision
+for source_file in source_files:
+    object_file = env.Object(source_file)
+    targets.append(object_file)
 
 Return(["targets"])
