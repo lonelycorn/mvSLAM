@@ -37,7 +37,7 @@ static constexpr ScalarType
 static constexpr int cv_mat_type = cv_Mat_traits<ScalarType>::DataType;
 
 // It seems that OpenCV yields a much better result than the home-brew version
-#define USE_OPENCV
+//#define USE_OPENCV
 
 /** Find essential matrix E such that p2.T * E * p1 == 0.
  * Internally this is implemented with RANSAC.
@@ -78,7 +78,7 @@ find_essential_matrix(const std::vector<NormalizedPoint> &p1,
                                            inlier_mask_Mat);
     E21 = Mat_to_Matrix3Type(E21_Mat);
     return true;
-#else
+#else // USE_OPENCV
     (void) confidence_level; // not used
     
     const size_t max_iteration = 1;
@@ -104,7 +104,7 @@ find_essential_matrix(const std::vector<NormalizedPoint> &p1,
     }
 
     return result;
-#endif
+#endif // USE_OPENCV
 }
 
 /** Decompose essential matrix into a rotation and a translation.
@@ -152,11 +152,82 @@ decompose_essential_matrix(const Matrix3Type &E21,
 static void
 triangulate_points(const Matrix3Type &R1to2,
                    const Vector3Type &t1to2,
-                   const std::vector<NormalizedPoint> &normalized_points1,
-                   const std::vector<NormalizedPoint> &normalized_points2,
+                   const std::vector<NormalizedPoint> &p1,
+                   const std::vector<NormalizedPoint> &p2,
                    std::vector<Point3D> &pointsin1)
 {
-    assert(false);
+    assert(p1.size() == p2.size());
+    assert(p1.size() > 0);
+
+    LOG("Generating camera projection matrices.");
+    const size_t point_count = p1.size();
+    const Matrix4Type P1 = SE3().get_matrix();
+    const Matrix4Type P2 = SE3(SO3(R1to2), t1to2).get_matrix();
+    std::vector<Point3D> result;
+    result.reserve(point_count);
+    std::cerr<<"P1 = \n"<<P1<<std::endl;
+    std::cerr<<"P2 = \n"<<P2<<std::endl;
+    
+    for (size_t i = 0; i < point_count; ++i)
+    {
+        // linearly triangulate the i-th point
+        // For each point pair (x1, x2), it holds true that
+        //      x1 = P1 * X
+        //      x2 = P2 * X
+        // where x1 is the homogeneous point on camera 1 image,
+        //       P1 is the projection matrix of camera 1,
+        //       x2 is the homogeneous point on camera 2 image,
+        //       P2 is the projection matrix of camera 2,
+        //       X is the homogeneous point in world
+        // Note that x1 and P1*X are co-linear,
+        //      x1.cross_product(P1*X) = 0
+        //      x2.cross_product(P2*X) = 0
+        // which defines a homogenous system A*X = 0
+        // A is 4-by-4 with a rank of 3 (could only be determined up
+        // to a scale), and the solution X is given by the singular
+        // vector corresponding to the smallest singular value.
+        // X is converted to inhomogeneous coordinates by scaling.
+        // see p312, Multple View Geometry in Computer Vision
+        const auto &x1 = p1[i];
+        const auto &x2 = p2[i];
+
+        // Construct the system A*x = 0
+        Vector4Type X(Vector4Type::Zero());
+        Matrix4Type A(Matrix4Type::Zero());
+        A.block<1, 4>(0, 0) = x1[0] * P1.block<1, 4>(2, 0) - P1.block<1, 4>(0, 0);
+        A.block<1, 4>(1, 0) = x1[1] * P1.block<1, 4>(2, 0) - P1.block<1, 4>(1, 0);
+        A.block<1, 4>(2, 0) = x2[0] * P2.block<1, 4>(2, 0) - P2.block<1, 4>(0, 0);
+        A.block<1, 4>(3, 0) = x2[1] * P2.block<1, 4>(2, 0) - P2.block<1, 4>(1, 0);
+
+#if 0
+        std::cerr<<"\nx1 = \n"<<x1<<std::endl;
+        std::cerr<<"x2 = \n"<<x2<<std::endl;
+        std::cerr<<"A = \n"<<A<<std::endl;
+#endif
+        
+        // SVD of A
+        {
+            Eigen::JacobiSVD<Matrix4Type> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
+            X = svd.matrixV().block<1, 4>(3, 0);
+            //std::cerr<<"X = \n"<<X<<std::endl;
+        }
+
+        // convert to inhomogeneous
+        if (std::abs(X[3]) < tolerance) // degenerated case?
+        {
+            assert(false);
+        }
+        else
+        {
+            ScalarType scale = static_cast<ScalarType>(1) / X[3];
+            Point3D pt;
+            pt << X[0], X[1], X[2];
+            pt *= scale;
+            result.push_back(pt);
+        }
+
+    }
+    std::swap(pointsin1, result);
 }
 
 /** Recover relative pose by decomposing the provided essential matrix;
@@ -274,8 +345,9 @@ recover_pose_and_points(const Matrix3Type &E21,
     {
         for (const auto &t_candidate : t1to2_candidates)
         {
-            std::vector<Point3D> &points_candidate;
-            triangulate_points(R, t,
+            std::vector<Point3D> points_candidate;
+            triangulate_points(R_candidate,
+                               t_candidate,
                                normalized_points1,
                                normalized_points2,
                                points_candidate);
@@ -283,7 +355,7 @@ recover_pose_and_points(const Matrix3Type &E21,
             std::vector<size_t> points_candidate_indexes;
             for (size_t i = 0; i < points_candidate.size(); ++i)
             {
-                if (points_candidate[i].z() > epsilon)
+                if (points_candidate[i].z() > tolerance)
                 {
                     points_candidate_indexes.push_back(i);
                 }
@@ -303,6 +375,7 @@ recover_pose_and_points(const Matrix3Type &E21,
             }
         }
     }
+    std::cerr<<"\n\n\nBest candidate:\nR1to2=\n"<<R1to2<<"\nt1to2=\n"<<t1to2<<"point count = "<<pointsin1_indexes.size()<<std::endl;
 #endif
     return true;
 }

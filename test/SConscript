@@ -27,6 +27,8 @@ test_sfm = env.mvSLAM_UnitTest('test-sfm',
                                ['test-sfm.cpp',
                                 env.Object('../source/vision/sfm.cpp'),
                                 env.Object('../source/vision/camera.cpp'), 
+                                env.Object('../source/vision/fundamental-matrix.cpp'),
+                                env.Object('../source/vision/estimator-RANSAC.cpp'),
                                 env.Object('../source/base/opencv.cpp'),
                                 env.Object('../source/base/math.cpp'),
                                ])
