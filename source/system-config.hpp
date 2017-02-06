@@ -1,6 +1,7 @@
 #pragma once
 #include <opencv2/opencv.hpp>
 #include <limits>
+
 namespace mvSLAM
 {
 using ScalarType = double;

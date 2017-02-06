@@ -16,6 +16,11 @@ test_math = env.mvSLAM_UnitTest('test-math',
                                 ])
 targets += test_math
 
+test_svd = env.mvSLAM_UnitTest('test-svd',
+                               ['test-svd.cpp',
+                               ])
+targets += test_svd
+
 test_camera = env.mvSLAM_UnitTest('test-camera',
                                   ['test-camera.cpp',
                                    env.Object('../source/vision/camera.cpp'), # depends on the object file, so that it is only compiled once
@@ -29,7 +34,6 @@ test_sfm = env.mvSLAM_UnitTest('test-sfm',
                                 env.Object('../source/vision/camera.cpp'), 
                                 env.Object('../source/vision/fundamental-matrix.cpp'),
                                 env.Object('../source/vision/estimator-RANSAC.cpp'),
-                                env.Object('../source/base/opencv.cpp'),
                                 env.Object('../source/base/math.cpp'),
                                ])
 targets += test_sfm

@@ -8,6 +8,8 @@
 
 using namespace unit_test;
 
+const mvSLAM::ScalarType tolerance = 0.001;
+
 UNIT_TEST(reconstruct_scene_cube)
 {
     mvSLAM::CameraIntrinsics K = mvSLAM::Matrix3Type::Identity();
@@ -21,22 +23,43 @@ UNIT_TEST(reconstruct_scene_cube)
     mvSLAM::PinholeCamera c1(K, P1);
     mvSLAM::PinholeCamera c2(K, P2);
 
-    mvSLAM::ScalarType cube_x = 0.6,
-                       cube_y = 0.0,
-                       cube_z = 3.0,
-                       cube_half_size = 1.0;
-
-    // generate points on a cube
     std::vector<mvSLAM::Point3D> points_in_world_frame;
     points_in_world_frame.reserve(8);
-    points_in_world_frame.emplace_back(-cube_half_size+cube_x, -cube_half_size+cube_y, -cube_half_size+cube_z);
-    points_in_world_frame.emplace_back(-cube_half_size+cube_x, -cube_half_size+cube_y, +cube_half_size+cube_z);
-    points_in_world_frame.emplace_back(-cube_half_size+cube_x, +cube_half_size+cube_y, -cube_half_size+cube_z);
-    points_in_world_frame.emplace_back(-cube_half_size+cube_x, +cube_half_size+cube_y, +cube_half_size+cube_z);
-    points_in_world_frame.emplace_back(+cube_half_size+cube_x, -cube_half_size+cube_y, -cube_half_size+cube_z);
-    points_in_world_frame.emplace_back(+cube_half_size+cube_x, -cube_half_size+cube_y, +cube_half_size+cube_z);
-    points_in_world_frame.emplace_back(+cube_half_size+cube_x, +cube_half_size+cube_y, -cube_half_size+cube_z);
-    points_in_world_frame.emplace_back(+cube_half_size+cube_x, +cube_half_size+cube_y, +cube_half_size+cube_z);
+
+    // generate points
+#if 1
+    mvSLAM::SO3 rotation(0.0, 0.0, 0.0); // yaw, pitch, roll
+    mvSLAM::Vector3Type translation{0.6, 0.0, 3.0};
+    mvSLAM::ScalarType scale = 1.0;
+    // cube
+    points_in_world_frame.emplace_back(-1, -1, -1);
+    points_in_world_frame.emplace_back(-1, -1, +1);
+    points_in_world_frame.emplace_back(-1, +1, -1);
+    points_in_world_frame.emplace_back(-1, +1, +1);
+    points_in_world_frame.emplace_back(+1, -1, -1);
+    points_in_world_frame.emplace_back(+1, -1, +1);
+    points_in_world_frame.emplace_back(+1, +1, -1);
+    points_in_world_frame.emplace_back(+1, +1, +1);
+#else
+    mvSLAM::SO3 rotation(1.5, 0.7, 0.0); // yaw, pitch, roll
+    mvSLAM::Vector3Type translation{0.6, 0.0, 3.0};
+    mvSLAM::ScalarType scale = 0.5;
+    // L-shaped rig
+    points_in_world_frame.emplace_back(1, 0, 0);
+    points_in_world_frame.emplace_back(0, 0, 0);
+    points_in_world_frame.emplace_back(0, 2, 0);
+    points_in_world_frame.emplace_back(1, 0, 3);
+    points_in_world_frame.emplace_back(0, 0, 3);
+    points_in_world_frame.emplace_back(0, 2, 3);
+    points_in_world_frame.emplace_back(0.5, 0.0, 1.5);
+    points_in_world_frame.emplace_back(0.0, 1.0, 1.5);
+#endif
+
+    // transform and scale the points
+    for (auto &p : points_in_world_frame)
+    {
+        p = rotation * (scale * p) + translation;
+    }
 
     // projected image points
     std::vector<mvSLAM::ImagePoint> image_points1 = c1.project_points(points_in_world_frame);
@@ -56,26 +79,39 @@ UNIT_TEST(reconstruct_scene_cube)
     {
         FAIL("reconstruct_scene() failed");
     }
+    auto se3_2to1_recovered = pose2in1_scaled.ln();
 
 #if 1
     // debug output
     {
+        std::cout<<"====================================="<<std::endl;
         std::cout<<"Camera 2 extrinsics:\n"<<P2<<std::endl;
         std::cout<<"Camera 2 pose in camera 1 ref frame:\n"
                  <<P2.inverse()<<std::endl;
         std::cout<<"[Recovered] Camera 2 pose in camera 1 ref frame:\n"
                  <<pose2in1_scaled<<std::endl;
-        auto se3_2to1_recovered = pose2in1_scaled.ln();
         std::cout<<"se3_2to1 = \n"<<se3_2to1<<std::endl;
-        std::cout<<"se3_2to1_recovered = \n"<<se3_2to1_recovered<<std::endl;
-        for (size_t i = 0; i < 6; ++i)
-            ASSERT_EQUAL(se3_2to1[i], se3_2to1_recovered[i], 0.01);
-
-
-        std::cout<<"Original points:"<<std::endl;
-        //for (const auto &p : points
+        std::cout<<"[Recovered] se3_2to1 = \n"<<se3_2to1_recovered<<std::endl;
+        std::cout<<"Points:"<<std::endl;
+        for (const auto &p : points_in_world_frame)
+        {
+            std::cout<<p<<std::endl<<std::endl;
+        }
+        std::cout<<"[Recovered] Points:"<<std::endl;
+        for (const auto &p : pointsin1_scaled)
+        {
+            std::cout<<p<<std::endl<<std::endl;;
+        }
     }
 #endif 
+    for (size_t i = 0; i < 6; ++i)
+        ASSERT_EQUAL(se3_2to1[i], se3_2to1_recovered[i], tolerance);
+    ASSERT_TRUE(points_in_world_frame.size() == pointsin1_scaled.size());
+    for (size_t i = 0; i < points_in_world_frame.size(); ++i)
+    {
+        for (size_t j = 0; j < 3; ++j)
+            ASSERT_EQUAL(points_in_world_frame[i][j], pointsin1_scaled[i][j], tolerance);
+    }
 
     PASS();
 }

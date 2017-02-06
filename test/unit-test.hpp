@@ -73,7 +73,7 @@ bool run_all_tests()
     return passed_count == test_count;
 }
 
-/** MACRO to run all registered unit tests and return
+/** MACRO to run all registered unit tests and return 0 on success.
  */
 #define RUN_ALL_TESTS() \
 { \
@@ -86,7 +86,7 @@ bool run_all_tests()
 { \
     if (!(x)) \
     { \
-        std::cout<<"EXPECT TURE: "<<#x<<std::endl; \
+        std::cerr<<"EXPECT TURE: "<<#x<<std::endl; \
     }\
 }
 */
@@ -95,7 +95,7 @@ bool run_all_tests()
 { \
     if (!(condition)) \
     { \
-        std::cout<<"ASSERT TURE: "<<#condition<<std::endl; \
+        std::cerr<<"ASSERT TURE: "<<#condition<<std::endl; \
         return false; \
     } \
 }
@@ -104,7 +104,7 @@ bool run_all_tests()
 {\
     if (((lhs) < (rhs) - (tolerance)) || ((lhs) > (rhs) + (tolerance))) \
     { \
-        std::cout<<"EQUAL_TO: "<<#lhs<<" != "<<#rhs<<" (tol = "<<tolerance<<")"<<std::endl; \
+        std::cerr<<"EQUAL_TO: "<<#lhs<<" != "<<#rhs<<" (tol = "<<tolerance<<")"<<std::endl; \
         return false; \
     } \
 }
@@ -112,7 +112,7 @@ bool run_all_tests()
 /// Fail the unit test with error message printed to stdout
 #define FAIL(error_msg) \
 { \
-    std::cout<<"FAIL: "<<error_msg<<std::endl; \
+    std::cerr<<"FAIL: "<<error_msg<<std::endl; \
     return false; \
 }
 

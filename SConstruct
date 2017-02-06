@@ -46,7 +46,10 @@ env["CPPPATH"] = ["#/source/",
                   "/usr/include/vtk-6.2/",
                   "/usr/include/boost/",
                  ]
-#env.Append(CPPDEFINES=["VERBOSE_LOGGING"])
+env.Append(CPPDEFINES=["VERBOSE_LOGGING",
+                       "USE_OPENCV_SVD",
+                       "USE_OPENCV_ESSENTIAL_MATRIX",
+                      ])
 
 env.AddMethod(build_and_install_mvSLAM_program, 'mvSLAM_Program')
 env.AddMethod(build_and_run_mvSLAM_unit_test, 'mvSLAM_UnitTest')

@@ -15,9 +15,6 @@ targets += test_pcl_visualizer
 test_image_io = env.mvSLAM_Program('test-image-io', ['test-image-io.cpp'])
 targets += test_image_io
 
-test_svd = env.mvSLAM_Program('test-svd', ['test-svd.cpp'])
-targets += test_svd
-
 test_visual_feature = env.mvSLAM_Program('test-visual-feature', ['test-visual-feature.cpp'])
 targets += test_visual_feature
 

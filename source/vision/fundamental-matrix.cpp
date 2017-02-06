@@ -126,13 +126,13 @@ find_fundamental_matrix_8point(const std::vector<Vector3Type> &normalized_p1,
         
     // singular constraint
     {
-        cv::Mat Fpre = Matrix3Type_to_Mat(F21);
+        cv::Mat Fpre = Matrix_to_Mat<Matrix3Type>(F21);
         cv::Mat u, w, vt;
         cv::SVDecomp(Fpre,w,u,vt,cv::SVD::MODIFY_A | cv::SVD::FULL_UV);
         std::cout<<"Singular values of F:\n"<<w<<std::endl;
         w.at<ScalarType>(2)=0;
         cv::Mat F21_Mat = u * cv::Mat::diag(w) * vt;
-        F21 = Mat_to_Matrix3Type(F21_Mat);
+        F21 = Mat_to_Matrix<Matrix3Type>(F21_Mat);
     }
     std::cout<<"After applying the singular constraint, F = \n"<<F21<<std::endl;
 

@@ -7,30 +7,21 @@
 namespace mvSLAM
 {
 
-/**
- * @brief
- * @param [in] image1   image taken at camera pose 1.
- * @prarm [in] image2   image taken at camera pose 2.
- * @param [in] K    intrinsics of the camera.
- * @param [out] pose2in1_scaled camera pose 2 in camera 1 ref frame.
- *      the translation is scaled to 1.
- * @param [out] pointsin1_scaled    reconstructed points in camera 1 ref frame.
- *      scaled by the same factor as @p pose2in1_scaled
- * @return whether the reconstruction was successful.
-*/
-/*
-bool reconstruct_scene(const ImageGrayscale &image1,
-                       const ImageGrayscale &image2,
-                       const CameraIntrinsics &K,
-                       Pose &pose2in1_scaled,
-                       std::vector<Point3D> &pointsin1_scaled);
-*/
-
-// pose2in1: the pose of camera 2, expressed in camera 1 ref frame. This is the
-// transform from camera 2 ref frame to camera 1 ref frame, and is the inverse
-// of the camera 2 matrix.
-bool reconstruct_scene(const std::vector<NormalizedPoint> &normalized_points1,
-                       const std::vector<NormalizedPoint> &normalized_points2,
+/** Reconstruct relative motion and structure with linear methods.
+ * @param [in] p1   matching points from camera 1 image;
+ *      already converted to ideal camera model.
+ * @param [in] p2   matching points from camera 2 image;
+ *      already converted to ideal camera model.
+ * @param [out] pose2in1_scaled     pose of camera 2 expressed in
+ *      camera 1 ref frame. This is also the transform from camera
+ *      2 ref frame to camera 1 ref frame. Due to the scale ambiguity,
+ *      the translation part is a unit vector.
+ * @param [out] pointsin1_scaled    position of world points.
+ *      The coordinates are scaled by the same factor as @p points2in1_scaled.
+ * @return true if the reconstruction was successful.
+ */
+bool reconstruct_scene(const std::vector<NormalizedPoint> &p1,
+                       const std::vector<NormalizedPoint> &p2,
                        Pose &pose2in1_scaled,
                        std::vector<Point3D> &pointsin1_scaled);
                        
