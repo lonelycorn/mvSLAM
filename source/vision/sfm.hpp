@@ -20,10 +20,10 @@ namespace mvSLAM
  *      The coordinates are scaled by the same factor as @p points2in1_scaled.
  * @return true if the reconstruction was successful.
  */
-bool reconstruct_scene(const std::vector<NormalizedPoint> &p1,
-                       const std::vector<NormalizedPoint> &p2,
+bool reconstruct_scene(const std::vector<IdealCameraImagePoint> &p1,
+                       const std::vector<IdealCameraImagePoint> &p2,
                        Pose &pose2in1_scaled,
-                       std::vector<Point3D> &pointsin1_scaled);
+                       std::vector<Point3> &pointsin1_scaled);
                        
 
 /**
@@ -33,9 +33,9 @@ bool refine_scene(const VisualFeature &vf1,
                   const VisualFeature &vf2,
                   const CameraIntrinsics &K,
                   const Pose &point2in1_scaled_guess,
-                  const std::vector<Point3D> pointsin1_scaled_guess,
+                  const std::vector<Point3> pointsin1_scaled_guess,
                   PoseEstimate &pose_estimate_scaled,
-                  std::vector<Point3DEstimate> &point_estimates_scaled);
+                  std::vector<Point3Estimate> &point_estimates_scaled);
 
 }
 

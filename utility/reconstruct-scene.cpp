@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     }
     
     mvSLAM::Pose pose2in1_scaled;
-    std::vector<mvSLAM::Point3D> pointsin1_scaled;
+    std::vector<mvSLAM::Point3> pointsin1_scaled;
     if (!reconstruct_scene(image1,
                            image2,
                            pose2in1_scaled,
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 #if 0
     // visualize points
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc =
-        mvSLAM::Point3D_to_PointCloud(pointsin1_scaled);
+        mvSLAM::Point3_to_PointCloud(pointsin1_scaled);
 
     pcl::visualization::PCLVisualizer viewer("3D Reconstruction");
     viewer.addPointCloud(pc, "triangulated points");

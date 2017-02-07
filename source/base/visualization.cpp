@@ -31,7 +31,7 @@ Vector3Type_to_PointCloud(std::vector<Vector3Type> &points)
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr
-Point3D_to_PointCloud(std::vector<Point3D> &points)
+Point3_to_PointCloud(std::vector<Point3> &points)
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr result(new pcl::PointCloud<pcl::PointXYZ>);
     for (const auto &p : points)

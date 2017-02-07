@@ -20,7 +20,7 @@ UNIT_TEST(project_point_trivial)
     mvSLAM::CameraIntrinsics K = mvSLAM::Matrix3Type::Identity();
     mvSLAM::CameraExtrinsics P; // by default use identity
     mvSLAM::PinholeCamera c(K, P);
-    mvSLAM::Point3D p_3d(1.0, 1.0, 1.0);
+    mvSLAM::Point3 p_3d(1.0, 1.0, 1.0);
     mvSLAM::ImagePoint p_image = c.project_point(p_3d);
     ASSERT_EQUAL(p_image.x, 1.0, tolerance);
     ASSERT_EQUAL(p_image.y, 1.0, tolerance);
@@ -39,7 +39,7 @@ UNIT_TEST(project_point)
     mvSLAM::CameraExtrinsics P = mvSLAM::SE3::exp(se3);
     
     mvSLAM::PinholeCamera c(K, P);
-    mvSLAM::Point3D p_3d(3.0, 2.0, 1.0);
+    mvSLAM::Point3 p_3d(3.0, 2.0, 1.0);
     mvSLAM::ImagePoint p_image = c.project_point(p_3d);
     ASSERT_EQUAL(p_image.x, -0.50+20, tolerance);
     ASSERT_EQUAL(p_image.y,  0.75+10, tolerance);
@@ -54,7 +54,7 @@ UNIT_TEST(project_points)
            0,   0,  1;
     mvSLAM::CameraExtrinsics P; // by default use identity
     mvSLAM::PinholeCamera c(K, P);
-    vector<mvSLAM::Point3D> points_3d;
+    vector<mvSLAM::Point3> points_3d;
     for (int x = -1; x <= 1; ++x)
         for (int y = -1; y <=1; ++y)
             points_3d.emplace_back(x, y, 1.0);

@@ -22,6 +22,8 @@ VisualFeature::extract(const ImageGrayscale &image)
     VisualFeature result;
     _detector->detect(image, result.m_keypoints);
     _extractor->compute(image, result.m_keypoints, result.m_descriptors);
+    result.m_image_width = image.cols;
+    result.m_image_height = image.rows;
     return result;
 }
 
@@ -76,7 +78,7 @@ VisualFeature::match_and_filter_images(const ImageGrayscale &image1,
 }
 
 VisualFeature::VisualFeature():
-    m_keypoints(), m_descriptors()
+    m_keypoints(), m_descriptors(), m_image_width(-1), m_image_height(-1)
 {
 }
 
@@ -87,6 +89,9 @@ VisualFeature::~VisualFeature()
 bool
 VisualFeature::equivalent_to(const VisualFeature &other) const
 {
+    if (!valid() || !other.valid())
+        return false;
+
     if (size() != other.size())
         return false;
 
@@ -115,12 +120,14 @@ VisualFeature::size() const
 const VisualFeatureConfig::DetectorResultType &
 VisualFeature::get_keypoints() const
 {
+    assert(valid());
     return m_keypoints;
 }
 
 std::vector<ImagePoint>
 VisualFeature::get_image_points() const
 {
+    assert(valid());
     std::vector<ImagePoint> result;
     result.reserve(m_keypoints.size());
     for (const auto &kp : m_keypoints)
@@ -128,6 +135,38 @@ VisualFeature::get_image_points() const
         result.emplace_back(kp.pt.x, kp.pt.y);
     }
     return result;
+}
+
+std::vector<Point2Estimate>
+VisualFeature::get_point_estimates() const
+{
+    assert(valid());
+    std::vector<Point2Estimate> result;
+    result.reserve(m_keypoints.size());
+    for (const auto &kp : m_keypoints)
+    {
+        // cv::KeyPoint contains
+        //  - angle:    orientation of the key point (i.e. major axis); may be unused. 
+        //  - class_id: id of object that the key point belongs to; may be unused.
+        //  - octave:   level in the image pyramid where the key point is detected. 
+        //              Roughly speaking a pixel in the k-th level represents pow(2, k)
+        //              pixels in the original image.
+        //  - pt:       (u, v) coordinate of the key point.
+        //  - response: intensity of the key point (higher is better); may be unused.
+        //  - size:     radius of the neighborhood the key point represents.
+        // For ORB, the unceritainty of a key point could be empirically modelled as
+        // a Gaussian with std dev equals to pow(2, k)
+        ScalarType stddev = static_cast<ScalarType>(1<<kp.octave);
+        Point2 mu{kp.pt.x, kp.pt.y};
+        result.emplace_back(mu, sqr(stddev) * Point2Uncertainty::Identity());
+    }
+    return result;
+}
+
+bool
+VisualFeature::valid() const
+{
+    return ((size() > 0) && (m_image_width > 0) && (m_image_height > 0));
 }
 
 }

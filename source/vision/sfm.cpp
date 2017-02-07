@@ -45,8 +45,8 @@ static constexpr int cv_mat_type = cv_Mat_traits<ScalarType>::DataType;
  * Note: for normalized cameras, essential matrix is the fundamental matrix.
  */
 static bool
-find_essential_matrix(const std::vector<NormalizedPoint> &p1,
-                      const std::vector<NormalizedPoint> &p2,
+find_essential_matrix(const std::vector<IdealCameraImagePoint> &p1,
+                      const std::vector<IdealCameraImagePoint> &p2,
                       const ScalarType max_error_sq,
                       const ScalarType confidence_level,
                       Matrix3Type &E21,
@@ -145,20 +145,20 @@ decompose_essential_matrix(const Matrix3Type &E21,
 }
 
 /** Triangulate point pairs to obtain 3D coordinates.
- * 1 Point3D for each pair.
+ * 1 Point3 for each pair.
  */
 static void
 triangulate_points(const Matrix3Type &R1to2,
                    const Vector3Type &t1to2,
-                   const std::vector<NormalizedPoint> &p1,
-                   const std::vector<NormalizedPoint> &p2,
-                   std::vector<Point3D> &pointsin1)
+                   const std::vector<IdealCameraImagePoint> &p1,
+                   const std::vector<IdealCameraImagePoint> &p2,
+                   std::vector<Point3> &pointsin1)
 {
     assert(p1.size() == p2.size());
     assert(p1.size() > 0);
 
     const size_t point_count = p1.size();
-    std::vector<Point3D> result;
+    std::vector<Point3> result;
     result.reserve(point_count);
 
     LOG("Triangulating points.");
@@ -215,7 +215,7 @@ triangulate_points(const Matrix3Type &R1to2,
         else
         {
             ScalarType scale = static_cast<ScalarType>(1) / X[3];
-            Point3D pt;
+            Point3 pt;
             pt << X[0], X[1], X[2];
             pt *= scale;
             result.push_back(pt);
@@ -230,12 +230,12 @@ triangulate_points(const Matrix3Type &R1to2,
  */
 static bool
 recover_pose_and_points(const Matrix3Type &E21,
-                        const std::vector<NormalizedPoint> &normalized_points1,
-                        const std::vector<NormalizedPoint> &normalized_points2,
+                        const std::vector<IdealCameraImagePoint> &normalized_points1,
+                        const std::vector<IdealCameraImagePoint> &normalized_points2,
                         const std::vector<uint8_t> &inliers,
                         Matrix3Type &R1to2,
                         Vector3Type &t1to2,
-                        std::vector<Point3D> &pointsin1,
+                        std::vector<Point3> &pointsin1,
                         std::vector<size_t> &pointsin1_indexes)
 {
     pointsin1.clear();
@@ -259,7 +259,7 @@ recover_pose_and_points(const Matrix3Type &E21,
     {
         for (const auto &t_candidate : t1to2_candidates)
         {
-            std::vector<Point3D> points_candidate;
+            std::vector<Point3> points_candidate;
             triangulate_points(R_candidate,
                                t_candidate,
                                normalized_points1,
@@ -298,10 +298,10 @@ recover_pose_and_points(const Matrix3Type &E21,
     return success;
 }
 
-bool reconstruct_scene(const std::vector<NormalizedPoint> &p1,
-                       const std::vector<NormalizedPoint> &p2,
+bool reconstruct_scene(const std::vector<IdealCameraImagePoint> &p1,
+                       const std::vector<IdealCameraImagePoint> &p2,
                        Pose &pose2in1_scaled,
-                       std::vector<Point3D> &pointsin1_scaled)
+                       std::vector<Point3> &pointsin1_scaled)
 {
     assert(p1.size() == p2.size());
     const size_t point_count = p1.size();
@@ -344,7 +344,7 @@ bool reconstruct_scene(const std::vector<NormalizedPoint> &p1,
      *==================================================*/
     LOG("Recovering relative pose and triangulating 3D points.");
     std::vector<size_t> point_indexes;
-    std::vector<Point3D> pointsin1;
+    std::vector<Point3> pointsin1;
     Matrix3Type R1to2;
     Vector3Type t1to2;
     if (!recover_pose_and_points(E21,
@@ -375,9 +375,9 @@ bool refine_scene(const VisualFeature &vf1,
                   const VisualFeature &vf2,
                   const CameraIntrinsics &K,
                   const Pose &pose2to1_guess,
-                  const std::vector<Point3D> pointsin1_guess,
+                  const std::vector<Point3> pointsin1_guess,
                   PoseEstimate &pose_estimate,
-                  std::vector<Point3DEstimate> &point_estimates)
+                  std::vector<Point3Estimate> &point_estimates)
 {
     assert(false);
 }

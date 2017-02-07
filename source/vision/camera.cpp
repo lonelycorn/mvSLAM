@@ -13,7 +13,7 @@ PinholeCamera::~PinholeCamera()
 }
 
 ImagePoint
-PinholeCamera::project_point(const Point3D &point_in_world_frame) const
+PinholeCamera::project_point(const Point3 &point_in_world_frame) const
 {
     Vector3Type p_in_camera_frame = P * point_in_world_frame;
     assert(p_in_camera_frame[2] > 0); // must be in front of the camera
@@ -30,7 +30,7 @@ PinholeCamera::project_point(const Point3D &point_in_world_frame) const
 }
 
 std::vector<ImagePoint>
-PinholeCamera::project_points(const std::vector<Point3D> &points_in_world_frame) const
+PinholeCamera::project_points(const std::vector<Point3> &points_in_world_frame) const
 {
     std::vector<ImagePoint> result;
     result.reserve(points_in_world_frame.size());
@@ -43,11 +43,9 @@ PinholeCamera::project_points(const std::vector<Point3D> &points_in_world_frame)
     return result;
 }
 
-NormalizedPoint
+IdealCameraImagePoint
 PinholeCamera::normalize_point(const ImagePoint &image_point) const
 {
-    // NOTE: we are not using ImagePoint_to_NormalizedPoint() because
-    // of performance considerations.
     Vector3Type v_image;
     v_image << image_point.x, 
                image_point.y, 
@@ -57,10 +55,10 @@ PinholeCamera::normalize_point(const ImagePoint &image_point) const
 
 }
 
-std::vector<NormalizedPoint>
+std::vector<IdealCameraImagePoint>
 PinholeCamera::normalize_points(const std::vector<ImagePoint> &image_points) const
 {
-    std::vector<NormalizedPoint> result;
+    std::vector<IdealCameraImagePoint> result;
     result.reserve(image_points.size());
     
     for (const auto &image_point : image_points)

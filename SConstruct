@@ -40,7 +40,6 @@ env["CCFLAGS"] = "-g -Wall -Werror -Wno-deprecated -pthread"
 env["CXXFLAGS"] = "-std=c++11"
 env["mvSLAM_external_dependency"] = mvSLAM_dependency.all_dependency
 env["CPPPATH"] = ["#/source/", 
-                  "/usr/include/",
                   "/usr/include/pcl-1.7/",
                   "/usr/include/eigen3/",
                   "/usr/include/vtk-6.2/",

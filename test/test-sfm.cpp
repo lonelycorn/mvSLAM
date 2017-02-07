@@ -23,7 +23,7 @@ UNIT_TEST(reconstruct_scene_cube)
     mvSLAM::PinholeCamera c1(K, P1);
     mvSLAM::PinholeCamera c2(K, P2);
 
-    std::vector<mvSLAM::Point3D> points_in_world_frame;
+    std::vector<mvSLAM::Point3> points_in_world_frame;
     points_in_world_frame.reserve(8);
 
     // generate points
@@ -66,12 +66,12 @@ UNIT_TEST(reconstruct_scene_cube)
     std::vector<mvSLAM::ImagePoint> image_points2 = c2.project_points(points_in_world_frame);
 
     // normalize points
-    std::vector<mvSLAM::NormalizedPoint> normalized_points1 = c1.normalize_points(image_points1);
-    std::vector<mvSLAM::NormalizedPoint> normalized_points2 = c2.normalize_points(image_points2);
+    std::vector<mvSLAM::IdealCameraImagePoint> normalized_points1 = c1.normalize_points(image_points1);
+    std::vector<mvSLAM::IdealCameraImagePoint> normalized_points2 = c2.normalize_points(image_points2);
 
     // reconstruction
     mvSLAM::Pose pose2in1_scaled;
-    std::vector<mvSLAM::Point3D> pointsin1_scaled;
+    std::vector<mvSLAM::Point3> pointsin1_scaled;
     if (!reconstruct_scene(normalized_points1,
                            normalized_points2,
                            pose2in1_scaled,

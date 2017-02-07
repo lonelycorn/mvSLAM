@@ -1,5 +1,6 @@
 #pragma once
 #include <base/image.hpp>
+#include <base/space.hpp>
 #include <utility>
 
 namespace mvSLAM
@@ -72,9 +73,15 @@ public:
     std::vector<ImagePoint>
         get_image_points() const;
 
+    /// get mean and covariance of image points
+    std::vector<Point2Estimate>
+        get_point_estimates() const;
+
 private:
+    bool valid() const;
     VisualFeatureConfig::DetectorResultType m_keypoints;
     VisualFeatureConfig::ExtractorResultType m_descriptors;
+    int m_image_width, m_image_height;
 };
 
 }

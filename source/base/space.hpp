@@ -56,8 +56,12 @@ using Pose = SE3;
 using PoseUncertainty = Matrix6Type;
 using PoseEstimate = StateEstimate<Pose, PoseUncertainty>;
 
-using Point3D = Vector3Type;
-using Point3DUncertainty = Matrix3Type;
-using Point3DEstimate = StateEstimate<Point3D, Point3DUncertainty>;
+using Point3 = Vector3Type;
+using Point3Uncertainty = Matrix3Type;
+using Point3Estimate = StateEstimate<Point3, Point3Uncertainty>;
+
+using Point2 = Vector2Type;
+using Point2Uncertainty = Matrix2Type;
+using Point2Estimate = StateEstimate<Point2, Point2Uncertainty>;
 
 }

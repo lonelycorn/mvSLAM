@@ -11,10 +11,10 @@ public:
     virtual ~CameraInterface();
 
     virtual std::vector<ImagePoint>
-        project_points(const std::vector<Point3D> &cartesian_points) const = 0;
+        project_points(const std::vector<Point3> &cartesian_points) const = 0;
 
     virtual ImagePoint
-        project_point(const Point3D &cartesian_point) const = 0;
+        project_point(const Point3 &cartesian_point) const = 0;
 };
 
 class PinholeCamera
@@ -32,17 +32,16 @@ public:
     /** Project the 3D points onto the image plane.
      */
     virtual std::vector<ImagePoint>
-        project_points(const std::vector<Point3D> &cartesian_points) const;
-
+        project_points(const std::vector<Point3> &cartesian_points) const;
     virtual ImagePoint
-        project_point(const Point3D &cartesian_point) const;
+        project_point(const Point3 &cartesian_point) const;
 
     /** Convert the image points to those of an ideal camera.
      * An ideal camera has the identity matrix as the intrinsics.
      */
-    std::vector<NormalizedPoint>
+    std::vector<IdealCameraImagePoint>
         normalize_points(const std::vector<ImagePoint> &image_points) const;
-    NormalizedPoint
+    IdealCameraImagePoint 
         normalize_point(const ImagePoint &image_point) const;
 
     const CameraIntrinsics &get_intrinsics() const;
