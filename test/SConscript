@@ -10,33 +10,60 @@ targets = []
 #targets += run_test_unit_test
 #Alias('test_unit_test', run_test_unit_test)
 
-test_math = env.mvSLAM_UnitTest('test-math',
-                                ['test-math.cpp',
-                                 env.Object('../source/base/math.cpp'),
-                                ])
+test_math = env.mvSLAM_UnitTest\
+(
+    'test-math',
+    [
+        'test-math.cpp',
+        env.Object('../source/base/math.cpp'),
+    ]
+)
 targets += test_math
 
-test_svd = env.mvSLAM_UnitTest('test-svd',
-                               ['test-svd.cpp',
-                               ])
+test_svd = env.mvSLAM_UnitTest\
+(
+    'test-svd',
+    [
+        'test-svd.cpp',
+    ]
+)
 targets += test_svd
 
-test_camera = env.mvSLAM_UnitTest('test-camera',
-                                  ['test-camera.cpp',
-                                   env.Object('../source/vision/camera.cpp'), # depends on the object file, so that it is only compiled once
-                                   env.Object('../source/base/math.cpp'),
-                                  ])
+test_camera = env.mvSLAM_UnitTest\
+(
+    'test-camera',
+    [
+        'test-camera.cpp',
+        env.Object('../source/vision/camera.cpp'), # depends on the object file, so that it is only compiled once
+        env.Object('../source/base/math.cpp'),
+    ]
+)
 targets += test_camera
 
-test_sfm = env.mvSLAM_UnitTest('test-sfm',
-                               ['test-sfm.cpp',
-                                env.Object('../source/vision/sfm.cpp'),
-                                env.Object('../source/vision/camera.cpp'), 
-                                env.Object('../source/vision/fundamental-matrix.cpp'),
-                                env.Object('../source/vision/estimator-RANSAC.cpp'),
-                                env.Object('../source/base/math.cpp'),
-                               ])
+test_sfm = env.mvSLAM_UnitTest\
+(
+    'test-sfm',
+    [
+        'test-sfm.cpp',
+        env.Object('../source/vision/sfm.cpp'),
+        env.Object('../source/vision/camera.cpp'), 
+        env.Object('../source/vision/fundamental-matrix.cpp'),
+        env.Object('../source/vision/estimator-RANSAC.cpp'),
+        env.Object('../source/base/math.cpp'),
+    ]
+)
 targets += test_sfm
+
+test_directory_iterator = env.mvSLAM_UnitTest\
+(
+    'test_directory_iterator',
+    [
+        'test-directory-iterator.cpp',
+        env.Object('../source/os/directory-iterator.cpp'),
+    ]
+)
+env.Depends(test_directory_iterator, env.Glob('../data/sfm/*'))
+targets += test_directory_iterator
 
 
 Return(['targets'])
