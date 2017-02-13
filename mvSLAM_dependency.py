@@ -62,6 +62,13 @@ vtk_dependency = [
 
         ]
 
+gtsam_dependency = [
+            #"gtsam_unstable",
+            "gtsam",
+            "tbb",
+            "tbbmalloc",
+        ]
+
 opencv_dependency = [
             #"opencv_stitching",
             #"opencv_superres",
@@ -111,6 +118,7 @@ all_dependency = \
         boost_dependency + \
         pcl_dependency + \
         vtk_dependency + \
+        gtsam_dependency + \
         opencv_dependency + \
         system_dependency
 

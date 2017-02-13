@@ -4,19 +4,22 @@ mvSLAM_base_files = [
     './base/math.cpp',
     './base/image.cpp',
     './base/visualization.cpp',
+    './base/gtsam.cpp',
 ]
 
 mvSLAM_os_files = [
     './os/time.cpp',
     './os/event.cpp',
     './os/mutex.cpp',
+    './os/directory-iterator.cpp',
 ]
 
 mvSLAM_vision_files = [
     './vision/io.cpp',
     './vision/camera.cpp',
     './vision/visual-feature.cpp',
-    './vision/sfm.cpp',
+    './vision/sfm-reconstruct.cpp',
+    './vision/sfm-refine.cpp',
     './vision/fundamental-matrix.cpp',
     './vision/estimator-RANSAC.cpp',
 ]

@@ -5,18 +5,18 @@
 namespace mvSLAM
 {
 
-template <typename MuType, typename CovarType>
+template <typename MeanType, typename CovarType>
 class StateEstimate 
 {
 public:
-    const MuType &mu() const
+    const MeanType &mean() const
     {
-        return _mu;
+        return _mean;
     }
 
-    MuType &mu()
+    MeanType &mean()
     {
-        return _mu;
+        return _mean;
     }
 
     const CovarType &covar() const
@@ -37,18 +37,18 @@ public:
      * @brief Ctor.
      * @note we may want to use information matrix instead
      */
-    StateEstimate(const MuType &mu, const CovarType &covar):
-        _mu(mu), _covar(covar)
+    StateEstimate(const MeanType &mean, const CovarType &covar):
+        _mean(mean), _covar(covar)
     {
     }
     /// Default ctor.
     StateEstimate():
-        _mu(), _covar(CovarType::Identity())
+        _mean(), _covar(CovarType::Identity())
     {
     }
     ~StateEstimate() {}
 private:
-    MuType _mu;
+    MeanType _mean;
     CovarType _covar;
 };
 

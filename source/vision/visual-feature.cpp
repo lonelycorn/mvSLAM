@@ -155,8 +155,8 @@ VisualFeature::get_point_estimates() const
         //  - response: intensity of the key point (higher is better); may be unused.
         //  - size:     radius of the neighborhood the key point represents.
         // For ORB, the unceritainty of a key point could be empirically modelled as
-        // a Gaussian with std dev equals to pow(2, k)
-        ScalarType stddev = static_cast<ScalarType>(1<<kp.octave);
+        // a Gaussian with std dev equals to pow(2, k) * 0.5
+        ScalarType stddev = static_cast<ScalarType>(1 << kp.octave) * 0.5;
         Point2 mu{kp.pt.x, kp.pt.y};
         result.emplace_back(mu, sqr(stddev) * Point2Uncertainty::Identity());
     }

@@ -153,6 +153,12 @@ public:
         return _R * v;
     }
 
+    SO3 operator*(const SO3 &rhs) const
+    {
+        Matrix3Type R = _R * rhs._R;
+        return SO3(R);
+    }
+
     Matrix3Type adjoint() const
     {
         return _R;
@@ -256,6 +262,13 @@ public:
     Vector3Type operator*(const Vector3Type &v) const
     {
         return _R * v + _t;
+    }
+
+    SE3 operator*(const SE3 &rhs) const
+    {
+        SO3 R = _R * rhs._R;
+        Vector3Type t = _R * rhs._t + _t;
+        return SE3(R, t);
     }
 
     /** Get the adjoint matrix for this transform.

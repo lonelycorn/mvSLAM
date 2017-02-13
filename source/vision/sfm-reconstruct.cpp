@@ -1,17 +1,14 @@
 #include <cassert>
-#include <cstdio>
 #include <cmath>
 #include <vector>
 #include <iostream>
-#include <opencv2/opencv.hpp>
 
+#include <base/debug.hpp>
+#include <base/gtsam.hpp>
+#include <base/svd.hpp>
 #include <vision/camera.hpp>
 #include <vision/estimator-RANSAC.hpp>
 #include <vision/sfm.hpp>
-#include <base/debug.hpp>
-#include <base/svd.hpp>
-#include <algorithm>
-#include <random>
 
 #define DEBUG_SFM
 
@@ -369,17 +366,6 @@ bool reconstruct_scene(const std::vector<IdealCameraImagePoint> &p1,
     pose2in1_scaled = SE3(SO3(R1to2), t1to2).inverse();
     pointsin1_scaled.swap(pointsin1);
     return true;
-}
-
-bool refine_scene(const VisualFeature &vf1,
-                  const VisualFeature &vf2,
-                  const CameraIntrinsics &K,
-                  const Pose &pose2to1_guess,
-                  const std::vector<Point3> pointsin1_guess,
-                  PoseEstimate &pose_estimate,
-                  std::vector<Point3Estimate> &point_estimates)
-{
-    assert(false);
 }
 
 }
