@@ -24,7 +24,7 @@ get_gaussian(mvSLAM::ScalarType mean = 0.0,
     return standard_gaussian(generator) * stddev + mean;
 }
 
-UNIT_TEST(reconstruct_scene_cube)
+UNIT_TEST(sfm_solve_cube)
 {
     /* Ground Truth */
     mvSLAM::CameraIntrinsics K = mvSLAM::Matrix3Type::Identity();
@@ -71,12 +71,12 @@ UNIT_TEST(reconstruct_scene_cube)
     // reconstruction
     mvSLAM::Pose pose2in1_scaled;
     std::vector<mvSLAM::Point3> pointsin1_scaled;
-    if (!reconstruct_scene(normalized_points1,
-                           normalized_points2,
-                           pose2in1_scaled,
-                           pointsin1_scaled))
+    if (!sfm_solve(normalized_points1,
+                   normalized_points2,
+                   pose2in1_scaled,
+                   pointsin1_scaled))
     {
-        FAIL("reconstruct_scene() failed");
+        FAIL("sfm_solve() failed");
     }
 
 #ifdef DEBUG_OUTPUT
@@ -113,7 +113,7 @@ UNIT_TEST(reconstruct_scene_cube)
     PASS();
 }
 
-UNIT_TEST(refine_scene_L_shape)
+UNIT_TEST(sfm_refine_L_shape)
 {
     /* Ground Truth */
     mvSLAM::CameraIntrinsics K = mvSLAM::Matrix3Type::Identity();
@@ -191,11 +191,11 @@ UNIT_TEST(refine_scene_L_shape)
     mvSLAM::Vector6Type delta_pose;
     delta_pose << get_gaussian(0.0, 5e-3), get_gaussian(0.0, 5e-3), get_gaussian(0.0, 5e-3), // translation
                   get_gaussian(0.0, 1e-2), get_gaussian(0.0, 1e-2), get_gaussian(0.0, 1e-2); // rotation
-    mvSLAM::Pose pose2in1_scaled_guess = mvSLAM::SE3::exp(delta_pose) * P1 *  P2.inverse();
+    mvSLAM::Pose pose2in1_guess = mvSLAM::SE3::exp(delta_pose) * P1 *  P2.inverse();
 
     // points
-    std::vector<mvSLAM::Point3> pointsin1_scaled_guess;
-    pointsin1_scaled_guess.reserve(points_in_world_frame.size());
+    std::vector<mvSLAM::Point3> pointsin1_guess;
+    pointsin1_guess.reserve(points_in_world_frame.size());
 
     const mvSLAM::ScalarType p_noise_mean(0.0);
     const mvSLAM::ScalarType p_noise_stddev(5e-3);
@@ -205,20 +205,20 @@ UNIT_TEST(refine_scene_L_shape)
         for (int i = 0; i < 3; ++i)
             mean[i] = p[i] + get_gaussian(p_noise_mean, p_noise_stddev);
 
-        pointsin1_scaled_guess.emplace_back(mean);
+        pointsin1_guess.emplace_back(mean);
     }
 
     
     // refinement 
-    mvSLAM::PoseEstimate pose2in1_scaled_estimate;
-    std::vector<mvSLAM::Point3Estimate> pointsin1_scaled_estimate;
-    if (!refine_scene(p1_estimate,
-                      p2_estimate,
-                      K,
-                      pose2in1_scaled_guess,
-                      pointsin1_scaled_guess,
-                      pose2in1_scaled_estimate,
-                      pointsin1_scaled_estimate))
+    mvSLAM::PoseEstimate pose2in1_estimate;
+    std::vector<mvSLAM::Point3Estimate> pointsin1_estimate;
+    if (!sfm_refine(p1_estimate,
+                    p2_estimate,
+                    K,
+                    pose2in1_guess,
+                    pointsin1_guess,
+                    pose2in1_estimate,
+                    pointsin1_estimate))
     {
         FAIL("refine_scene() failed");
     }
@@ -230,27 +230,27 @@ UNIT_TEST(refine_scene_L_shape)
         std::cout<<"Camera 2 pose in camera 1 ref frame:\n"
                  <<P2.inverse()<<std::endl;
         std::cout<<"[Refined] Camera 2 pose in camera 1 ref frame:\n"
-                 <<pose2in1_scaled_estimate.mean()<<std::endl;
+                 <<pose2in1_estimate.mean()<<std::endl;
         std::cout<<"Points:"<<std::endl;
         for (const auto &p : points_in_world_frame)
         {
             std::cout<<p<<std::endl<<std::endl;
         }
         std::cout<<"[Refined] Points:"<<std::endl;
-        for (const auto &pe : pointsin1_scaled_estimate)
+        for (const auto &pe : pointsin1_estimate)
         {
             std::cout<<pe.mean()<<std::endl<<std::endl;;
         }
     }
 #endif 
 
-    auto se3_2to1_recovered = pose2in1_scaled_estimate.mean().ln();
+    auto se3_2to1_recovered = pose2in1_estimate.mean().ln();
     for (size_t i = 0; i < 6; ++i)
         ASSERT_EQUAL(se3_2to1[i], se3_2to1_recovered[i], tolerance);
-    ASSERT_TRUE(points_in_world_frame.size() == pointsin1_scaled_estimate.size());
+    ASSERT_TRUE(points_in_world_frame.size() == pointsin1_estimate.size());
     for (size_t i = 0; i < points_in_world_frame.size(); ++i)
     {
-        const auto &pointin1_recovered = pointsin1_scaled_estimate[i].mean();
+        const auto &pointin1_recovered = pointsin1_estimate[i].mean();
         for (size_t j = 0; j < 3; ++j)
             ASSERT_EQUAL(points_in_world_frame[i][j], pointin1_recovered[j], tolerance);
     }

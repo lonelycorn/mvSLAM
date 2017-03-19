@@ -32,10 +32,6 @@ static constexpr ScalarType
     VF_MATCH_ERROR_MAX = (ScalarType) 1.0;
 static constexpr ScalarType
     VF_MATCH_CONFIDENCE_LEVEL = (ScalarType) 0.99;
-static constexpr int cv_mat_type = cv_Mat_traits<ScalarType>::DataType;
-
-// It seems that OpenCV yields a much better result than the home-brew version
-#define USE_OPENCV
 
 /** Find essential matrix E such that p2.T * E * p1 == 0.
  * Internally this is implemented with RANSAC.
@@ -295,10 +291,10 @@ recover_pose_and_points(const Matrix3Type &E21,
     return success;
 }
 
-bool reconstruct_scene(const std::vector<IdealCameraImagePoint> &p1,
-                       const std::vector<IdealCameraImagePoint> &p2,
-                       Pose &pose2in1_scaled,
-                       std::vector<Point3> &pointsin1_scaled)
+bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
+               const std::vector<IdealCameraImagePoint> &p2,
+               Pose &pose2in1_scaled,
+               std::vector<Point3> &pointsin1_scaled)
 {
     assert(p1.size() == p2.size());
     const size_t point_count = p1.size();

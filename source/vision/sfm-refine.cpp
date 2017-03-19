@@ -42,16 +42,16 @@ static constexpr ScalarType
 static constexpr ScalarType
     SFM_REGULATOR_STDDEV_ORIENTATION(1e-2);
 
-bool refine_scene(const std::vector<Point2Estimate> &p1_estimate,
-                  const std::vector<Point2Estimate> &p2_estimate,
-                  const CameraIntrinsics &ci,
-                  const Pose &pose2in1_scaled_guess,
-                  const std::vector<Point3> pointsin1_scaled_guess,
-                  PoseEstimate &pose2in1_scaled_estimate,
-                  std::vector<Point3Estimate> &pointsin1_scaled_estimate)
+bool sfm_refine(const std::vector<Point2Estimate> &p1_estimate,
+                const std::vector<Point2Estimate> &p2_estimate,
+                const CameraIntrinsics &ci,
+                const Pose &pose2in1_guess,
+                const std::vector<Point3> pointsin1_guess,
+                PoseEstimate &pose2in1_estimate,
+                std::vector<Point3Estimate> &pointsin1_estimate)
 {
     assert(p1_estimate.size() == p2_estimate.size());
-    assert(p1_estimate.size() == pointsin1_scaled_guess.size());
+    assert(p1_estimate.size() == pointsin1_guess.size());
     const size_t point_count = p1_estimate.size();
 
     gtsam::NonlinearFactorGraph graph;
@@ -102,7 +102,7 @@ bool refine_scene(const std::vector<Point2Estimate> &p1_estimate,
     // Use gtsam::PriorFactor to regulate camera 2 pose.
     {
         auto symbol = gtsam::Symbol('x', 2);
-        auto pose = SE3_to_Pose3(pose2in1_scaled_guess);
+        auto pose = SE3_to_Pose3(pose2in1_guess);
         gtsam::Vector6 stddev;
         const double prior_stddev_position = SFM_REGULATOR_STDDEV_POSITION;
         const double prior_stddev_orientation = SFM_REGULATOR_STDDEV_ORIENTATION;
@@ -121,7 +121,7 @@ bool refine_scene(const std::vector<Point2Estimate> &p1_estimate,
         for (size_t i = 0; i < point_count; ++i)
         {
             auto symbol = gtsam::Symbol('p', i);
-            auto p = mvSLAM_Point3_to_gtsam_Point3(pointsin1_scaled_guess[i]);
+            auto p = mvSLAM_Point3_to_gtsam_Point3(pointsin1_guess[i]);
             gtsam::Vector3 stddev;
             const double prior_stddev_position = SFM_REGULATOR_STDDEV_POSITION;
             stddev << prior_stddev_position,
@@ -144,13 +144,13 @@ bool refine_scene(const std::vector<Point2Estimate> &p1_estimate,
     }
     {
         auto symbol = gtsam::Symbol('x', 2);
-        auto pose = SE3_to_Pose3(pose2in1_scaled_guess);
+        auto pose = SE3_to_Pose3(pose2in1_guess);
         initial_guess.insert(symbol, pose);
     }
     for (size_t i = 0; i < point_count; ++i)
     {
         auto symbol = gtsam::Symbol('p', i);
-        auto p = mvSLAM_Point3_to_gtsam_Point3(pointsin1_scaled_guess[i]);
+        auto p = mvSLAM_Point3_to_gtsam_Point3(pointsin1_guess[i]);
         initial_guess.insert(symbol, p);
     }
 #ifdef DEBUG_SFM
@@ -172,19 +172,19 @@ bool refine_scene(const std::vector<Point2Estimate> &p1_estimate,
         gtsam::Pose3 pose1_gtsam = result.at<gtsam::Pose3>(symbol_x1); // in world frame
         gtsam::Pose3 pose2_gtsam = result.at<gtsam::Pose3>(symbol_x2); // in world frame
         gtsam::Pose3 pose2in1_gtsam = pose1_gtsam.inverse() * pose2_gtsam;
-        pose2in1_scaled_estimate.mean() = Pose3_to_SE3(pose2in1_gtsam);
+        pose2in1_estimate.mean() = Pose3_to_SE3(pose2in1_gtsam);
         // FIXME: we treat x1 as fixed... but is that correct? we should pass in and update x1 estimate
-        pose2in1_scaled_estimate.covar() = marginals.marginalCovariance(symbol_x2);
+        pose2in1_estimate.covar() = marginals.marginalCovariance(symbol_x2);
     }
-    pointsin1_scaled_estimate.clear();
-    pointsin1_scaled_estimate.reserve(point_count);
+    pointsin1_estimate.clear();
+    pointsin1_estimate.reserve(point_count);
     for (size_t i = 0; i < point_count; ++i)
     {
         auto symbol = gtsam::Symbol('p', i);
         gtsam::Point3 point_gtsam = result.at<gtsam::Point3>(symbol); // in world frame
         auto mean = gtsam_Point3_to_mvSLAM_Point3(point_gtsam);
         auto covar = marginals.marginalCovariance(symbol);
-        pointsin1_scaled_estimate.emplace_back(mean, covar);
+        pointsin1_estimate.emplace_back(mean, covar);
     }
 
     return true;

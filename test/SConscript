@@ -40,27 +40,12 @@ test_camera = env.mvSLAM_UnitTest\
 )
 targets += test_camera
 
-"""
-test_gtsam = env.mvSLAM_UnitTest\
-(
-    'test-gtsam',
-    [
-        'test-gtsam.cpp',
-        env.Object('../source/vision/camera.cpp'), 
-        env.Object('../source/vision/sfm-refine.cpp'),
-        env.Object('../source/base/math.cpp'),
-        env.Object('../source/base/gtsam.cpp'),
-    ]
-)
-targets += test_gtsam
-"""
-
 test_sfm = env.mvSLAM_UnitTest\
 (
     'test-sfm',
     [
         'test-sfm.cpp',
-        env.Object('../source/vision/sfm-reconstruct.cpp'),
+        env.Object('../source/vision/sfm-solve.cpp'),
         env.Object('../source/vision/sfm-refine.cpp'),
         env.Object('../source/vision/camera.cpp'), 
         env.Object('../source/vision/fundamental-matrix.cpp'),

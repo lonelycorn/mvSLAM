@@ -18,7 +18,7 @@ mvSLAM_vision_files = [
     './vision/io.cpp',
     './vision/camera.cpp',
     './vision/visual-feature.cpp',
-    './vision/sfm-reconstruct.cpp',
+    './vision/sfm-solve.cpp',
     './vision/sfm-refine.cpp',
     './vision/fundamental-matrix.cpp',
     './vision/estimator-RANSAC.cpp',
