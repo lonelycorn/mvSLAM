@@ -1,7 +1,8 @@
 #pragma once
 #include <system-config.hpp>
-#include <opencv2/opencv.hpp>
 #include <base/math.hpp>
+
+#include <opencv2/opencv.hpp>
 
 /**
  * Helper functions to interface with OpenCV
