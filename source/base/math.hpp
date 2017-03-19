@@ -306,8 +306,9 @@ public:
         return se3;
     }
 
-    /** 
+    /** Create by exponential mapping.
      * see http://www.ethaneade.org/lie.pdf
+     * @param [in] se3  representation in the tagent space. Translation part first.
      */
     static SE3 exp(const Vector6Type &se3)
     {

@@ -21,6 +21,7 @@ bool pnp_solve(const std::vector<Point3> &world_points,
 
 /** Estimate camera pose in world ref frame from correspondences between
  * world points and image points.
+ * A.k.a Motion-only Bundle Adjustment.
  *
  * @param [in] world_point_estimates    estimates of corresponding world points.
  * @param [in] image_point_estimates    estimates of image points.

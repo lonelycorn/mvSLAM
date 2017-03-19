@@ -9,6 +9,7 @@
  */
 namespace mvSLAM
 {
+
 gtsam::Point2 mvSLAM_Point2_to_gtsam_Point2(const mvSLAM::Point2 &p);
 mvSLAM::Point2 gtsam_Point2_to_mvSLAM_Point2(const gtsam::Point2 &p);
 

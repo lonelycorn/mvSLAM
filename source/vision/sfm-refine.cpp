@@ -1,17 +1,13 @@
 #include <cassert>
-#include <vector>
 #include <iostream>
-#include <opencv2/opencv.hpp>
 
 #include <base/debug.hpp>
 #include <base/gtsam.hpp>
-#include <base/svd.hpp>
-#include <vision/camera.hpp>
 #include <vision/sfm.hpp>
 
 #include <gtsam/geometry/Point2.h> // image points
+#include <gtsam/geometry/Point3.h> // world points
 #include <gtsam/inference/Symbol.h> // use symbols like "X1"
-#include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/slam/PriorFactor.h>
 #include <gtsam/slam/ProjectionFactor.h> // simple camera reprojection model
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
@@ -52,6 +48,8 @@ bool sfm_refine(const std::vector<Point2Estimate> &p1_estimate,
 {
     assert(p1_estimate.size() == p2_estimate.size());
     assert(p1_estimate.size() == pointsin1_guess.size());
+    LOG("Refining SfM.");
+
     const size_t point_count = p1_estimate.size();
 
     gtsam::NonlinearFactorGraph graph;
@@ -86,8 +84,8 @@ bool sfm_refine(const std::vector<Point2Estimate> &p1_estimate,
         auto symbol = gtsam::Symbol('x', 1);
         auto pose = gtsam::Pose3(); // origin
         gtsam::Vector6 stddev;
-        const double prior_stddev_position = SFM_ANCHOR_STDDEV_POSITION;
-        const double prior_stddev_orientation = SFM_ANCHOR_STDDEV_ORIENTATION;
+        const ScalarType prior_stddev_position = SFM_ANCHOR_STDDEV_POSITION;
+        const ScalarType prior_stddev_orientation = SFM_ANCHOR_STDDEV_ORIENTATION;
         // NOTE: translation before rotation
         stddev << prior_stddev_position,
                   prior_stddev_position,
@@ -104,8 +102,8 @@ bool sfm_refine(const std::vector<Point2Estimate> &p1_estimate,
         auto symbol = gtsam::Symbol('x', 2);
         auto pose = SE3_to_Pose3(pose2in1_guess);
         gtsam::Vector6 stddev;
-        const double prior_stddev_position = SFM_REGULATOR_STDDEV_POSITION;
-        const double prior_stddev_orientation = SFM_REGULATOR_STDDEV_ORIENTATION;
+        const ScalarType prior_stddev_position = SFM_REGULATOR_STDDEV_POSITION;
+        const ScalarType prior_stddev_orientation = SFM_REGULATOR_STDDEV_ORIENTATION;
         // NOTE: translation before rotation
         stddev << prior_stddev_position,
                   prior_stddev_position,
@@ -123,7 +121,7 @@ bool sfm_refine(const std::vector<Point2Estimate> &p1_estimate,
             auto symbol = gtsam::Symbol('p', i);
             auto p = mvSLAM_Point3_to_gtsam_Point3(pointsin1_guess[i]);
             gtsam::Vector3 stddev;
-            const double prior_stddev_position = SFM_REGULATOR_STDDEV_POSITION;
+            const ScalarType prior_stddev_position = SFM_REGULATOR_STDDEV_POSITION;
             stddev << prior_stddev_position,
                       prior_stddev_position,
                       prior_stddev_position;

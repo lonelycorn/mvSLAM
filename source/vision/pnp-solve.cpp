@@ -28,7 +28,7 @@ bool pnp_solve(const std::vector<Point3> &world_points,
     assert(world_points.size() == image_points.size());
 
     LOG("Solving PnP.");
-    size_t point_count = world_points.size();
+    const size_t point_count = world_points.size();
     constexpr int cv_Mat_type = cv_Mat_traits<ScalarType>::DataType;
     // FIXME: implement with Perspective-3-Points and RANSAC
     std::vector<cv::Point3_<ScalarType> > objectPoints;

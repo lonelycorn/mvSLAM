@@ -61,11 +61,11 @@ test_pnp = env.mvSLAM_UnitTest\
     'test-pnp',
     [
         'test-pnp.cpp',
-        #env.Object('../source/vision/pnp-refine.cpp'),
+        env.Object('../source/vision/pnp-refine.cpp'),
         env.Object('../source/vision/pnp-solve.cpp'),
         env.Object('../source/vision/camera.cpp'), 
         env.Object('../source/base/math.cpp'),
-        #env.Object('../source/base/gtsam.cpp'),
+        env.Object('../source/base/gtsam.cpp'),
     ]
 )
 targets += test_pnp
