@@ -7,25 +7,16 @@
 #include <random>
 #include <cmath>
 #include "unit-test.hpp"
+#include "unit-test-helper.hpp"
 
 //#define DEBUG_OUTPUT
 
 using namespace unit_test;
 
-const mvSLAM::ScalarType tolerance = 0.02;
-
-mvSLAM::ScalarType
-get_gaussian(mvSLAM::ScalarType mean = 0.0,
-             mvSLAM::ScalarType stddev = 1.0)
-{
-    static std::random_device rd;
-    static std::mt19937 generator(rd());
-    static std::normal_distribution<mvSLAM::ScalarType> standard_gaussian;
-    return standard_gaussian(generator) * stddev + mean;
-}
 
 UNIT_TEST(sfm_solve_cube)
 {
+    const mvSLAM::ScalarType tolerance = 0.001;
     /* Ground Truth */
     mvSLAM::CameraIntrinsics K = mvSLAM::Matrix3Type::Identity();
     mvSLAM::CameraExtrinsics P1; // by default, use identity
@@ -38,27 +29,13 @@ UNIT_TEST(sfm_solve_cube)
     mvSLAM::PinholeCamera c1(K, P1);
     mvSLAM::PinholeCamera c2(K, P2);
 
-    std::vector<mvSLAM::Point3> points_in_world_frame;
-    points_in_world_frame.reserve(8);
 
     // generate points on a cube
     mvSLAM::SO3 rotation(0.0, 0.0, 0.0); // yaw, pitch, roll
     mvSLAM::Vector3Type translation{0.6, 0.0, 3.0};
     mvSLAM::ScalarType scale = 1.0;
-    points_in_world_frame.emplace_back(-1, -1, -1);
-    points_in_world_frame.emplace_back(-1, -1, +1);
-    points_in_world_frame.emplace_back(-1, +1, -1);
-    points_in_world_frame.emplace_back(-1, +1, +1);
-    points_in_world_frame.emplace_back(+1, -1, -1);
-    points_in_world_frame.emplace_back(+1, -1, +1);
-    points_in_world_frame.emplace_back(+1, +1, -1);
-    points_in_world_frame.emplace_back(+1, +1, +1);
-
-    // transform and scale the points
-    for (auto &p : points_in_world_frame)
-    {
-        p = rotation * (scale * p) + translation;
-    }
+    std::vector<mvSLAM::Point3> points_in_world_frame =
+        get_rig_points(RIG_TYPE::CUBE, rotation, translation, scale);
 
     // projected image points
     std::vector<mvSLAM::ImagePoint> image_points1 = c1.project_points(points_in_world_frame);
@@ -115,6 +92,7 @@ UNIT_TEST(sfm_solve_cube)
 
 UNIT_TEST(sfm_refine_L_shape)
 {
+    const mvSLAM::ScalarType tolerance = 0.02;
     /* Ground Truth */
     mvSLAM::CameraIntrinsics K = mvSLAM::Matrix3Type::Identity();
     mvSLAM::CameraExtrinsics P1; // by default, use identity
@@ -127,33 +105,18 @@ UNIT_TEST(sfm_refine_L_shape)
     mvSLAM::PinholeCamera c1(K, P1);
     mvSLAM::PinholeCamera c2(K, P2);
 
-    std::vector<mvSLAM::Point3> points_in_world_frame;
-    points_in_world_frame.reserve(8);
-
     // generate points on an L-shaped rig
     mvSLAM::SO3 rotation(1.5, 0.7, 0.0); // yaw, pitch, roll
     mvSLAM::Vector3Type translation{0.6, 0.0, 3.0};
     mvSLAM::ScalarType scale = 0.5;
-    points_in_world_frame.emplace_back(1, 0, 0);
-    points_in_world_frame.emplace_back(0, 0, 0);
-    points_in_world_frame.emplace_back(0, 2, 0);
-    points_in_world_frame.emplace_back(1, 0, 3);
-    points_in_world_frame.emplace_back(0, 0, 3);
-    points_in_world_frame.emplace_back(0, 2, 3);
-    points_in_world_frame.emplace_back(0.5, 0.0, 1.5);
-    points_in_world_frame.emplace_back(0.0, 1.0, 1.5);
-
-    // transform and scale the points
-    for (auto &p : points_in_world_frame)
-    {
-        p = rotation * (scale * p) + translation;
-    }
+    std::vector<mvSLAM::Point3> points_in_world_frame =
+        get_rig_points(RIG_TYPE::L_SHAPE, rotation, translation, scale);
 
     // projected image points
     std::vector<mvSLAM::ImagePoint> image_points1 = c1.project_points(points_in_world_frame);
     std::vector<mvSLAM::ImagePoint> image_points2 = c2.project_points(points_in_world_frame);
 
-    /* Simeanlate measurements */
+    /* Simulate measurements */
     std::vector<mvSLAM::Point2Estimate> p1_estimate;
     std::vector<mvSLAM::Point2Estimate> p2_estimate;
     p1_estimate.reserve(image_points1.size());

@@ -45,6 +45,7 @@ test_sfm = env.mvSLAM_UnitTest\
     'test-sfm',
     [
         'test-sfm.cpp',
+        env.Object('unit-test-helper.cpp'),
         env.Object('../source/vision/sfm-solve.cpp'),
         env.Object('../source/vision/sfm-refine.cpp'),
         env.Object('../source/vision/camera.cpp'), 
@@ -61,6 +62,7 @@ test_pnp = env.mvSLAM_UnitTest\
     'test-pnp',
     [
         'test-pnp.cpp',
+        env.Object('unit-test-helper.cpp'),
         env.Object('../source/vision/pnp-refine.cpp'),
         env.Object('../source/vision/pnp-solve.cpp'),
         env.Object('../source/vision/camera.cpp'), 
@@ -72,7 +74,7 @@ targets += test_pnp
 
 test_directory_iterator = env.mvSLAM_UnitTest\
 (
-    'test_directory_iterator',
+    'test-directory-iterator',
     [
         'test-directory-iterator.cpp',
         env.Object('../source/os/directory-iterator.cpp'),
