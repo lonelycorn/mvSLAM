@@ -1,9 +1,18 @@
 #pragma once
 #include <base/math.hpp>
 #include <iostream>
+#include <cstddef>
 
 namespace mvSLAM
 {
+
+class Id
+{
+public:
+    using Type = std::size_t;
+    static constexpr Type INVALID = static_cast<Type>(-1);
+};
+
 
 template <typename MeanType, typename CovarType>
 class StateEstimate 
@@ -52,9 +61,9 @@ private:
     CovarType _covar;
 };
 
-using Pose = SE3;
-using PoseUncertainty = Matrix6Type;
-using PoseEstimate = StateEstimate<Pose, PoseUncertainty>;
+using Transformation = SE3;
+using TransformationUncertainty = Matrix6Type;
+using TransformationEstimate = StateEstimate<Transformation, TransformationUncertainty>;
 
 using Point3 = Vector3Type;
 using Point3Uncertainty = Matrix3Type;

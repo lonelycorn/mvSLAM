@@ -22,7 +22,7 @@ constexpr size_t
 
 bool pnp_solve(const std::vector<Point3> &world_points,
                const std::vector<IdealCameraImagePoint> &image_points,
-               Pose &pose)
+               Transformation &pose)
 {
     assert(world_points.size() >= PNP_MIN_POINT_COUNT);
     assert(world_points.size() == image_points.size());

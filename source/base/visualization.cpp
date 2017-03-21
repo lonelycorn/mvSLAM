@@ -42,7 +42,7 @@ Point3_to_PointCloud(std::vector<Point3> &points)
     return result;
 }
 
-void add_camera_representation(const Pose &camera_pose,
+void add_camera_representation(const Transformation &camera_pose,
                                const char *title,
                                pcl::visualization::PCLVisualizer &viewer,
                                bool shrink)

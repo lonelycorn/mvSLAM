@@ -41,9 +41,9 @@ static constexpr ScalarType
 bool sfm_refine(const std::vector<Point2Estimate> &p1_estimate,
                 const std::vector<Point2Estimate> &p2_estimate,
                 const CameraIntrinsics &ci,
-                const Pose &pose2in1_guess,
+                const Transformation &pose2in1_guess,
                 const std::vector<Point3> pointsin1_guess,
-                PoseEstimate &pose2in1_estimate,
+                TransformationEstimate &pose2in1_estimate,
                 std::vector<Point3Estimate> &pointsin1_estimate)
 {
     assert(p1_estimate.size() == p2_estimate.size());

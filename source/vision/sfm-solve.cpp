@@ -293,7 +293,7 @@ recover_pose_and_points(const Matrix3Type &E21,
 
 bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
                const std::vector<IdealCameraImagePoint> &p2,
-               Pose &pose2in1_scaled,
+               Transformation &pose2in1_scaled,
                std::vector<Point3> &pointsin1_scaled)
 {
     assert(p1.size() == p2.size());

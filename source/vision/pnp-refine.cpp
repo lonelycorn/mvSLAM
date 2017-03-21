@@ -37,8 +37,8 @@ static constexpr ScalarType
 bool pnp_refine(const std::vector<Point3Estimate> &world_point_estimates,
                 const std::vector<Point2Estimate> &image_point_estimates,
                 const CameraIntrinsics &ci,
-                const Pose &pose_guess,
-                PoseEstimate &pose_estimate)
+                const Transformation &pose_guess,
+                TransformationEstimate &pose_estimate)
 {
     assert(world_point_estimates.size() == image_point_estimates.size());
     LOG("Refining PnP.");

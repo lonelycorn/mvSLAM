@@ -46,7 +46,7 @@ UNIT_TEST(sfm_solve_cube)
     std::vector<mvSLAM::IdealCameraImagePoint> normalized_points2 = c2.normalize_points(image_points2);
 
     // reconstruction
-    mvSLAM::Pose pose2in1_scaled;
+    mvSLAM::Transformation pose2in1_scaled;
     std::vector<mvSLAM::Point3> pointsin1_scaled;
     if (!sfm_solve(normalized_points1,
                    normalized_points2,
@@ -154,7 +154,7 @@ UNIT_TEST(sfm_refine_L_shape)
     mvSLAM::Vector6Type delta_pose;
     delta_pose << get_gaussian(0.0, 5e-3), get_gaussian(0.0, 5e-3), get_gaussian(0.0, 5e-3), // translation
                   get_gaussian(0.0, 1e-2), get_gaussian(0.0, 1e-2), get_gaussian(0.0, 1e-2); // rotation
-    mvSLAM::Pose pose2in1_guess = mvSLAM::SE3::exp(delta_pose) * P1 *  P2.inverse();
+    mvSLAM::Transformation pose2in1_guess = mvSLAM::SE3::exp(delta_pose) * P1 *  P2.inverse();
 
     // points
     std::vector<mvSLAM::Point3> pointsin1_guess;
@@ -173,7 +173,7 @@ UNIT_TEST(sfm_refine_L_shape)
 
     
     // refinement 
-    mvSLAM::PoseEstimate pose2in1_estimate;
+    mvSLAM::TransformationEstimate pose2in1_estimate;
     std::vector<mvSLAM::Point3Estimate> pointsin1_estimate;
     if (!sfm_refine(p1_estimate,
                     p2_estimate,

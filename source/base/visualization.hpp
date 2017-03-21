@@ -13,10 +13,10 @@ Vector3Type_to_PointCloud(std::vector<Vector3Type> &points);
 pcl::PointCloud<pcl::PointXYZ>::Ptr
 Point3_to_PointCloud(std::vector<Point3> &points);
 
-/**
- * @brief Add a polyhedro representing the camera pose to the viewer.
+/** Add a polyhedro representing the camera pose to the viewer.
+ * @param [in] camera_pose  transformation from camera to world.
  */
-void add_camera_representation(const Pose &camera_pose,
+void add_camera_representation(const Transformation &camera_pose,
                                const char *title,
                                pcl::visualization::PCLVisualizer &viewer,
                                bool shrink=false);

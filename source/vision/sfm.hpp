@@ -27,7 +27,7 @@ namespace mvSLAM
  */
 bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
                const std::vector<IdealCameraImagePoint> &p2,
-               Pose &pose2in1_scaled,
+               Transformation &pose2in1_scaled,
                std::vector<Point3> &pointsin1_scaled);
                        
 
@@ -46,9 +46,9 @@ bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
 bool sfm_refine(const std::vector<Point2Estimate> &p1_estimates,
                 const std::vector<Point2Estimate> &p2_estimates,
                 const CameraIntrinsics &K,
-                const Pose &pose2in1_guess,
+                const Transformation &pose2in1_guess,
                 const std::vector<Point3> pointsin1_guess,
-                PoseEstimate &pose2in1_estimate,
+                TransformationEstimate &pose2in1_estimate,
                 std::vector<Point3Estimate> &pointsin1_estimate);
 }
 

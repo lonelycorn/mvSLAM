@@ -37,7 +37,7 @@ UNIT_TEST(pnp_solve_cube)
     std::vector<mvSLAM::IdealCameraImagePoint> normalized_points = c.normalize_points(image_points);
 
     // PnP
-    mvSLAM::Pose pose_recovered;
+    mvSLAM::Transformation pose_recovered;
     if (!pnp_solve(points,
                    normalized_points,
                    pose_recovered))
@@ -124,10 +124,10 @@ UNIT_TEST(pnp_refine_L_shape)
     mvSLAM::Vector6Type delta_pose;
     delta_pose << get_gaussian(0.0, 5e-3), get_gaussian(0.0, 5e-3), get_gaussian(0.0, 5e-3), // translation
                   get_gaussian(0.0, 5e-3), get_gaussian(0.0, 5e-3), get_gaussian(0.0, 5e-3); // rotation
-    mvSLAM::Pose pose_guess = mvSLAM::SE3::exp(delta_pose) * P.inverse();
+    mvSLAM::Transformation pose_guess = mvSLAM::SE3::exp(delta_pose) * P.inverse();
 
     // refinement 
-    mvSLAM::PoseEstimate pose_estimate;
+    mvSLAM::TransformationEstimate pose_estimate;
     if (!pnp_refine(world_point_estimates,
                     image_point_estimates,
                     K,

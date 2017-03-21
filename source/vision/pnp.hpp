@@ -17,7 +17,7 @@ namespace mvSLAM
  */
 bool pnp_solve(const std::vector<Point3> &world_points,
                const std::vector<IdealCameraImagePoint> &image_points,
-               Pose &pose);
+               Transformation &pose);
 
 /** Estimate camera pose in world ref frame from correspondences between
  * world points and image points.
@@ -34,6 +34,6 @@ bool pnp_solve(const std::vector<Point3> &world_points,
 bool pnp_refine(const std::vector<Point3Estimate> &world_point_estimates,
                 const std::vector<Point2Estimate> &image_point_estimates,
                 const CameraIntrinsics &K,
-                const Pose &pose_guess,
-                PoseEstimate &pose_estimate);
+                const Transformation &pose_guess,
+                TransformationEstimate &pose_estimate);
 }
