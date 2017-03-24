@@ -83,6 +83,19 @@ test_directory_iterator = env.mvSLAM_UnitTest\
 env.Depends(test_directory_iterator, env.Glob('../data/sfm/*'))
 targets += test_directory_iterator
 
+test_graph = env.mvSLAM_UnitTest\
+(
+    'test-graph',
+    [
+        'test-graph.cpp',
+        env.Object('unit-test-helper.cpp'),
+        env.Object('../source/back-end/graph.cpp'),
+        env.Object('../source/back-end/data-type.cpp'),
+        env.Object('../source/base/gtsam.cpp'),
+        env.Object('../source/base/math.cpp'),
+    ]
+)
+targets += test_graph
 
 Return(['targets'])
 

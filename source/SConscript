@@ -25,10 +25,15 @@ mvSLAM_vision_files = [
     './vision/estimator-RANSAC.cpp',
 ]
 
+mvSLAM_back_end_files = [
+    './back-end/graph.cpp',
+]
+
 source_files = \
     mvSLAM_base_files + \
     mvSLAM_os_files + \
-    mvSLAM_vision_files
+    mvSLAM_vision_files + \
+    mvSLAM_back_end_files
 
 targets = []
 for source_file in source_files:

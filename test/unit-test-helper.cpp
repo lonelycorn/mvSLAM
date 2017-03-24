@@ -12,6 +12,20 @@ get_gaussian(mvSLAM::ScalarType mean, mvSLAM::ScalarType stddev)
     return standard_gaussian(generator) * stddev + mean;
 }
 
+mvSLAM::SE3
+get_SE3_sample(mvSLAM::ScalarType isotropic_noise_stddev)
+{
+    assert(isotropic_noise_stddev > static_cast<mvSLAM::ScalarType>(0));
+
+    mvSLAM::Vector6Type delta;
+    for (int i = 0; i < 6; ++i)
+    {
+        delta[i] = get_gaussian(0.0, isotropic_noise_stddev);
+    }
+    return mvSLAM::SE3::exp(delta);
+
+}
+
 static void
 transform_points(std::vector<mvSLAM::Vector3Type> &points,
                  const mvSLAM::SO3 &rotation,
@@ -64,5 +78,21 @@ get_rig_points(RIG_TYPE rig_type,
     return points;
 }
 
+bool check_similar_SE3(const mvSLAM::SE3 &T1,
+                       const mvSLAM::SE3 &T2,
+                       mvSLAM::ScalarType tol)
+{
+    auto t1 = T1.ln();
+    auto t2 = T2.ln();
+    for (size_t i = 0; i < 6; ++i)
+    {
+        if ((t1[i] < t2[i] - tol) ||
+            (t1[i] > t2[i] + tol))
+        {
+            return false;
+        }
+    }
+    return true;
+}
 
 }
