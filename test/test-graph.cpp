@@ -178,15 +178,18 @@ UNIT_TEST(planar_triangle)
     graph.print("===== after optimization =====");
 #endif
     
+    auto optimized_pose = graph.get_all_pose_node_value();
     for (auto node_id : created_node_id)
     {
         auto pose1 = graph.get_pose_node_value(node_id);
         auto pose2 = pose_true[node_id]; 
+        auto pose3 = optimized_pose[node_id];
 #ifdef DEBUG_OUTPUT
         std::cout<<"===== node "<<node_id<<" =====\ntrue pose\n"
                  <<pose2<<"\nestimated pose\n"<<pose1<<std::endl;
 #endif
         ASSERT_TRUE(check_similar_SE3(pose1, pose2, TOLERANCE));
+        ASSERT_TRUE(check_similar_SE3(pose1, pose3, 1e-4));
     }
 
     PASS();
