@@ -1,22 +1,14 @@
-#include <base/math.hpp>
 #include <base/debug.hpp>
+#include <base/math.hpp>
 #include <base/opencv.hpp>
 #include <vision/pnp.hpp>
 
-#define DEBUG_PNP
-
-#ifdef DEBUG_PNP
-    #define ERROR(...)  MVSLAM_ERROR(__VA_ARGS__)
-    #define LOG(...)    MVSLAM_LOG(__VA_ARGS__)
-    #define DEBUG(...)  MVSLAM_DEBUG(__VA_ARGS__)
-#else
-    #define ERROR(...)
-    #define LOG(...)
-    #define DEBUG(...)
-#endif
 
 namespace mvSLAM
 {
+
+static Logger logger("pnp-solve", true);
+
 constexpr size_t
     PNP_MIN_POINT_COUNT = 4;
 
@@ -27,7 +19,7 @@ bool pnp_solve(const std::vector<Point3> &world_points,
     assert(world_points.size() >= PNP_MIN_POINT_COUNT);
     assert(world_points.size() == image_points.size());
 
-    LOG("Solving PnP.");
+    logger.info("Solving PnP.");
     const size_t point_count = world_points.size();
     constexpr int cv_Mat_type = cv_Mat_traits<ScalarType>::DataType;
     // FIXME: implement with Perspective-3-Points and RANSAC
@@ -64,7 +56,7 @@ bool pnp_solve(const std::vector<Point3> &world_points,
                       useExtrinsicGuess,
                       flags))
     {
-        ERROR("Cannot find camera pose.");
+        logger.error("Cannot find camera pose.");
         return false;
     }
 

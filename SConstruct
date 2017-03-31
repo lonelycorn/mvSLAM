@@ -45,8 +45,7 @@ env["CPPPATH"] = ["#/source/",
                   "/usr/include/vtk-6.2/",
                   "/usr/include/boost/",
                  ]
-env.Append(CPPDEFINES=["VERBOSE_LOGGING",
-                       "USE_OPENCV_SVD",
+env.Append(CPPDEFINES=["USE_OPENCV_SVD",
                        "USE_OPENCV_ESSENTIAL_MATRIX",
                       ])
 

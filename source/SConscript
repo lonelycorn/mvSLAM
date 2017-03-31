@@ -2,6 +2,7 @@ Import("env")
 
 mvSLAM_base_files = [
     './base/math.cpp',
+    './base/debug.cpp',
     './base/image.cpp',
     './base/visualization.cpp',
     './base/gtsam.cpp',

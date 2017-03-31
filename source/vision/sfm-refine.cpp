@@ -15,20 +15,10 @@
 #include <gtsam/nonlinear/Values.h>
 #include <gtsam/nonlinear/Marginals.h>
 
-//#define DEBUG_SFM
-
-#ifdef DEBUG_SFM
-    #define ERROR(...)  MVSLAM_ERROR(__VA_ARGS__)
-    #define LOG(...)    MVSLAM_LOG(__VA_ARGS__)
-    #define DEBUG(...)  MVSLAM_DEBUG(__VA_ARGS__)
-#else
-    #define ERROR(...)
-    #define LOG(...)
-    #define DEBUG(...)
-#endif
-
 namespace mvSLAM
 {
+static Logger logger("sfm-refine", true);
+
 static constexpr ScalarType
     SFM_ANCHOR_STDDEV_POSITION(1e-5);
 static constexpr ScalarType
@@ -48,7 +38,7 @@ bool sfm_refine(const std::vector<Point2Estimate> &p1_estimate,
 {
     assert(p1_estimate.size() == p2_estimate.size());
     assert(p1_estimate.size() == pointsin1_guess.size());
-    LOG("Refining SfM.");
+    logger.info("Refining SfM.");
 
     const size_t point_count = p1_estimate.size();
 

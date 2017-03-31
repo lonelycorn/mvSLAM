@@ -52,6 +52,7 @@ test_sfm = env.mvSLAM_UnitTest\
         env.Object('../source/vision/fundamental-matrix.cpp'),
         env.Object('../source/vision/estimator-RANSAC.cpp'),
         env.Object('../source/base/math.cpp'),
+        env.Object('../source/base/debug.cpp'),
         env.Object('../source/base/gtsam.cpp'),
     ]
 )
@@ -67,6 +68,7 @@ test_pnp = env.mvSLAM_UnitTest\
         env.Object('../source/vision/pnp-solve.cpp'),
         env.Object('../source/vision/camera.cpp'), 
         env.Object('../source/base/math.cpp'),
+        env.Object('../source/base/debug.cpp'),
         env.Object('../source/base/gtsam.cpp'),
     ]
 )

@@ -15,20 +15,10 @@
 #include <gtsam/nonlinear/Values.h>
 #include <gtsam/nonlinear/Marginals.h>
 
-//#define DEBUG_PNP
-
-#ifdef DEBUG_PNP
-    #define ERROR(...)  MVSLAM_ERROR(__VA_ARGS__)
-    #define LOG(...)    MVSLAM_LOG(__VA_ARGS__)
-    #define DEBUG(...)  MVSLAM_DEBUG(__VA_ARGS__)
-#else
-    #define ERROR(...)
-    #define LOG(...)
-    #define DEBUG(...)
-#endif
-
 namespace mvSLAM
 {
+static Logger logger("pnp-refine", true);
+
 static constexpr ScalarType
     PNP_REGULATOR_STDDEV_POSITION(1e-2);
 static constexpr ScalarType
@@ -41,7 +31,7 @@ bool pnp_refine(const std::vector<Point3Estimate> &world_point_estimates,
                 TransformationEstimate &pose_estimate)
 {
     assert(world_point_estimates.size() == image_point_estimates.size());
-    LOG("Refining PnP.");
+    logger.info("Refining PnP.");
 
     const size_t point_count = world_point_estimates.size();
 

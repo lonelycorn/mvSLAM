@@ -10,20 +10,10 @@
 #include <vision/estimator-RANSAC.hpp>
 #include <vision/sfm.hpp>
 
-#define DEBUG_SFM
-
-#ifdef DEBUG_SFM
-    #define ERROR(...)  MVSLAM_ERROR(__VA_ARGS__)
-    #define LOG(...)    MVSLAM_LOG(__VA_ARGS__)
-    #define DEBUG(...)  MVSLAM_DEBUG(__VA_ARGS__)
-#else
-    #define ERROR(...)
-    #define LOG(...)
-    #define DEBUG(...)
-#endif
-
 namespace mvSLAM
 {
+static Logger logger("sfm-solve", true);
+
 static constexpr int 
     VF_MATCH_SIZE_MIN = 20;
 static constexpr int 
@@ -111,7 +101,7 @@ decompose_essential_matrix(const Matrix3Type &E21,
                            Matrix3Type &R1to2_b,
                            Vector3Type &t1to2)
 {
-    LOG("Decomposing essential matrix.");
+    logger.info("Decomposing essential matrix.");
     // An essential matrix can be decomposed as E = SR,
     // where S is the cross_product_matrix for the translation t,
     // and R is the rotation matrix.
@@ -154,7 +144,7 @@ triangulate_points(const Matrix3Type &R1to2,
     std::vector<Point3> result;
     result.reserve(point_count);
 
-    LOG("Triangulating points.");
+    logger.info("Triangulating points.");
 
     const Matrix4Type P1 = SE3().get_matrix();
     const Matrix4Type P2 = SE3(SO3(R1to2), t1to2).get_matrix();
@@ -303,7 +293,7 @@ bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
     /*===============================================
      * estimate essential matrix. x2.T * E * x1 == 0 
      *===============================================*/
-    LOG("Estimating essential matrix using point pairs from ideal cameras.");
+    logger.info("Estimating essential matrix using point pairs from ideal cameras.");
     int inlier_count;
     std::vector<uint8_t> inliers;
     Matrix3Type E21;
@@ -314,20 +304,20 @@ bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
                                E21,
                                inliers))
     {
-        ERROR("Cannot find essential matrix.");
+        logger.error("Cannot find essential matrix.");
         return false;
     }
 
     // the more inliers the more likely this is a good essential matrix
     // but is this really necessary?
-    LOG("Checking inliers.");
+    logger.info("Checking inliers.");
     inlier_count = 0;
     for (auto i : inliers)
         inlier_count += ((i > 0) ? 1 : 0);
-    DEBUG("%d inliers when estimating essential matrix.", inlier_count);
+    logger.debugf("%d inliers when estimating essential matrix.", inlier_count);
     if (inlier_count < VF_MATCH_INLIER_MIN)
     {
-        ERROR("not enough inliers when estimating essential matrix.");
+        logger.error("not enough inliers when estimating essential matrix.");
         return false;
     }
 
@@ -335,7 +325,7 @@ bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
      * recover pose by decomposing the essential matrix
      * recover 3D triangulate points
      *==================================================*/
-    LOG("Recovering relative pose and triangulating 3D points.");
+    logger.info("Recovering relative pose and triangulating 3D points.");
     std::vector<size_t> point_indexes;
     std::vector<Point3> pointsin1;
     Matrix3Type R1to2;
@@ -349,10 +339,10 @@ bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
                                  pointsin1,
                                  point_indexes))
     {
-        ERROR("Cannot recover pose and points.");
+        logger.error("Cannot recover pose and points.");
         return false;
     }
-    DEBUG("%d points recovered.", (int) point_indexes.size());
+    logger.debugf("%d points recovered.", (int) point_indexes.size());
 
     /*================
      * prepare output 
