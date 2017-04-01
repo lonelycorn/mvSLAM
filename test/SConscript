@@ -85,6 +85,22 @@ test_directory_iterator = env.mvSLAM_UnitTest\
 env.Depends(test_directory_iterator, env.Glob('../data/sfm/*'))
 targets += test_directory_iterator
 
+test_frame_manager = env.mvSLAM_UnitTest\
+(
+    'test-frame-manager',
+    [
+        'test-frame-manager.cpp',
+        env.Object('../source/front-end/frame-manager.cpp'),
+        env.Object('../source/front-end/data-type.cpp'),
+        env.Object('../source/vision/visual-feature.cpp'),
+        env.Object('../source/vision/io.cpp'),
+        env.Object('../source/base/debug.cpp'),
+        env.Object('../source/os/mutex.cpp'),
+    ]
+)
+env.Depends(test_frame_manager, env.Glob('../data/tsukuba/*'))
+targets += test_frame_manager
+
 test_graph = env.mvSLAM_UnitTest\
 (
     'test-graph',
