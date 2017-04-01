@@ -27,7 +27,13 @@ mvSLAM_vision_files = [
 ]
 
 mvSLAM_back_end_files = [
+    './back-end/data-type.cpp',
     './back-end/graph.cpp',
+]
+
+mvSLAM_front_end_files = [
+    './front-end/data-type.cpp',
+    './front-end/frame-manager.cpp',
 ]
 
 source_files = \
