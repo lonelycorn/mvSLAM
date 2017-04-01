@@ -39,7 +39,7 @@ Mutex::Mutex()
 Mutex::~Mutex()
 {
     int result = pthread_mutex_destroy(&_mutex);
-    assert(result);
+    assert(result == 0);
 }
 
 void
