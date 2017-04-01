@@ -2,7 +2,6 @@
 
 #include <system-config.hpp>
 #include <base/space.hpp>
-#include <unordered_map>
 
 namespace mvSLAM
 {
