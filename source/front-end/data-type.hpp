@@ -14,6 +14,9 @@ struct FrontEndTypes
     using FrameId = Id::Type;
     static FrameId generate_frame_id();
 
+    // TODO: make const?
+    // TODO: only allow FrameManager to create
+    /// data structure to store basic information useful to front-end.
     struct Frame
     {
         FrameId id;
@@ -31,7 +34,8 @@ struct FrontEndTypes
               const ImageGrayscale &image_);
     };
 
-    using FramePtr = std::shared_ptr<Frame>;
+    // by default, no write access
+    using FramePtr = std::shared_ptr<const Frame>;
 };
 
 
