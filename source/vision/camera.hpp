@@ -7,8 +7,13 @@ namespace mvSLAM
 class CameraInterface
 {
 public:
-    CameraInterface();
-    virtual ~CameraInterface();
+    CameraInterface()
+    {
+    }
+
+    virtual ~CameraInterface()
+    {
+    }
 
     virtual std::vector<ImagePoint>
         project_points(const std::vector<Point3> &cartesian_points) const = 0;
@@ -17,7 +22,7 @@ public:
         project_point(const Point3 &cartesian_point) const = 0;
 };
 
-class PinholeCamera
+class PinholeCamera: public CameraInterface
 {
 public:
     PinholeCamera(const CameraIntrinsics &K,
