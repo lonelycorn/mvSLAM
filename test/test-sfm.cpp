@@ -41,17 +41,16 @@ UNIT_TEST(sfm_solve_cube)
     std::vector<mvSLAM::ImagePoint> image_points1 = c1.project_points(points_in_world_frame);
     std::vector<mvSLAM::ImagePoint> image_points2 = c2.project_points(points_in_world_frame);
 
-    // normalize points
-    std::vector<mvSLAM::IdealCameraImagePoint> normalized_points1 = c1.normalize_points(image_points1);
-    std::vector<mvSLAM::IdealCameraImagePoint> normalized_points2 = c2.normalize_points(image_points2);
-
     // reconstruction
     mvSLAM::Transformation pose2in1_scaled;
     std::vector<mvSLAM::Point3> pointsin1_scaled;
-    if (!sfm_solve(normalized_points1,
-                   normalized_points2,
+    std::vector<size_t> point_indexes;
+    if (!sfm_solve(image_points1,
+                   image_points2,
+                   K,
                    pose2in1_scaled,
-                   pointsin1_scaled))
+                   pointsin1_scaled,
+                   point_indexes))
     {
         FAIL("sfm_solve() failed");
     }

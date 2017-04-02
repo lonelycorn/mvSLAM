@@ -13,22 +13,23 @@ namespace mvSLAM
  * Due to the nature of SfM, the reconstructed world could only be
  * determined up to scale.
  *
- * @param [in] p1   matching points from camera 1 image;
- *      already converted to ideal pinhole camera model.
- * @param [in] p2   matching points from camera 2 image;
- *      already converted to ideal pinhole camera model.
+ * @param [in] p1   matching points from camera 1 image.
+ * @param [in] p2   matching points from camera 2 image.
  * @param [out] pose2in1_scaled     pose of camera 2 expressed in
  *      camera 1 ref frame. This is also the transform from camera
  *      2 ref frame to camera 1 ref frame. Due to the scale ambiguity,
  *      the translation part is a unit vector.
  * @param [out] pointsin1_scaled    position of world points.
  *      The coordinates are scaled by the same factor as @p points2in1_scaled.
+ * @param [out] points_index the original indices of the reconstructed points.
  * @return true if the reconstruction was successful.
  */
-bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
-               const std::vector<IdealCameraImagePoint> &p2,
+bool sfm_solve(const std::vector<ImagePoint> &p1,
+               const std::vector<ImagePoint> &p2,
+               const CameraIntrinsics &K,
                Transformation &pose2in1_scaled,
-               std::vector<Point3> &pointsin1_scaled);
+               std::vector<Point3> &pointsin1_scaled,
+               std::vector<size_t> &point_indexes);
                        
 
 /** Refine relative motion and structure using initial guesses.

@@ -12,7 +12,7 @@
 
 namespace mvSLAM
 {
-static Logger logger("sfm-solve", true);
+static Logger logger("[sfm-solve]", true);
 
 static constexpr int 
     VF_MATCH_SIZE_MIN = 20;
@@ -280,15 +280,24 @@ recover_pose_and_points(const Matrix3Type &E21,
     }
     return success;
 }
-
-bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
-               const std::vector<IdealCameraImagePoint> &p2,
+bool sfm_solve(const std::vector<ImagePoint> &p1_,
+               const std::vector<ImagePoint> &p2_,
+               const CameraIntrinsics &K,
                Transformation &pose2in1_scaled,
-               std::vector<Point3> &pointsin1_scaled)
+               std::vector<Point3> &pointsin1_scaled,
+               std::vector<size_t> &point_indexes_)
 {
-    assert(p1.size() == p2.size());
-    const size_t point_count = p1.size();
-    (void) point_count;
+    assert(p1_.size() == p2_.size());
+    const size_t point_count = p1_.size();
+    logger.info(point_count, " point pairs");
+
+    /*==================
+     * normalize points
+     *==================*/
+    logger.info("Converting to ideal camera points");
+    PinholeCamera c(K, CameraExtrinsics()); // we don't care about extrinsics
+    std::vector<IdealCameraImagePoint> p1 = c.normalize_points(p1_);
+    std::vector<IdealCameraImagePoint> p2 = c.normalize_points(p2_);
 
     /*===============================================
      * estimate essential matrix. x2.T * E * x1 == 0 
@@ -314,7 +323,7 @@ bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
     inlier_count = 0;
     for (auto i : inliers)
         inlier_count += ((i > 0) ? 1 : 0);
-    logger.debugf("%d inliers when estimating essential matrix.", inlier_count);
+    logger.debug(inlier_count, " inliers when estimating essential matrix.");
     if (inlier_count < VF_MATCH_INLIER_MIN)
     {
         logger.error("not enough inliers when estimating essential matrix.");
@@ -342,7 +351,7 @@ bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
         logger.error("Cannot recover pose and points.");
         return false;
     }
-    logger.debugf("%d points recovered.", (int) point_indexes.size());
+    logger.debug(point_indexes.size(), " points recovered.");
 
     /*================
      * prepare output 
@@ -351,6 +360,7 @@ bool sfm_solve(const std::vector<IdealCameraImagePoint> &p1,
     // pose of camera 2 expressed in camera 1 ref frame
     pose2in1_scaled = SE3(SO3(R1to2), t1to2).inverse();
     pointsin1_scaled.swap(pointsin1);
+    point_indexes_.swap(point_indexes);
     return true;
 }
 
