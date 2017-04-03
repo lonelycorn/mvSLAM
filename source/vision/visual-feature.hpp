@@ -16,7 +16,8 @@ public:
     /** Find the match between the two images.
      * @param [in] vf1  visual feature extracted from the first image.
      * @param [in] vf2  visual feature extracted from the second image.
-     * @return the matches from 2 to 1.
+     * @return the matches from 2 to 1, sorted in ascending order of match
+     *         distance.
      */
     static VisualFeatureConfig::MatchResultType
         match_visual_features(const VisualFeature &vf1,
@@ -25,7 +26,8 @@ public:
     /** Find the match between the two images.
      * @param [in] image1 a rectified image.
      * @param [in] image2 a rectified image.
-     * @return the matches from 2 to 1.
+     * @return the matches from 2 to 1, sorted in ascending order of match
+     *         distance.
      */
     static VisualFeatureConfig::MatchResultType
         match_images(const ImageGrayscale &image1,

@@ -34,7 +34,8 @@ bool sfm_refine(const std::vector<Point2Estimate> &p1_estimate,
                 const Transformation &pose2in1_guess,
                 const std::vector<Point3> pointsin1_guess,
                 TransformationEstimate &pose2in1_estimate,
-                std::vector<Point3Estimate> &pointsin1_estimate)
+                std::vector<Point3Estimate> &pointsin1_estimate,
+                ScalarType &residual)
 {
     assert(p1_estimate.size() == p2_estimate.size());
     assert(p1_estimate.size() == pointsin1_guess.size());
@@ -174,6 +175,8 @@ bool sfm_refine(const std::vector<Point2Estimate> &p1_estimate,
         auto covar = marginals.marginalCovariance(symbol);
         pointsin1_estimate.emplace_back(mean, covar);
     }
+
+    residual = optimizer.error();
 
     return true;
 }

@@ -174,13 +174,15 @@ UNIT_TEST(sfm_refine_L_shape)
     // refinement 
     mvSLAM::TransformationEstimate pose2in1_estimate;
     std::vector<mvSLAM::Point3Estimate> pointsin1_estimate;
+    mvSLAM::ScalarType error;
     if (!sfm_refine(p1_estimate,
                     p2_estimate,
                     K,
                     pose2in1_guess,
                     pointsin1_guess,
                     pose2in1_estimate,
-                    pointsin1_estimate))
+                    pointsin1_estimate,
+                    error))
     {
         FAIL("refine_scene() failed");
     }

@@ -42,6 +42,7 @@ bool sfm_solve(const std::vector<ImagePoint> &p1,
  * @param [in] pointsin1_guess  initial guesses for world points in camera 1 ref frame.
  * @param [out] pose2in1_estimate   refined estimate of camera 2 pose in camera 1 ref frame.
  * @param [out] pointsin1_guess refined estimates of world points in camera 1 ref frame.
+ * @param [out] residual    the residual after the refinement.
  * @return true if the refinement was successful.
  */
 bool sfm_refine(const std::vector<Point2Estimate> &p1_estimates,
@@ -50,6 +51,7 @@ bool sfm_refine(const std::vector<Point2Estimate> &p1_estimates,
                 const Transformation &pose2in1_guess,
                 const std::vector<Point3> pointsin1_guess,
                 TransformationEstimate &pose2in1_estimate,
-                std::vector<Point3Estimate> &pointsin1_estimate);
+                std::vector<Point3Estimate> &pointsin1_estimate,
+                ScalarType &residual);
 }
 

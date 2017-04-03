@@ -1,6 +1,8 @@
 #include <vision/visual-feature.hpp>
+#include <algorithm>
 #include <cassert>
 #include <unordered_map>
+
 namespace mvSLAM
 {
 /** Configuration for key point detector */
@@ -15,6 +17,17 @@ static VisualFeatureConfig::ExtractorContainerType
 static bool cross_check = true;
 static VisualFeatureConfig::MatcherType
     _matcher(VisualFeatureConfig::MatcherNormType, cross_check);
+
+// TODO: maybe move this function to common utils?
+static void
+sort_matches(VisualFeatureConfig::MatchResultType &matches)
+{
+    auto better_match = [](cv::DMatch &m1, cv::DMatch &m2) -> bool
+        {
+            return (m1.distance < m2.distance);
+        };
+    std::sort(matches.begin(), matches.end(), better_match);
+}
 
 VisualFeature
 VisualFeature::extract(const ImageGrayscale &image)
@@ -35,6 +48,7 @@ VisualFeature::match_visual_features(const VisualFeature &vf1,
     _matcher.match(vf2.m_descriptors,   // queryDescriptors
                    vf1.m_descriptors,   // trainDescriptors
                    matches2to1);        // matches between train and query
+    sort_matches(matches2to1);
     return matches2to1;
 }
 
