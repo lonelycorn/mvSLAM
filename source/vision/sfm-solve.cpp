@@ -128,14 +128,18 @@ decompose_essential_matrix(const Matrix3Type &E21,
 }
 
 /** Triangulate point pairs to obtain 3D coordinates.
- * 1 Point3 for each pair.
+ * @param [in] inlier_mask k-th element is 1 if match between p1[k] and p2[k] is an inlier.
+ * @param [out] pointsin1 triangulated points for inliers, and passed Cheirality check.
+ * @param [out] point_indexes original indexes for the @p pointsin1
  */
 static void
 triangulate_points(const Matrix3Type &R1to2,
                    const Vector3Type &t1to2,
                    const std::vector<IdealCameraImagePoint> &p1,
                    const std::vector<IdealCameraImagePoint> &p2,
-                   std::vector<Point3> &pointsin1)
+                   const std::vector<uint8_t> &inlier_mask,
+                   std::vector<Point3> &pointsin1,
+                   std::vector<size_t> &point_indexes)
 {
     assert(p1.size() == p2.size());
     assert(p1.size() > 0);
@@ -143,6 +147,8 @@ triangulate_points(const Matrix3Type &R1to2,
     const size_t point_count = p1.size();
     std::vector<Point3> result;
     result.reserve(point_count);
+    std::vector<size_t> indexes;
+    indexes.reserve(point_count);
 
     logger.info("Triangulating points.");
 
@@ -151,6 +157,10 @@ triangulate_points(const Matrix3Type &R1to2,
     
     for (size_t i = 0; i < point_count; ++i)
     {
+        if (inlier_mask[i] == 0) // skip outliers
+        {
+            continue;
+        }
         // linearly triangulate the i-th point
         // For each point pair (x1, x2), it holds true that
         //      x1 = P1 * X
@@ -194,18 +204,27 @@ triangulate_points(const Matrix3Type &R1to2,
         if (std::abs(X[3]) < tolerance) // degenerated case?
         {
             assert(false);
+            continue;
         }
-        else
+        ScalarType scale = static_cast<ScalarType>(1) / X[3];
+        Point3 pt;
+        pt << X[0], X[1], X[2];
+        pt *= scale;
+        if (pt[2] < tolerance) // behind camera 1
         {
-            ScalarType scale = static_cast<ScalarType>(1) / X[3];
-            Point3 pt;
-            pt << X[0], X[1], X[2];
-            pt *= scale;
-            result.push_back(pt);
+            continue;
         }
+        Point3 pt2 = R1to2 * pt + t1to2;
+        if (pt2[2] < tolerance) // behind camera 2
+        {
+            continue;
+        }
+        result.push_back(pt);
+        indexes.push_back(i);
 
     }
     std::swap(pointsin1, result);
+    std::swap(point_indexes, indexes);
 }
 
 /** Recover relative pose by decomposing the provided essential matrix;
@@ -215,7 +234,7 @@ static bool
 recover_pose_and_points(const Matrix3Type &E21,
                         const std::vector<IdealCameraImagePoint> &normalized_points1,
                         const std::vector<IdealCameraImagePoint> &normalized_points2,
-                        const std::vector<uint8_t> &inliers,
+                        const std::vector<uint8_t> &inlier_mask,
                         Matrix3Type &R1to2,
                         Vector3Type &t1to2,
                         std::vector<Point3> &pointsin1,
@@ -243,35 +262,19 @@ recover_pose_and_points(const Matrix3Type &E21,
         for (const auto &t_candidate : t1to2_candidates)
         {
             std::vector<Point3> points_candidate;
+            std::vector<size_t> points_candidate_indexes;
             triangulate_points(R_candidate,
                                t_candidate,
                                normalized_points1,
                                normalized_points2,
-                               points_candidate);
-            // cheirality check: all points should have positive depth (z-value)
-            std::vector<size_t> points_candidate_indexes;
-            for (size_t i = 0; i < points_candidate.size(); ++i)
-            {
-                auto pt = points_candidate[i]; // coord in camera 1 ref frame
-                if (pt[2] < tolerance) // behind camera 1
-                    continue;
-
-                pt = R_candidate * pt + t_candidate; // coord in camera 2 ref frame
-                if (pt[2] < tolerance) // behind camera 2
-                    continue;
-
-                points_candidate_indexes.push_back(i);
-            }
+                               inlier_mask,
+                               points_candidate,
+                               points_candidate_indexes);
 
             if (points_candidate_indexes.size() > pointsin1.size()) // found a better solution
             {
                 success = true;
-                pointsin1.clear();
-                pointsin1.reserve(points_candidate_indexes.size());
-                for (auto idx : points_candidate_indexes)
-                {
-                    pointsin1.push_back(points_candidate[idx]);
-                }
+                pointsin1.swap(points_candidate);
                 pointsin1_indexes.swap(points_candidate_indexes);
                 R1to2 = R_candidate;
                 t1to2 = t_candidate;
