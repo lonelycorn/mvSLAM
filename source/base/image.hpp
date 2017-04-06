@@ -6,10 +6,18 @@
 namespace mvSLAM
 {
 
-using CameraExtrinsics = SE3;
-using CameraIntrinsics = Matrix3Type;
 using ImageRGB = cv::Mat; // 3-channel
 using ImageGrayscale = cv::Mat; // 1-channel
+
+ImageGrayscale load_image_grayscale(const std::string &filename);
+
+bool save_image_grayscale(const std::string &filename,
+                          const ImageGrayscale &image);
+
+ImageRGB load_image_rgb(const std::string &filename);
+
+bool save_image_rgb(const std::string &filename,
+                    const ImageRGB &image);
 
 struct VisualFeatureConfig
 {

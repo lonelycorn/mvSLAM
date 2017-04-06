@@ -1,7 +1,6 @@
 #include "unit-test.hpp"
 #include <string>
 #include <front-end/frame-manager.hpp>
-#include <vision/io.hpp>
 #include <iostream>
 #include <set>
 

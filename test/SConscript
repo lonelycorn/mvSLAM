@@ -93,7 +93,7 @@ test_frame_manager = env.mvSLAM_UnitTest\
         env.Object('../source/front-end/frame-manager.cpp'),
         env.Object('../source/front-end/data-type.cpp'),
         env.Object('../source/vision/visual-feature.cpp'),
-        env.Object('../source/vision/io.cpp'),
+        env.Object('../source/base/image.cpp'),
         env.Object('../source/base/debug.cpp'),
         env.Object('../source/os/mutex.cpp'),
     ]
@@ -113,9 +113,9 @@ test_image_pair = env.mvSLAM_UnitTest\
         env.Object('../source/vision/sfm-solve.cpp'),
         env.Object('../source/vision/sfm-refine.cpp'),
         env.Object('../source/vision/camera.cpp'),
-        env.Object('../source/vision/io.cpp'),
         env.Object('../source/base/gtsam.cpp'),
         env.Object('../source/base/math.cpp'),
+        env.Object('../source/base/image.cpp'),
         env.Object('../source/base/debug.cpp'),
         env.Object('../source/os/mutex.cpp'),
     ]

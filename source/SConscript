@@ -16,7 +16,6 @@ mvSLAM_os_files = [
 ]
 
 mvSLAM_vision_files = [
-    './vision/io.cpp',
     './vision/camera.cpp',
     './vision/visual-feature.cpp',
     './vision/sfm-solve.cpp',

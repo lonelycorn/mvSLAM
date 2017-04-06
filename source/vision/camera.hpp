@@ -1,28 +1,14 @@
+#pragma once
 #include <base/math.hpp>
 #include <base/image.hpp>
 #include <base/space.hpp>
 #include <vector>
 namespace mvSLAM
 {
-class CameraInterface
-{
-public:
-    CameraInterface()
-    {
-    }
+using CameraExtrinsics = SE3;
+using CameraIntrinsics = Matrix3Type;
 
-    virtual ~CameraInterface()
-    {
-    }
-
-    virtual std::vector<ImagePoint>
-        project_points(const std::vector<Point3> &cartesian_points) const = 0;
-
-    virtual ImagePoint
-        project_point(const Point3 &cartesian_point) const = 0;
-};
-
-class PinholeCamera: public CameraInterface
+class PinholeCamera
 {
 public:
     PinholeCamera(const CameraIntrinsics &K,
@@ -36,9 +22,9 @@ public:
 
     /** Project the 3D points onto the image plane.
      */
-    virtual std::vector<ImagePoint>
+    std::vector<ImagePoint>
         project_points(const std::vector<Point3> &cartesian_points) const;
-    virtual ImagePoint
+    ImagePoint
         project_point(const Point3 &cartesian_point) const;
 
     /** Convert the image points to those of an ideal camera.
@@ -46,15 +32,19 @@ public:
      */
     std::vector<IdealCameraImagePoint>
         normalize_points(const std::vector<ImagePoint> &image_points) const;
-    IdealCameraImagePoint 
+    IdealCameraImagePoint
         normalize_point(const ImagePoint &image_point) const;
 
     const CameraIntrinsics &get_intrinsics() const;
     const CameraExtrinsics &get_extrinsics() const;
 
+    // IO
+    bool load_from_file(const std::string &filename);
+    bool save_to_file(const std::string &filename) const;
+
 private:
-    const CameraIntrinsics K;
-    const Matrix3Type K_inv; // cached for speed
+    CameraIntrinsics K;
+    Matrix3Type K_inv; // cached for speed
     CameraExtrinsics P; // transform from world ref frame to camera ref frame.
 };
 
