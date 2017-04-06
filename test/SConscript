@@ -123,6 +123,21 @@ test_image_pair = env.mvSLAM_UnitTest\
 env.Depends(test_image_pair, env.Glob('../data/tsukuba/*'))
 targets += test_image_pair
 
+test_camera_manager = env.mvSLAM_UnitTest\
+(
+    'test-camera-manager',
+    [
+        'test-camera-manager.cpp',
+        env.Object('unit-test-helper.cpp'),
+        env.Object('../source/front-end/camera-manager.cpp'),
+        env.Object('../source/vision/camera.cpp'),
+        env.Object('../source/base/math.cpp'),
+        env.Object('../source/base/debug.cpp'),
+        env.Object('../source/os/mutex.cpp'),
+    ]
+)
+env.Depends(test_camera_manager, env.Glob('../data/camera_config/sample.txt'))
+targets += test_camera_manager 
 
 test_graph = env.mvSLAM_UnitTest\
 (
