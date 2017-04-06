@@ -1,7 +1,8 @@
 #pragma once
-#include <cstdio>
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <cstdio>
 #include <cstdarg>
 #include <cassert>
 
@@ -32,25 +33,36 @@ void __do_stream_write(OutputStreamType &output_stream, T t, Args... args)
     __do_stream_write(output_stream, args...);
 }
 
+/// write formatted data to stream. atomic operation.
 template <typename OutputStreamType>
 void __stream_format_write_data(OutputStreamType &output_stream,
                                 const char *format, ...)
 {
-    char buffer[LOGGING_FORMAT_STRING_BUFFER_SIZE];
+    char buffer[LOGGING_FORMAT_STRING_BUFFER_SIZE+1]; // extra byte for \n
     va_list args;
     va_start(args, format);
     int result = vsnprintf(buffer, LOGGING_FORMAT_STRING_BUFFER_SIZE, format, args);
-    assert(result >= 0);
     va_end(args);
+
+    assert(result >= 0);
+    if (result < LOGGING_FORMAT_STRING_BUFFER_SIZE)
+    {
+        buffer[result] = '\n';
+        buffer[result+1] = '\0';
+    }
+
     __do_stream_write(output_stream, buffer);
-    __do_stream_write(output_stream, '\n');
 }
 
+/// write data to stream. atomic operation.
 template <typename OutputStreamType, typename ... Args>
 void __stream_write_data(OutputStreamType &output_stream, Args... args)
 {
-    __do_stream_write(output_stream, args...);
-    __do_stream_write(output_stream, '\n');
+    std::stringstream ss;
+    __do_stream_write(ss, args...);
+    __do_stream_write(ss, '\n');
+
+    __do_stream_write(output_stream, ss.str());
 }
 
 class Logging
@@ -167,11 +179,10 @@ public:
     template <typename ...Args> \
     void CHANNEL(Args... args) \
     { \
-        if (!m_enabled) \
+        if (m_enabled) \
         { \
-            return; \
+            Logging::CHANNEL(m_tag, args...); \
         } \
-        Logging::CHANNEL(m_tag, args...); \
     }
 
     MAKE_LOGGING_CHANNEL(debug);
@@ -182,16 +193,15 @@ public:
 #define MAKE_LOGGING_CHANNEL(CHANNEL) \
     void CHANNEL(const char *fmt, ...) \
     { \
-        if (!m_enabled) \
+        if (m_enabled) \
         { \
-            return; \
+            std::string fmt_with_tag(fmt); \
+            fmt_with_tag = m_tag + fmt_with_tag; \
+            va_list args; \
+            va_start(args, fmt); \
+            Logging::CHANNEL(fmt_with_tag.c_str(), args); \
+            va_end(args); \
         } \
-        std::string fmt_with_tag(fmt); \
-        fmt_with_tag = m_tag + fmt_with_tag; \
-        va_list args; \
-        va_start(args, fmt); \
-        Logging::CHANNEL(fmt_with_tag.c_str(), args); \
-        va_end(args); \
     }
     MAKE_LOGGING_CHANNEL(debugf);
     MAKE_LOGGING_CHANNEL(infof);

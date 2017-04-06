@@ -3,7 +3,7 @@
 
 namespace mvSLAM
 {
-static Logger logger("FrameManager");
+static Logger logger("[FrameManager]", true);
 
 FrameManager &
 FrameManager::get_instance()
