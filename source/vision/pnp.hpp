@@ -12,12 +12,14 @@ namespace mvSLAM
  *
  * @param [in] world_points corresponding world points.
  * @param [in] image_points corresponding image points;
- *      already converted to ideal pinhold camera model.
+ * @param [in] K    intrinsics of the camera.
+ *      Use Identity if @p image_points are from an ideal pinhole camera.
  * @param [out] pose    pose of camera expressed in world frame.
  * @return true if a solution is found.
  */
 bool pnp_solve(const std::vector<Point3> &world_points,
-               const std::vector<IdealCameraImagePoint> &image_points,
+               const std::vector<ImagePoint> &image_points,
+               const CameraIntrinsics &K,
                Transformation &pose);
 
 /** Estimate camera pose in world ref frame from correspondences between
@@ -27,7 +29,7 @@ bool pnp_solve(const std::vector<Point3> &world_points,
  * @param [in] world_point_estimates    estimates of corresponding world points.
  * @param [in] image_point_estimates    estimates of image points.
  * @param [in] K    intrinsics of the camera.
- *      Use Identity if points are already converted to ideal pinhole camera.
+ *      Use Identity if @p image_point_estimates are from an ideal pinhole camera.
  * @param [in] pose_guess   initial guess of camera pose in world ref frame.
  * @param [out] pose_estimate   refined estimate of camera pose in world ref frame.
  * @return true if the refinement was successful.

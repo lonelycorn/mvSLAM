@@ -13,7 +13,8 @@ constexpr size_t
     PNP_MIN_POINT_COUNT = 4;
 
 bool pnp_solve(const std::vector<Point3> &world_points,
-               const std::vector<IdealCameraImagePoint> &image_points,
+               const std::vector<ImagePoint> &image_points,
+               const CameraIntrinsics &K,
                Transformation &pose)
 {
     assert(world_points.size() >= PNP_MIN_POINT_COUNT);
@@ -21,30 +22,22 @@ bool pnp_solve(const std::vector<Point3> &world_points,
 
     logger.info("Solving PnP.");
     const size_t point_count = world_points.size();
-    constexpr int cv_Mat_type = cv_Mat_traits<ScalarType>::DataType;
+
     // FIXME: implement with Perspective-3-Points and RANSAC
     std::vector<cv::Point3_<ScalarType> > objectPoints;
-    std::vector<cv::Point_<ScalarType> > imagePoints;
-    cv::Mat cameraMatrix(cv::Mat::eye(3, 3, cv_Mat_type)); // Identity: already idealized.
-    cv::Mat distCoeffs; // Null: already rectified.
-    cv::Mat rvec; // output rotation vector, world to camera
-    cv::Mat tvec; // output translation vector, world to camera
-    bool useExtrinsicGuess = false;
-    int flags = cv::SOLVEPNP_EPNP;
-
-    // convert inputs to OpenCV types
     objectPoints.reserve(point_count);
     for (size_t i = 0; i < point_count; ++i)
     {
         const auto &p = world_points[i];
         objectPoints.emplace_back(p[0], p[1], p[2]);
     }
-    imagePoints.reserve(point_count);
-    for (size_t i = 0; i < point_count; ++i)
-    {
-        const auto &p = image_points[i];
-        imagePoints.emplace_back(p[0], p[1]);
-    }
+    const std::vector<cv::Point_<ScalarType> > &imagePoints = image_points;
+    cv::Mat cameraMatrix = Matrix_to_Mat<Matrix3Type>(K);
+    cv::Mat distCoeffs; // Null: already rectified.
+    cv::Mat rvec; // output rotation vector, world to camera
+    cv::Mat tvec; // output translation vector, world to camera
+    bool useExtrinsicGuess = false;
+    int flags = cv::SOLVEPNP_EPNP;
     
     // solve with OpenCV's P3P
     if (!cv::solvePnP(objectPoints,
@@ -56,7 +49,7 @@ bool pnp_solve(const std::vector<Point3> &world_points,
                       useExtrinsicGuess,
                       flags))
     {
-        logger.error("Cannot find camera pose.");
+        logger.info("Cannot find camera pose.");
         return false;
     }
 

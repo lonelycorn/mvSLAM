@@ -33,13 +33,11 @@ UNIT_TEST(pnp_solve_cube)
     // project image points
     std::vector<mvSLAM::ImagePoint> image_points = c.project_points(points);
 
-    // normalize image points
-    std::vector<mvSLAM::IdealCameraImagePoint> normalized_points = c.normalize_points(image_points);
-
     // PnP
     mvSLAM::Transformation pose_recovered;
     if (!pnp_solve(points,
-                   normalized_points,
+                   image_points,
+                   K,
                    pose_recovered))
     {
         FAIL("pnp_solve() failed!");
