@@ -89,6 +89,71 @@ UNIT_TEST(sfm_solve_cube)
     PASS();
 }
 
+UNIT_TEST(sfm_triangulate_cube)
+{
+    const mvSLAM::ScalarType tolerance = 0.001;
+    /* Ground Truth */
+    mvSLAM::CameraIntrinsics K = mvSLAM::Matrix3Type::Identity();
+    mvSLAM::CameraExtrinsics P1; // by default, use identity
+    mvSLAM::Vector6Type se3_2to1; // transform from camera 2 to camera 1
+    se3_2to1 << 1, 0, 0, // translation in positive x
+                0, 0, 0; // no rotation
+    mvSLAM::CameraExtrinsics P2 =
+        mvSLAM::SE3::exp(se3_2to1).inverse(); // transform from world (camera 1) to camera 2
+
+    mvSLAM::PinholeCamera c1(K, P1);
+    mvSLAM::PinholeCamera c2(K, P2);
+
+
+    // generate points on a cube
+    mvSLAM::SO3 rotation(0.0, 0.0, 0.0); // yaw, pitch, roll
+    mvSLAM::Vector3Type translation{0.6, 0.0, 3.0};
+    mvSLAM::ScalarType scale = 1.0;
+    std::vector<mvSLAM::Point3> points_in_world_frame =
+        get_rig_points(RIG_TYPE::CUBE, rotation, translation, scale);
+
+    // projected image points
+    std::vector<mvSLAM::ImagePoint> image_points1 = c1.project_points(points_in_world_frame);
+    std::vector<mvSLAM::ImagePoint> image_points2 = c2.project_points(points_in_world_frame);
+
+    // reconstruction
+    std::vector<mvSLAM::Point3> points;
+    std::vector<size_t> point_indexes;
+    sfm_triangulate(image_points1,
+                    image_points2,
+                    K,
+                    P1.inverse(), // from camera to world
+                    P2.inverse(), // from camera to world
+                    points,
+                    point_indexes);
+
+#ifdef DEBUG_OUTPUT
+    // debug output
+    {
+        std::cout<<"====================================="<<std::endl;
+        std::cout<<"Points:"<<std::endl;
+        for (const auto &p : points_in_world_frame)
+        {
+            std::cout<<p<<std::endl<<std::endl;
+        }
+        std::cout<<"[Recovered] Points:"<<std::endl;
+        for (const auto &p : points)
+        {
+            std::cout<<p<<std::endl<<std::endl;;
+        }
+    }
+#endif 
+
+    ASSERT_TRUE(points_in_world_frame.size() == points.size());
+    for (size_t i = 0; i < points_in_world_frame.size(); ++i)
+    {
+        for (size_t j = 0; j < 3; ++j)
+            ASSERT_EQUAL(points_in_world_frame[i][j], points[i][j], tolerance);
+    }
+
+    PASS();
+}
+
 UNIT_TEST(sfm_refine_L_shape)
 {
     const mvSLAM::ScalarType tolerance = 0.02;

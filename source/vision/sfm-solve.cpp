@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 
+#include <base/space.hpp>
 #include <base/debug.hpp>
 #include <base/gtsam.hpp>
 #include <base/svd.hpp>
@@ -130,7 +131,7 @@ decompose_essential_matrix(const Matrix3Type &E21,
 /** Triangulate point pairs to obtain 3D coordinates.
  * @param [in] inlier_mask k-th element is 1 if match between p1[k] and p2[k] is an inlier.
  * @param [out] pointsin1 triangulated points for inliers, and passed Cheirality check.
- * @param [out] point_indexes original indexes for the @p pointsin1
+ * @param [out] point_indexes original indexes for @p pointsin1
  */
 static void
 triangulate_points(const Matrix3Type &R1to2,
@@ -365,6 +366,32 @@ bool sfm_solve(const std::vector<ImagePoint> &p1_,
     pointsin1_scaled.swap(pointsin1);
     point_indexes_.swap(point_indexes);
     return true;
+}
+
+void sfm_triangulate(const std::vector<ImagePoint> &p1_,
+                     const std::vector<ImagePoint> &p2_,
+                     const CameraIntrinsics &K,
+                     const Transformation &pose1,
+                     const Transformation &pose2,
+                     std::vector<Point3> &points,
+                     std::vector<size_t> &point_indexes)
+{
+    assert(p1_.size() == p2_.size());
+    size_t point_count = p1_.size();
+
+    Transformation T_1_to_2 = pose2.inverse() * pose1;
+    PinholeCamera c(K, CameraExtrinsics()); // we don't care about extrinsics
+    std::vector<IdealCameraImagePoint> p1 = c.normalize_points(p1_);
+    std::vector<IdealCameraImagePoint> p2 = c.normalize_points(p2_);
+    const std::vector<uint8_t> inlier_mask(point_count, 1);
+
+    triangulate_points(T_1_to_2.rotation().get_matrix(),
+                       T_1_to_2.translation(),
+                       p1,
+                       p2,
+                       inlier_mask,
+                       points,
+                       point_indexes);
 }
 
 }
