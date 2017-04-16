@@ -5,24 +5,32 @@
 
 namespace mvSLAM
 {
+
+constexpr int MAX_FEATURE_COUNT = 500;
+
 /** Configuration for key point detector */
 static VisualFeatureConfig::DetectorContainerType
-    _detector = VisualFeatureConfig::DetectorType::create();
+    _detector = VisualFeatureConfig::DetectorType::create(MAX_FEATURE_COUNT);
 
 /** Configuration for descriptor extractor */
 static VisualFeatureConfig::ExtractorContainerType
-    _extractor = VisualFeatureConfig::ExtractorType::create();
+    _extractor = VisualFeatureConfig::ExtractorType::create(MAX_FEATURE_COUNT);
 
 /** Configuration for descriptor matcher */
-static bool cross_check = true;
+// NOTE: cannot apply cross check to knn matching
+static constexpr bool CROSS_CHECK = false;
+static constexpr int NEAREST_NEIGHBOR_COUNT = 2;
+static constexpr ScalarType NEAREST_NEIGHBOR_DIST_RATIO = 0.7;
 static VisualFeatureConfig::MatcherType
-    _matcher(VisualFeatureConfig::MatcherNormType, cross_check);
+    _matcher(VisualFeatureConfig::MatcherNormType, CROSS_CHECK);
+
 
 // TODO: maybe move this function to common utils?
 static void
 sort_matches(VisualFeatureConfig::MatchResultType &matches)
 {
-    auto better_match = [](cv::DMatch &m1, cv::DMatch &m2) -> bool
+    // use of 'auto' in lambda is available since C++14
+    auto better_match = [](const cv::DMatch &m1, const cv::DMatch &m2) -> bool
         {
             return (m1.distance < m2.distance);
         };
@@ -42,16 +50,34 @@ VisualFeature::extract(const ImageGrayscale &image)
 
 VisualFeatureConfig::MatchResultType
 VisualFeature::match_visual_features(const VisualFeature &vf1,
-                                     const VisualFeature &vf2)
+                                     const VisualFeature &vf2,
+                                     ScalarType max_dist)
 {
+    std::vector<std::vector<cv::DMatch> > knn_matches2to1;
+    _matcher.knnMatch(vf2.m_descriptors,   // queryDescriptors
+                      vf1.m_descriptors,   // trainDescriptors
+                      knn_matches2to1,// matches between train and query
+                      NEAREST_NEIGHBOR_COUNT);
+    // lowe ratio test
+    auto passed_end = std::partition(knn_matches2to1.begin(), knn_matches2to1.end(),
+            [&](const std::vector<cv::DMatch> &knn_m) -> bool
+            {
+                bool check1 = (knn_m[0].distance < NEAREST_NEIGHBOR_DIST_RATIO * knn_m[1].distance);
+                bool check2 = (max_dist < 0) || (knn_m[0].distance <= max_dist);
+                return check1 && check2;
+            });
+
     VisualFeatureConfig::MatchResultType matches2to1;
-    _matcher.match(vf2.m_descriptors,   // queryDescriptors
-                   vf1.m_descriptors,   // trainDescriptors
-                   matches2to1);        // matches between train and query
+    matches2to1.reserve(passed_end - knn_matches2to1.begin());
+    for (auto it = knn_matches2to1.begin(); it != passed_end; ++it)
+    {
+        matches2to1.push_back(it->at(0));
+    }
     sort_matches(matches2to1);
     return matches2to1;
 }
 
+/*
 VisualFeatureConfig::MatchResultType
 VisualFeature::match_images(const ImageGrayscale &image1,
                             const ImageGrayscale &image2)
@@ -60,6 +86,7 @@ VisualFeature::match_images(const ImageGrayscale &image1,
     VisualFeature vf2 = extract(image2);
     return match_visual_features(vf1, vf2);
 }
+*/
 
 std::pair<VisualFeature, VisualFeature>
 VisualFeature::match_and_filter_visual_features(const VisualFeature &vf1,
@@ -67,7 +94,7 @@ VisualFeature::match_and_filter_visual_features(const VisualFeature &vf1,
 {
     VisualFeatureConfig::MatchResultType matches2to1 =
         match_visual_features(vf1, vf2);
-    
+
     VisualFeature filtered1;
     VisualFeature filtered2;
 
@@ -82,6 +109,7 @@ VisualFeature::match_and_filter_visual_features(const VisualFeature &vf1,
     return std::make_pair(filtered1, filtered2);
 }
 
+/*
 std::pair<VisualFeature, VisualFeature>
 VisualFeature::match_and_filter_images(const ImageGrayscale &image1,
                                        const ImageGrayscale &image2)
@@ -90,6 +118,7 @@ VisualFeature::match_and_filter_images(const ImageGrayscale &image1,
     VisualFeature vf2 = extract(image2);
     return match_and_filter_visual_features(vf1, vf2);
 }
+*/
 
 VisualFeature::VisualFeature():
     m_keypoints(), m_descriptors(), m_image_width(-1), m_image_height(-1)
@@ -159,15 +188,6 @@ VisualFeature::get_point_estimates() const
     result.reserve(m_keypoints.size());
     for (const auto &kp : m_keypoints)
     {
-        // cv::KeyPoint contains
-        //  - angle:    orientation of the key point (i.e. major axis); may be unused. 
-        //  - class_id: id of object that the key point belongs to; may be unused.
-        //  - octave:   level in the image pyramid where the key point is detected. 
-        //              Roughly speaking a pixel in the k-th level represents pow(2, k)
-        //              pixels in the original image.
-        //  - pt:       (u, v) coordinate of the key point.
-        //  - response: intensity of the key point (higher is better); may be unused.
-        //  - size:     radius of the neighborhood the key point represents.
         // For ORB, the unceritainty of a key point could be empirically modelled as
         // a Gaussian with std dev equals to pow(2, k) * 0.5
         ScalarType stddev = static_cast<ScalarType>(1 << kp.octave) * 0.5;

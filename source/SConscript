@@ -35,13 +35,16 @@ mvSLAM_back_end_files = [
 mvSLAM_front_end_files = [
     './front-end/data-type.cpp',
     './front-end/frame-manager.cpp',
+    './front-end/camera-manager.cpp',
+    './front-end/visual-odometer.cpp'
 ]
 
 source_files = \
     mvSLAM_base_files + \
     mvSLAM_os_files + \
     mvSLAM_vision_files + \
-    mvSLAM_back_end_files
+    mvSLAM_back_end_files + \
+    mvSLAM_front_end_files
 
 targets = []
 for source_file in source_files:

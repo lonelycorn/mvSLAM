@@ -32,7 +32,9 @@ UNIT_TEST(image_pair)
         pair_frame = mvSLAM::FrameManager::get_instance().get_frame(frame_id);
     }
 
-    mvSLAM::ImagePair ip(base_frame, pair_frame);
+    auto p = mvSLAM::ImagePair::get_default_params();
+    p.refine_structure_in_constructor = true;
+    mvSLAM::ImagePair ip(base_frame, pair_frame, p);
 
     PASS();
 }

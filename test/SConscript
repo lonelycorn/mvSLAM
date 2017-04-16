@@ -126,6 +126,34 @@ test_image_pair = env.mvSLAM_UnitTest\
 env.Depends(test_image_pair, env.Glob('../data/tsukuba/*'))
 targets += test_image_pair
 
+test_visual_odometer = env.mvSLAM_UnitTest\
+(
+    'test-visual-odometer',
+    [
+        'test-visual-odometer.cpp',
+        env.Object('unit-test-helper.cpp'),
+        env.Object('../source/front-end/image-pair.cpp'),
+        env.Object('../source/front-end/frame-manager.cpp'),
+        env.Object('../source/front-end/camera-manager.cpp'),
+        env.Object('../source/front-end/data-type.cpp'),
+        env.Object('../source/front-end/visual-odometer.cpp'),
+        env.Object('../source/vision/visual-feature.cpp'),
+        env.Object('../source/vision/sfm-solve.cpp'),
+        env.Object('../source/vision/sfm-refine.cpp'),
+        env.Object('../source/vision/pnp-solve.cpp'),
+        env.Object('../source/vision/pnp-refine.cpp'),
+        env.Object('../source/vision/ba.cpp'),
+        env.Object('../source/vision/camera.cpp'),
+        env.Object('../source/base/gtsam.cpp'),
+        env.Object('../source/base/math.cpp'),
+        env.Object('../source/base/image.cpp'),
+        env.Object('../source/base/debug.cpp'),
+        env.Object('../source/os/mutex.cpp'),
+    ]
+)
+env.Depends(test_visual_odometer, env.Glob('../data/tsukuba/*'))
+targets += test_visual_odometer 
+
 test_camera_manager = env.mvSLAM_UnitTest\
 (
     'test-camera-manager',

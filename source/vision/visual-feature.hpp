@@ -16,12 +16,14 @@ public:
     /** Find the match between the two images.
      * @param [in] vf1  visual feature extracted from the first image.
      * @param [in] vf2  visual feature extracted from the second image.
+     * @param [in] max_dist max distance to be considered as a match. pass -1 to get all.
      * @return the matches from 2 to 1, sorted in ascending order of match
      *         distance.
      */
     static VisualFeatureConfig::MatchResultType
         match_visual_features(const VisualFeature &vf1,
-                              const VisualFeature &vf2);
+                              const VisualFeature &vf2,
+                              ScalarType max_dist = -1);
 
     /** Find the match between the two images.
      * @param [in] image1 a rectified image.
@@ -29,9 +31,11 @@ public:
      * @return the matches from 2 to 1, sorted in ascending order of match
      *         distance.
      */
+    /*
     static VisualFeatureConfig::MatchResultType
         match_images(const ImageGrayscale &image1,
                      const ImageGrayscale &image2);
+     */
 
     /** Find match and remove outliers.
      * @return a std::pair, the first of which contains the matched
@@ -47,9 +51,11 @@ public:
      * @param [in] image2 a rectified image.
      * @return see @ref match_and_filter_visual_features().
      */
+    /*
     static std::pair<VisualFeature, VisualFeature>
         match_and_filter_images(const ImageGrayscale &image1,
                                 const ImageGrayscale &image2);
+    */
 
     /// Ctor
     VisualFeature();
@@ -63,14 +69,14 @@ public:
 
     /// check if contains the same set of keypoints.
     bool equivalent_to(const VisualFeature &other) const;
-    
+
     /// get the number of keypoints.
     size_t size() const;
 
     /// get all keypoints.
     const VisualFeatureConfig::DetectorResultType &
         get_keypoints() const;
-    
+
     /// get all image points
     std::vector<ImagePoint>
         get_image_points() const;

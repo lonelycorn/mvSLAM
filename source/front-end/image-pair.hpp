@@ -9,13 +9,38 @@ namespace mvSLAM
 class ImagePair
 {
 public:
+    /*
+    struct MatchedPoint
+    {
+        Point3 point;
+        size_t vf_idx_in_base;
+        size_t vf_idx_in_pair;
+    };
+
+    struct MatchedPointEstimate
+    {
+        Point3Estimate point;
+        size_t vf_idx_in_base;
+        size_t vf_idx_in_pair;
+    };
+    */
+    struct Params
+    {
+        /// max distance for a match to be considered as an inlier.
+        ScalarType max_match_inlier_distance;
+        /// set to true to perform refinement during construction. defaults to false.
+        bool refine_structure_in_constructor;
+    };
+
+    static Params get_default_params();
+
     /** Constructor.
      * Will try to reconstruct 3D scene
      * @param refine_structure when set to true, will refine the reconstruction.
      */
     ImagePair(const FrontEndTypes::FramePtr &base_frame_,
               const FrontEndTypes::FramePtr &pair_frame_,
-              bool refine_structure = false);
+              const Params &params);
 
     /// Dtor
     ~ImagePair();
@@ -27,6 +52,7 @@ public:
 
     bool refine();
 
+    // TODO: encapsulate these members
     FrontEndTypes::FramePtr base_frame;
     FrontEndTypes::FramePtr pair_frame;
     bool valid;
@@ -36,6 +62,8 @@ public:
     uint32_t match_inlier_ssd; // SSD of inlier matched descriptors
     Transformation T_base_to_pair;
     std::vector<Point3> points; // for inliers only
+    std::vector<size_t> visual_feature_index_in_base; // for inliers only
+    std::vector<size_t> visual_feature_index_in_pair; // for inliers only
 
     // states that are available after refine()
     ScalarType error; // total error after refinement
@@ -52,8 +80,9 @@ protected:
         REFINED,
     };
     State m_state;
+    Params m_params;
     VisualFeatureConfig::MatchResultType matches_base_to_pair; // raw matches
-    std::vector<size_t> point_indexes; // original indexes in @ref matches_base_to_pair of all the inlier points
+    std::vector<size_t> point_index_in_match; // original indexes in @ref matches_base_to_pair of all the inlier points
 };
 
 }

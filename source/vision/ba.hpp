@@ -17,7 +17,7 @@ using PointIdToPoint2Estimate = std::unordered_map<Id::Type, Point2Estimate>;
  * @param [in] frame_pose_prior prior (if any) of frame poses, indexed by frame id.
  * @param [in] point_guess  initial guess of points, indexed by point id.
  * @param [in] point_prior  prior (if any) of points, indexed by point id.
- * @param [in] frame_observations   first indexed by frame id, then by point id.
+ * @param [in] frame_observation    first indexed by frame id, then by point id.
  * @param [out] frame_pose_estimate refined frame pose estimates, indexed by frame id.
  * @param [out] point_estimate  refine point estimates, indexed by point id.
  * @param [out] final_error error after refinement.

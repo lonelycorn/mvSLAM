@@ -19,6 +19,22 @@ ImageRGB load_image_rgb(const std::string &filename);
 bool save_image_rgb(const std::string &filename,
                     const ImageRGB &image);
 
+// cv::KeyPoint contains
+//  - angle:    orientation of the key point (i.e. major axis); may be unused.
+//  - class_id: id of object that the key point belongs to; may be unused.
+//  - octave:   level in the image pyramid where the key point is detected.
+//              Roughly speaking a pixel in the k-th level represents pow(2, k)
+//              pixels in the original image.
+//  - pt:       (u, v) coordinate of the key point.
+//  - response: intensity of the key point (higher is better); may be unused.
+//  - size:     radius of the neighborhood the key point represents.
+//
+// cv::DMatch contains
+//  - distance (float)
+//  - imgIdx (int)
+//  - queryIdx (int)
+//  - trainIdx (int)
+
 struct VisualFeatureConfig
 {
     using DetectorType = cv::ORB;

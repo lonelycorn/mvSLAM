@@ -10,9 +10,18 @@ namespace mvSLAM
 {
 static Logger logger("[ImagePair]", true);
 
+ImagePair::Params
+ImagePair::get_default_params()
+{
+    Params p;
+    p.max_match_inlier_distance = 10;
+    p.refine_structure_in_constructor = false;
+    return p;
+}
+
 ImagePair::ImagePair(const FrontEndTypes::FramePtr &base_frame_,
                      const FrontEndTypes::FramePtr &pair_frame_,
-                     bool refine_structure):
+                     const Params &params):
     base_frame(base_frame_),
     pair_frame(pair_frame_),
     valid(false),
@@ -27,23 +36,25 @@ ImagePair::ImagePair(const FrontEndTypes::FramePtr &base_frame_,
     point_estimates(),
 
     m_state(State::INIT),
+    m_params(params),
     matches_base_to_pair(),
-    point_indexes()
+    point_index_in_match()
 {
     assert(base_frame->id != pair_frame->id);
     logger.info("constructor, base frame id = ", base_frame_->id,
                 ", pair frame id = ", pair_frame_->id);
 
     // a vector of {trainIdx, queryIdx, distance}
-    matches_base_to_pair= \
-        VisualFeature::match_visual_features(base_frame->visual_feature,
-                                             pair_frame->visual_feature);
+    matches_base_to_pair= VisualFeature::match_visual_features(
+            base_frame->visual_feature,
+            pair_frame->visual_feature,
+            m_params.max_match_inlier_distance);
 
     logger.debug(matches_base_to_pair.size(), " matches found");
 
     reconstruct();
 
-    if (valid && refine_structure)
+    if (valid && m_params.refine_structure_in_constructor)
     {
         refine();
     }
@@ -57,7 +68,9 @@ bool
 ImagePair::update(const FrontEndTypes::FramePtr &new_frame)
 {
     // perform light-weight reconstruction only
-    ImagePair new_image_pair(base_frame, new_frame, false);
+    auto params = m_params;
+    params.refine_structure_in_constructor = false;
+    ImagePair new_image_pair(base_frame, new_frame, params);
 
     if (!new_image_pair.valid)
     {
@@ -118,17 +131,21 @@ ImagePair::reconstruct()
                       K,
                       T_base_to_pair,
                       points,
-                      point_indexes);
+                      point_index_in_match);
     if (!valid)
     {
         logger.info("reconstruct, failed");
     }
     else
     {
-        match_inlier_count = point_indexes.size();
-        for (auto idx : point_indexes)
+        match_inlier_count = point_index_in_match.size();
+        visual_feature_index_in_base.reserve(match_inlier_count);
+        visual_feature_index_in_pair.reserve(match_inlier_count);
+        for (auto idx : point_index_in_match)
         {
             const auto &m = matches_base_to_pair[idx];
+            visual_feature_index_in_base.push_back(m.trainIdx);
+            visual_feature_index_in_pair.push_back(m.queryIdx);
             match_inlier_ssd += sqr(m.distance);
         }
         logger.debug("reconstruct, inliers count = ", match_inlier_count,
@@ -150,20 +167,18 @@ ImagePair::refine()
     base_point_estimates.reserve(match_inlier_count);
     {
         std::vector<Point2Estimate> point_estimates = base_frame->visual_feature.get_point_estimates();
-        for (auto idx : point_indexes)
+        for (auto idx : visual_feature_index_in_base)
         {
-            const auto &m = matches_base_to_pair[idx];
-            base_point_estimates.push_back(point_estimates[m.trainIdx]);
+            base_point_estimates.push_back(point_estimates[idx]);
         }
     }
     std::vector<Point2Estimate> pair_point_estimates;
     pair_point_estimates.reserve(match_inlier_count);
     {
         std::vector<Point2Estimate> point_estimates = pair_frame->visual_feature.get_point_estimates();
-        for (auto idx : point_indexes)
+        for (auto idx : visual_feature_index_in_pair)
         {
-            const auto &m = matches_base_to_pair[idx];
-            pair_point_estimates.push_back(point_estimates[m.queryIdx]);
+            pair_point_estimates.push_back(point_estimates[idx]);
         }
     }
 
@@ -188,4 +203,5 @@ ImagePair::refine()
     }
     return valid;
 }
+
 }
