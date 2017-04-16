@@ -1,19 +1,9 @@
-#include <base/math.hpp>
 #include <cassert> 
 
 #include <base/debug.hpp>
-#include <base/gtsam.hpp>
+#include <base/space.hpp>
+#include <vision/ba.hpp>
 #include <vision/pnp.hpp>
-
-#include <gtsam/geometry/Point2.h> // image points
-#include <gtsam/geometry/Point3.h> // world points
-#include <gtsam/inference/Symbol.h> // use symbols like "X1"
-#include <gtsam/slam/PriorFactor.h>
-#include <gtsam/slam/ProjectionFactor.h> // simple camera reprojection model
-#include <gtsam/nonlinear/NonlinearFactorGraph.h>
-#include <gtsam/nonlinear/LevenbergMarquardtOptimizer.h>
-#include <gtsam/nonlinear/Values.h>
-#include <gtsam/nonlinear/Marginals.h>
 
 namespace mvSLAM
 {
@@ -28,88 +18,93 @@ bool pnp_refine(const std::vector<Point3Estimate> &world_point_estimates,
                 const std::vector<Point2Estimate> &image_point_estimates,
                 const CameraIntrinsics &ci,
                 const Transformation &pose_guess,
-                TransformationEstimate &pose_estimate)
+                TransformationEstimate &pose_estimate,
+                ScalarType &error)
 {
     assert(world_point_estimates.size() == image_point_estimates.size());
     logger.info("Refining PnP.");
 
     const size_t point_count = world_point_estimates.size();
 
-    gtsam::NonlinearFactorGraph graph;
-    gtsam::Values initial_guess;
+    std::unordered_set<Id::Type> frame_id;
+    std::unordered_set<Id::Type> point_id;
+    std::unordered_map<Id::Type, Transformation> frame_pose_guess;
+    std::unordered_map<Id::Type, TransformationUncertainty> frame_pose_prior;
+    std::unordered_map<Id::Type, Point3> point_guess;
+    std::unordered_map<Id::Type, Point3Uncertainty> point_prior;
+    std::unordered_map<Id::Type, PointIdToPoint2Estimate> frame_observation;
+    std::unordered_map<Id::Type, TransformationEstimate> frame_pose_estimate;
+    std::unordered_map<Id::Type, Point3Estimate> point_estimate;
 
-    // Camera Intrinsics: fx, fy, shear, px, py
-    auto K = boost::make_shared<gtsam::Cal3_S2>(ci(0, 0), ci(1, 1), ci(0, 1),
-                                                ci(0, 2), ci(1, 2));
+    // frame id
+    frame_id.insert(0);
 
-    // add camera measurements
+    // point id
     for (size_t i = 0; i < point_count; ++i)
     {
-        const Point2Estimate &p = image_point_estimates[i];
-        auto observation = mvSLAM_Point2_to_gtsam_Point2(p.mean());
-        auto uncertainty = gtsam::noiseModel::Gaussian::Covariance(p.covar());
-
-        auto camera_symbol = gtsam::Symbol('x', 1);
-        auto world_point_symbol = gtsam::Symbol('p', i);
-        auto f = 
-            gtsam::GenericProjectionFactor<gtsam::Pose3, gtsam::Point3, gtsam::Cal3_S2>
-            (observation, uncertainty, camera_symbol, world_point_symbol, K);
-        graph.push_back(f);
+        point_id.insert(i);
     }
-    
-    // add point estimates
+
+    // frame_pose_guess
+    frame_pose_guess[0] = pose_guess;
+
+    // frame_pose_prior
+    {
+        // regulator
+        Matrix6Type covar(Matrix6Type::Identity());
+        for (int i = 0; i < 3; ++i)
+        {
+            covar(i, i) *= sqr(PNP_REGULATOR_STDDEV_POSITION);
+            covar(i+3, i+3) *= sqr(PNP_REGULATOR_STDDEV_ORIENTATION);
+        }
+        frame_pose_prior[0] = covar;
+    }
+
+    // point guess
     for (size_t i = 0; i < point_count; ++i)
     {
-        const Point3Estimate &p = world_point_estimates[i];
-        const auto symbol = gtsam::Symbol('p', i);
-        auto position = mvSLAM_Point3_to_gtsam_Point3(p.mean());
-        auto noise = gtsam::noiseModel::Gaussian::Covariance(p.covar());
-        graph.push_back(gtsam::PriorFactor<gtsam::Point3>(symbol, position, noise));
-        initial_guess.insert(symbol, position);
+        point_guess[i] = world_point_estimates[i].mean();
     }
 
-    // add camera
+    // point prior
+    for (size_t i = 0; i < point_count; ++i)
     {
-        const auto symbol = gtsam::Symbol('x', 1);
-        auto pose = SE3_to_Pose3(pose_guess);
-        // NOTE: it is always good to use a regulator to make sure that the final estimate
-        // does not deviate too much from the initial guess.
-        gtsam::Vector6 stddev;
-        const ScalarType prior_stddev_position = PNP_REGULATOR_STDDEV_POSITION;
-        const ScalarType prior_stddev_orientation = PNP_REGULATOR_STDDEV_ORIENTATION;
-        // NOTE: translation part first
-        stddev << prior_stddev_position,
-                  prior_stddev_position,
-                  prior_stddev_position,
-                  prior_stddev_orientation,
-                  prior_stddev_orientation,
-                  prior_stddev_orientation;
-        auto noise = gtsam::noiseModel::Diagonal::Sigmas(stddev);
-        graph.push_back(gtsam::PriorFactor<gtsam::Pose3>(symbol, pose, noise));
-        initial_guess.insert(symbol, pose);
+        point_prior[i] = world_point_estimates[i].covar();
     }
-#ifdef DEBUG_PNP
-    graph.print("\n\n===== Factor Graph =====\n");
-    initial_guess.print("\n\n===== Initial Guess =====\n");
-#endif
 
-    // solve
-    gtsam::LevenbergMarquardtOptimizer optimizer(graph, initial_guess);
-    gtsam::Values result = optimizer.optimize();
-#ifdef DEBUG_PNP
-    result.print("\n\n===== Result =====");
-#endif
-    
+    // frame observation
+    {
+        PointIdToPoint2Estimate observation;
+        for (size_t i = 0; i < point_count; ++i)
+        {
+            observation[i] = image_point_estimates[i];
+        }
+        frame_observation[0] = observation;
+    }
+
+    // do bundle adjustment
+    ba_frame_pose_and_point(ci,
+                            frame_id,
+                            point_id,
+                            frame_pose_guess,
+                            frame_pose_prior,
+                            point_guess,
+                            point_prior,
+                            frame_observation,
+                            frame_pose_estimate,
+                            point_estimate,
+                            error);
+
     // convert to output types
-    gtsam::Marginals marginals(graph, result); // to calculate the covariances
-    {
-        auto symbol = gtsam::Symbol('x', 1);
-        gtsam::Pose3 pose_gtsam = result.at<gtsam::Pose3>(symbol); // in world frame
-        pose_estimate.mean() = Pose3_to_SE3(pose_gtsam);
-        pose_estimate.covar() = marginals.marginalCovariance(symbol);
-    }
+    // FIXME: not sure if the covar of camera pose estimate is correct. the covar
+    //        has 3 components: world point prior, camera pose prior (regulator),
+    //        and the uncertainty from the image point observations. I think the
+    //        we should remove the regulator contribution.
+    pose_estimate = frame_pose_estimate[0];
+
     // FIXME: we are __NOT__ updating the point estimates, despite that there is
     // new information from the new iamge.
+
     return true;
 }
 

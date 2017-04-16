@@ -5,7 +5,6 @@
 
 #include <base/space.hpp>
 #include <base/debug.hpp>
-#include <base/gtsam.hpp>
 #include <base/svd.hpp>
 #include <vision/camera.hpp>
 #include <vision/estimator-RANSAC.hpp>

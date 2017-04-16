@@ -58,7 +58,7 @@ UNIT_TEST(pnp_solve_cube)
 
 UNIT_TEST(pnp_refine_L_shape)
 {
-    constexpr mvSLAM::ScalarType tolerance = 0.02;
+    constexpr mvSLAM::ScalarType tolerance = 0.025;
     /* Ground Truth */
     mvSLAM::CameraIntrinsics K = mvSLAM::Matrix3Type::Identity();
     mvSLAM::Vector6Type se3; // from camera to world
@@ -126,11 +126,13 @@ UNIT_TEST(pnp_refine_L_shape)
 
     // refinement 
     mvSLAM::TransformationEstimate pose_estimate;
+    mvSLAM::ScalarType error;
     if (!pnp_refine(world_point_estimates,
                     image_point_estimates,
                     K,
                     pose_guess,
-                    pose_estimate))
+                    pose_estimate,
+                    error))
     {
         FAIL("pnp_refine() failed");
     }
@@ -140,11 +142,13 @@ UNIT_TEST(pnp_refine_L_shape)
     {
         std::cout<<"====================================="<<std::endl;
         std::cout<<"Camera pose =\n"<<P.inverse()<<std::endl;
-        std::cout<<"[Refined] Camera pose =\n"<<pose_guess.mean()<<std::endl;
+        std::cout<<"[Refined] Camera pose =\n"<<pose_estimate.mean()<<std::endl;
     }
 #endif 
 
     auto se3_recovered = pose_estimate.mean().ln(); // camera to world
+    std::cout<<"se3 = \n"<<se3<<std::endl;
+    std::cout<<"se3_recovered = \n"<<se3_recovered<<std::endl;
     for (size_t i = 0; i < 6; ++i)
         ASSERT_EQUAL(se3[i], se3_recovered[i], tolerance);
 

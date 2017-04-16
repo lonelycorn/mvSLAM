@@ -32,11 +32,13 @@ bool pnp_solve(const std::vector<Point3> &world_points,
  *      Use Identity if @p image_point_estimates are from an ideal pinhole camera.
  * @param [in] pose_guess   initial guess of camera pose in world ref frame.
  * @param [out] pose_estimate   refined estimate of camera pose in world ref frame.
+ * @param [out] error   error after refinement.
  * @return true if the refinement was successful.
  */
 bool pnp_refine(const std::vector<Point3Estimate> &world_point_estimates,
                 const std::vector<Point2Estimate> &image_point_estimates,
                 const CameraIntrinsics &K,
                 const Transformation &pose_guess,
-                TransformationEstimate &pose_estimate);
+                TransformationEstimate &pose_estimate,
+                ScalarType &error);
 }

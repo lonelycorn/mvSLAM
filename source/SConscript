@@ -21,6 +21,8 @@ mvSLAM_vision_files = [
     './vision/sfm-solve.cpp',
     './vision/sfm-refine.cpp',
     './vision/pnp-solve.cpp',
+    './vision/pnp-refine.cpp',
+    './vision/ba.cpp',
     './vision/fundamental-matrix.cpp',
     './vision/estimator-RANSAC.cpp',
 ]

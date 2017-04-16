@@ -156,7 +156,7 @@ UNIT_TEST(sfm_triangulate_cube)
 
 UNIT_TEST(sfm_refine_L_shape)
 {
-    const mvSLAM::ScalarType tolerance = 0.02;
+    const mvSLAM::ScalarType tolerance = 0.025;
     /* Ground Truth */
     mvSLAM::CameraIntrinsics K = mvSLAM::Matrix3Type::Identity();
     mvSLAM::CameraExtrinsics P1; // by default, use identity
