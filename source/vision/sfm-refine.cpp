@@ -7,7 +7,7 @@
 
 namespace mvSLAM
 {
-static Logger logger("[sfm-refine]", true);
+static Logger logger("[sfm-refine]", false);
 
 static constexpr ScalarType
     SFM_ANCHOR_STDDEV_POSITION(1e-5);

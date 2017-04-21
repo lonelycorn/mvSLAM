@@ -18,7 +18,7 @@
 
 namespace mvSLAM
 {
-static Logger logger("[ba]", true);
+static Logger logger("[ba]", false);
 
 static constexpr char SymbolPrefixFrame = 'x';
 static constexpr char SymbolPrefixPoint = 'p';

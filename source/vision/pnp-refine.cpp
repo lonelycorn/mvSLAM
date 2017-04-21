@@ -7,7 +7,7 @@
 
 namespace mvSLAM
 {
-static Logger logger("[pnp-refine]", true);
+static Logger logger("[pnp-refine]", false);
 
 static constexpr ScalarType
     PNP_REGULATOR_STDDEV_POSITION(1e-2);

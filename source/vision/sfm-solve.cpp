@@ -12,7 +12,7 @@
 
 namespace mvSLAM
 {
-static Logger logger("[sfm-solve]", true);
+static Logger logger("[sfm-solve]", false);
 
 static constexpr int 
     VF_MATCH_SIZE_MIN = 20;

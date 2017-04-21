@@ -7,7 +7,7 @@
 namespace mvSLAM
 {
 
-static Logger logger("[pnp-solve]", true);
+static Logger logger("[pnp-solve]", false);
 
 constexpr size_t
     PNP_MIN_POINT_COUNT = 4;
