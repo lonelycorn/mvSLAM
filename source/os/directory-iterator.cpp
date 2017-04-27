@@ -10,10 +10,11 @@ DirectoryIterator::DirectoryIterator(const std::string &directory,
     m_dir_entry(nullptr), m_dir_entry_next(nullptr)
 {
     m_dir = opendir(directory.c_str());
-    assert(m_dir);
-
-    load_next_entry();
-    next();
+    if (m_dir)
+    {
+        m_valid = true;
+        load_next_entry();
+    }
 }
 
 DirectoryIterator::~DirectoryIterator()
@@ -28,7 +29,7 @@ DirectoryIterator::~DirectoryIterator()
 bool
 DirectoryIterator::next()
 {
-    if (m_dir_entry_next == nullptr)
+    if (!m_valid || (m_dir_entry_next == nullptr))
     {
         return false;
     }
@@ -38,10 +39,16 @@ DirectoryIterator::next()
     return true;
 }
 
+bool
+DirectoryIterator::is_valid() const
+{
+    return m_valid;
+}
+
 std::string
 DirectoryIterator::get_file_name() const
 {
-    if (m_dir_entry == nullptr)
+    if (!m_valid || (m_dir_entry == nullptr))
     {
         return std::string("");
     }

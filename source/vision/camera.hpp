@@ -11,6 +11,7 @@ using CameraIntrinsics = Matrix3Type;
 class PinholeCamera
 {
 public:
+    PinholeCamera(const std::string &fileame);
     PinholeCamera(const CameraIntrinsics &K,
                   const CameraExtrinsics &P);
     ~PinholeCamera();

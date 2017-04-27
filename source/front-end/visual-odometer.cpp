@@ -318,7 +318,12 @@ VisualOdometer::track(const FrontEndTypes::FramePtr &new_frame)
 
     // PnP to find new frame pose
     Transformation new_frame_transformation; // T from new ref frame to init ref frame
+    std::unordered_set<PointId> outlier_point_id;
     {
+        // ID of all tracked points
+        std::vector<PointId> point_id;
+        point_id.reserve(tracked_point_id_to_new_frame_vf_idx.size());
+
         // tracked points in world ref frame.
         std::vector<Point3> matched_world_points;
         matched_world_points.reserve(tracked_point_id_to_new_frame_vf_idx.size());
@@ -333,19 +338,29 @@ VisualOdometer::track(const FrontEndTypes::FramePtr &new_frame)
         {
             auto pid = p.first;
             auto vf_idx = p.second;
+            point_id.push_back(pid);
             matched_world_points.push_back(m_point_id_to_point3[pid]);
             matched_image_points.push_back(new_frame_image_points[vf_idx]);
+            outlier_point_id.insert(pid);
         }
 
+        std::vector<size_t> inlier_point_indexes;
         if (!pnp_solve(matched_world_points,
                        matched_image_points,
                        CameraManager::get_camera().get_intrinsics(),
-                       new_frame_transformation))
+                       new_frame_transformation,
+                       inlier_point_indexes))
         {
             logger.info("cannot track new frame pose.");
             return false;
         }
-        logger.debug("PnP transformation:\n", new_frame_transformation);
+        logger.debug("PnP found ", inlier_point_indexes.size(), " inliers; new frame transformation:\n", new_frame_transformation);
+
+        // remove inliers from outlier_point_id
+        for (auto idx : inlier_point_indexes)
+        {
+            outlier_point_id.erase(point_id[idx]);
+        }
     }
 
     // find out scale of the new image pair reconstruction
@@ -379,6 +394,10 @@ VisualOdometer::track(const FrontEndTypes::FramePtr &new_frame)
             else
             {
                 pid = m_last_frame_vf_idx_to_point_id[vf_idx_in_base];
+                if (outlier_point_id.count(pid) > 0) // skip outlier points
+                {
+                    continue;
+                }
                 new_point_id_to_point3[pid] = m_point_id_to_point3[pid];
             }
             new_point_id_to_new_frame_vf_idx[pid] = vf_idx_in_pair;

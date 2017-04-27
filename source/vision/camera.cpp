@@ -1,9 +1,16 @@
 #include <vision/camera.hpp>
 #include <iostream>
 #include <fstream>
+#include <cassert>
 
 namespace mvSLAM
 {
+PinholeCamera::PinholeCamera(const std::string &filename)
+{
+    bool result = load_from_file(filename);
+    assert(result);
+}
+
 PinholeCamera::PinholeCamera(const CameraIntrinsics &K_,
                              const CameraExtrinsics &P_):
     K(K_), K_inv(K_.inverse()), P(P_)

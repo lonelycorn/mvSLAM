@@ -15,12 +15,15 @@ namespace mvSLAM
  * @param [in] K    intrinsics of the camera.
  *      Use Identity if @p image_points are from an ideal pinhole camera.
  * @param [out] pose    pose of camera expressed in world frame.
+ * @param [out] inlier_point_indexes    inlier points' original indexes in
+ *      the input arrays.
  * @return true if a solution is found.
  */
 bool pnp_solve(const std::vector<Point3> &world_points,
                const std::vector<ImagePoint> &image_points,
                const CameraIntrinsics &K,
-               Transformation &pose);
+               Transformation &pose,
+               std::vector<size_t> &inlier_point_indexes);
 
 /** Estimate camera pose in world ref frame from correspondences between
  * world points and image points.

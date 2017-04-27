@@ -1,7 +1,9 @@
 #include <os/time.hpp>
 #include <cassert>
 #include <time.h>
-using namespace mvSLAM;
+
+namespace mvSLAM
+{
 
 class Timer
 {
@@ -36,12 +38,14 @@ private:
 
 static Timer timer;
 
-timestamp_ms_t timer_ms()
+timestamp_ms_t get_time_ms()
 {
     return timer.get_time_us() / US_PER_MS;
 }
 
-timestamp_us_t timer_us()
+timestamp_us_t get_time_us()
 {
     return timer.get_time_us();
+}
+
 }

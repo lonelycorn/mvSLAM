@@ -27,18 +27,20 @@ UNIT_TEST(pnp_solve_cube)
     mvSLAM::SO3 rotation(0.0, 0.0, 0.0); // yaw, pitch, roll
     mvSLAM::Vector3Type translation{0.6, 0.0, 3.0};
     mvSLAM::ScalarType scale = 1.0;
-    std::vector<mvSLAM::Point3> points =
+    std::vector<mvSLAM::Point3> world_points =
         get_rig_points(RIG_TYPE::CUBE, rotation, translation, scale);
 
     // project image points
-    std::vector<mvSLAM::ImagePoint> image_points = c.project_points(points);
+    std::vector<mvSLAM::ImagePoint> image_points = c.project_points(world_points);
 
     // PnP
     mvSLAM::Transformation pose_recovered;
-    if (!pnp_solve(points,
-                   image_points,
-                   K,
-                   pose_recovered))
+    std::vector<size_t> inlier_point_indexes;
+    if (!mvSLAM::pnp_solve(world_points,
+                           image_points,
+                           K,
+                           pose_recovered,
+                           inlier_point_indexes))
     {
         FAIL("pnp_solve() failed!");
     }
@@ -49,6 +51,7 @@ UNIT_TEST(pnp_solve_cube)
         std::cout<<"[Recovered] Camera pose:\n"<<pose_recovered<<std::endl;
     }
 #endif
+    ASSERT_TRUE(inlier_point_indexes.size() == world_points.size()); // no outliers
     auto se3_recovered = pose_recovered.ln();
     for (size_t i = 0; i < 6; ++i)
         ASSERT_EQUAL(se3[i], se3_recovered[i], tolerance);
@@ -104,7 +107,7 @@ UNIT_TEST(pnp_refine_L_shape)
 
     const mvSLAM::ScalarType p_noise_stddev(5e-3); // NOTE this is in meters
     const mvSLAM::ScalarType p_noise_mean(0.0); // SHOULD be 0.
-    
+
     for (const auto &p : world_points)
     {
         // additive noise
@@ -124,15 +127,15 @@ UNIT_TEST(pnp_refine_L_shape)
                   get_gaussian(0.0, 5e-3), get_gaussian(0.0, 5e-3), get_gaussian(0.0, 5e-3); // rotation
     mvSLAM::Transformation pose_guess = mvSLAM::SE3::exp(delta_pose) * P.inverse();
 
-    // refinement 
+    // refinement
     mvSLAM::TransformationEstimate pose_estimate;
     mvSLAM::ScalarType error;
-    if (!pnp_refine(world_point_estimates,
-                    image_point_estimates,
-                    K,
-                    pose_guess,
-                    pose_estimate,
-                    error))
+    if (!mvSLAM::pnp_refine(world_point_estimates,
+                            image_point_estimates,
+                            K,
+                            pose_guess,
+                            pose_estimate,
+                            error))
     {
         FAIL("pnp_refine() failed");
     }
@@ -144,7 +147,7 @@ UNIT_TEST(pnp_refine_L_shape)
         std::cout<<"Camera pose =\n"<<P.inverse()<<std::endl;
         std::cout<<"[Refined] Camera pose =\n"<<pose_estimate.mean()<<std::endl;
     }
-#endif 
+#endif
 
     auto se3_recovered = pose_estimate.mean().ln(); // camera to world
     std::cout<<"se3 = \n"<<se3<<std::endl;

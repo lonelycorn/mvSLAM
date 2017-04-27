@@ -1,4 +1,5 @@
 #include <front-end/image-pair.hpp>
+#include <front-end/camera-manager.hpp>
 #include <vision/sfm.hpp>
 #include <base/debug.hpp>
 #include <base/image.hpp>
@@ -125,7 +126,7 @@ ImagePair::reconstruct()
     }
 
     // reconstruct structure
-    const CameraIntrinsics K = Matrix3Type::Identity(); // FIXME: get this info somewhere
+    const CameraIntrinsics &K = CameraManager::get_camera().get_intrinsics();
     valid = sfm_solve(base_points,
                       pair_points,
                       K,
@@ -182,7 +183,7 @@ ImagePair::refine()
         }
     }
 
-    const CameraIntrinsics K = Matrix3Type::Identity(); // FIXME: get this info somewhere
+    const CameraIntrinsics &K = CameraManager::get_camera().get_intrinsics();
     valid = sfm_refine(base_point_estimates,
                        pair_point_estimates,
                        K,

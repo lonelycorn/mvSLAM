@@ -1,6 +1,6 @@
-#include <vision/visual-feature.hpp>
-#include <vision/io.hpp>
+#include <base/image.hpp>
 #include <base/error.hpp>
+#include <vision/visual-feature.hpp>
 #include <cstdio>
 #include <opencv2/highgui.hpp>
 using namespace mvSLAM;

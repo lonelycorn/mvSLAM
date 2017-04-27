@@ -44,7 +44,8 @@ public:
      */
     static std::pair<VisualFeature, VisualFeature>
         match_and_filter_visual_features(const VisualFeature &vf1,
-                                         const VisualFeature &vf2);
+                                         const VisualFeature &vf2,
+                                         ScalarType max_dist = -1);
 
     /** Find match and remove outliers.
      * @param [in] image1 a rectified image.

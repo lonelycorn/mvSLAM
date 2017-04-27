@@ -53,6 +53,8 @@ VisualFeature::match_visual_features(const VisualFeature &vf1,
                                      const VisualFeature &vf2,
                                      ScalarType max_dist)
 {
+    assert(vf1.valid() && vf2.valid());
+
     std::vector<std::vector<cv::DMatch> > knn_matches2to1;
     _matcher.knnMatch(vf2.m_descriptors,   // queryDescriptors
                       vf1.m_descriptors,   // trainDescriptors
@@ -90,13 +92,20 @@ VisualFeature::match_images(const ImageGrayscale &image1,
 
 std::pair<VisualFeature, VisualFeature>
 VisualFeature::match_and_filter_visual_features(const VisualFeature &vf1,
-                                               const VisualFeature &vf2)
+                                                const VisualFeature &vf2,
+                                                ScalarType max_dist)
 {
     VisualFeatureConfig::MatchResultType matches2to1 =
-        match_visual_features(vf1, vf2);
+        match_visual_features(vf1, vf2, max_dist);
+
+    assert(vf1.m_image_height == vf2.m_image_height);
+    assert(vf1.m_image_width == vf2.m_image_width);
 
     VisualFeature filtered1;
     VisualFeature filtered2;
+
+    filtered1.m_image_height = filtered2.m_image_height = vf1.m_image_height;
+    filtered1.m_image_width = filtered2.m_image_width = vf1.m_image_width;
 
     for (auto m : matches2to1)
     {

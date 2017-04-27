@@ -36,7 +36,8 @@ mvSLAM_front_end_files = [
     './front-end/data-type.cpp',
     './front-end/frame-manager.cpp',
     './front-end/camera-manager.cpp',
-    './front-end/visual-odometer.cpp'
+    './front-end/image-pair.cpp',
+    './front-end/visual-odometer.cpp',
 ]
 
 source_files = \

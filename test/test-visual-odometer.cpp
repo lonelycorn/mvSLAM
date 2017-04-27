@@ -61,7 +61,10 @@ UNIT_TEST(visual_odometer_tracking)
     const std::string extension("jpg");
     const size_t total_frame_count = 5;
 
+    mvSLAM::CameraManager::load_from_file("../data/tsukuba/camera.config");
+
     mvSLAM::VisualOdometer::Params vo_params = mvSLAM::VisualOdometer::get_default_params();
+    //vo_params.max_match_inlier_distance = 15;
     mvSLAM::VisualOdometer vo(vo_params);
 
     for (size_t i = 0; i < total_frame_count; ++i)
@@ -84,9 +87,11 @@ UNIT_TEST(visual_odometer_tracking)
         }
         else
         {
+#ifdef DEBUG_OUTPUT
             std::cout<<"========== i = "<<i<<" ============"<<std::endl;
             std::cout<<"result = "<<result<<", pose = \n"<<pose<<std::endl;
             std::cout<<"==================================="<<std::endl;
+#endif // DEBUG_OUTPUT
             ASSERT_TRUE(result);
 
             mvSLAM::Vector3Type translation;

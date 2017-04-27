@@ -65,7 +65,7 @@ all_targets += targets
 
 # load all tests
 targets = SConscript("#/test/SConscript",
-                     variant_dir='./.unit-test', # VariantDir
+                     variant_dir='#/.test', # VariantDir
                      src_dir="./", # re-root
                      exports=['env']
                     )
@@ -73,7 +73,7 @@ all_targets += targets
 
 # load all utilities
 targets = SConscript("#/utility/SConscript",
-                     variant_dir='./variant-dir', # VariantDir
+                     variant_dir='#/variant-dir', # VariantDir
                      src_dir="./", # re-root
                      exports=['env']
                     )

@@ -65,8 +65,8 @@ test_pnp = env.mvSLAM_UnitTest\
     [
         'test-pnp.cpp',
         env.Object('unit-test-helper.cpp'),
-        env.Object('../source/vision/pnp-refine.cpp'),
         env.Object('../source/vision/pnp-solve.cpp'),
+        env.Object('../source/vision/pnp-refine.cpp'),
         env.Object('../source/vision/ba.cpp'),
         env.Object('../source/vision/camera.cpp'),
         env.Object('../source/base/math.cpp'),
@@ -84,7 +84,7 @@ test_directory_iterator = env.mvSLAM_UnitTest\
         env.Object('../source/os/directory-iterator.cpp'),
     ]
 )
-env.Depends(test_directory_iterator, env.Glob('../data/sfm/*'))
+env.Depends(test_directory_iterator, env.Glob('../data/tsukuba/*'))
 targets += test_directory_iterator
 
 test_frame_manager = env.mvSLAM_UnitTest\
@@ -110,6 +110,7 @@ test_image_pair = env.mvSLAM_UnitTest\
         'test-image-pair.cpp',
         env.Object('../source/front-end/image-pair.cpp'),
         env.Object('../source/front-end/frame-manager.cpp'),
+        env.Object('../source/front-end/camera-manager.cpp'),
         env.Object('../source/front-end/data-type.cpp'),
         env.Object('../source/vision/visual-feature.cpp'),
         env.Object('../source/vision/sfm-solve.cpp'),
@@ -132,11 +133,11 @@ test_visual_odometer = env.mvSLAM_UnitTest\
     [
         'test-visual-odometer.cpp',
         env.Object('unit-test-helper.cpp'),
+        env.Object('../source/front-end/visual-odometer.cpp'),
         env.Object('../source/front-end/image-pair.cpp'),
         env.Object('../source/front-end/frame-manager.cpp'),
         env.Object('../source/front-end/camera-manager.cpp'),
         env.Object('../source/front-end/data-type.cpp'),
-        env.Object('../source/front-end/visual-odometer.cpp'),
         env.Object('../source/vision/visual-feature.cpp'),
         env.Object('../source/vision/sfm-solve.cpp'),
         env.Object('../source/vision/sfm-refine.cpp'),
