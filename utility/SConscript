@@ -19,6 +19,9 @@ targets += test_visual_feature
 reconstruct_scene = env.mvSLAM_Program('reconstruct-scene', ['reconstruct-scene.cpp'])
 targets += reconstruct_scene
 
+calibrate_camera = env.mvSLAM_Program('calibrate-camera', ['calibrate-camera.cpp'])
+targets += calibrate_camera
+
 video_capture = env.mvSLAM_Program('video-capture', ['video-capture.cpp'])
 targets += video_capture
 
