@@ -100,10 +100,10 @@ opencv_dependency = [
             #"opencv_xobjdetect",
             #"opencv_xphoto",
             "opencv_highgui",
-            #"opencv_videoio",
+            "opencv_videoio", # cv::VideoCapture
             "opencv_imgcodecs",
             #"opencv_photo",
-            #"opencv_imgproc",
+            "opencv_imgproc", # cv::puText
             "opencv_core",
             #"opencv_hal",
         ]
