@@ -2,5 +2,5 @@ result
 variant-dir
 resource
 .sconsign.dblite
-.unit-test
+.test
 *.pyc
