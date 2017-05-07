@@ -14,12 +14,12 @@ namespace mvSLAM
 {
 static Logger logger("[sfm-solve]", false);
 
-static constexpr int 
-    VF_MATCH_SIZE_MIN = 20;
+// NOTE: value is for identity intrinsics. If not using identity,
+// must scale down accordingly
+static constexpr const ScalarType
+    MAX_ERROR_SQ = 5e-2;
 static constexpr int 
     VF_MATCH_INLIER_MIN = 8;
-static constexpr ScalarType
-    VF_MATCH_ERROR_MAX = (ScalarType) 1.0;
 static constexpr ScalarType
     VF_MATCH_CONFIDENCE_LEVEL = (ScalarType) 0.99;
 
@@ -309,9 +309,10 @@ bool sfm_solve(const std::vector<ImagePoint> &p1_,
     int inlier_count;
     std::vector<uint8_t> inliers;
     Matrix3Type E21;
+    ScalarType max_error_sq = MAX_ERROR_SQ / K(0, 0) / K(1, 1); // geometrical mean
     if (!find_essential_matrix(p1,
                                p2,
-                               static_cast<ScalarType>(0.05),
+                               max_error_sq,
                                VF_MATCH_CONFIDENCE_LEVEL,
                                E21,
                                inliers))

@@ -17,6 +17,8 @@ UNIT_TEST(visual_odometer_initialization)
     mvSLAM::VisualOdometer::Params vo_params = mvSLAM::VisualOdometer::get_default_params();
     mvSLAM::VisualOdometer vo(vo_params);
 
+    mvSLAM::CameraManager::load_from_file("../data/tsukuba/camera.config");
+
     // first frame
     {
         std::string filename = directory + std::to_string(1) + "." + extension;
@@ -56,7 +58,7 @@ UNIT_TEST(visual_odometer_initialization)
 
 UNIT_TEST(visual_odometer_tracking)
 {
-    const mvSLAM::ScalarType tolerance(12e-3);
+    const mvSLAM::ScalarType tolerance(1e-3);
     const std::string directory("../data/tsukuba/");
     const std::string extension("jpg");
     const size_t total_frame_count = 5;
