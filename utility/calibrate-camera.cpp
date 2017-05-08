@@ -87,7 +87,7 @@ int main(int argc, char **argv)
     if (argc != 4)
     {
         print_help(argv[0]);
-        return mvSLAM::ApplicationErrorCode::AEC_INVALID_ARGS;
+        return static_cast<int>(mvSLAM::ApplicationErrorCode::INVALID_ARGS);
     }
 
     std::string directory_fn(argv[1]);
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
     if (!cbp.is_valid())
     {
         std::cerr << "Unable to load chessboard params." << std::endl;
-        return mvSLAM::ApplicationErrorCode::AEC_BAD_DATA;
+        return static_cast<int>(mvSLAM::ApplicationErrorCode::BAD_DATA);
     }
     const cv::Size &pattern_size = cbp.get_pattern_size();
     const float cell_size = cbp.get_cell_size();
@@ -126,7 +126,7 @@ int main(int argc, char **argv)
             std::cerr << "Image size mismatch: (" << image.rows << ", "
                     << image.cols << ") != (" << image_size.height << ", "
                     << image_size.width << ")" << std::endl;;
-            return mvSLAM::ApplicationErrorCode::AEC_BAD_DATA;
+            return static_cast<int>(mvSLAM::ApplicationErrorCode::BAD_DATA);
         }
 
         std::vector<cv::Point2f> corners;
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
         {
             std::cerr << "Cannot find chessboard corners in '"
                     << image_fn << "'"<<std::endl;
-            return mvSLAM::ApplicationErrorCode::AEC_BAD_DATA;
+            return static_cast<int>(mvSLAM::ApplicationErrorCode::BAD_DATA);
         }
         image_points.push_back(std::move(corners));
     }
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
     {
         std::cerr << "Too few images: " << image_points.size()
                 << " < " << MIN_IMAGE_COUNT << std::endl;
-        return mvSLAM::ApplicationErrorCode::AEC_BAD_DATA;
+        return static_cast<int>(mvSLAM::ApplicationErrorCode::BAD_DATA);
     }
 
     // generate chessboard world points
@@ -211,5 +211,5 @@ int main(int argc, char **argv)
         }
     }
     
-    return mvSLAM::ApplicationErrorCode::AEC_NONE;
+    return static_cast<int>(mvSLAM::ApplicationErrorCode::NONE);
 }

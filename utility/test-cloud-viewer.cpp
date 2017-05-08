@@ -7,6 +7,7 @@
 #include <system-config.hpp>
 #include <os/mutex.hpp>
 #include <os/event.hpp>
+#include <base/error.hpp>
 #include <base/visualization.hpp>
 #include <base/math.hpp>
 
@@ -130,5 +131,5 @@ int main()
         }
     }
 
-    return 0;
+    return static_cast<int>(mvSLAM::ApplicationErrorCode::NONE);
 }

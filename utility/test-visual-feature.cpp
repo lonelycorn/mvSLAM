@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     if (argc != 3)
     {
         print_help(argv[0]);
-        return mvSLAM::ApplicationErrorCode::AEC_INVALID_ARGS;
+        return static_cast<int>(mvSLAM::ApplicationErrorCode::INVALID_ARGS);
     }
 
     std::string image1_fn(argv[1]);
@@ -44,6 +44,6 @@ int main(int argc, char **argv)
     std::printf("Press Escape to continue...\n");
     while (cv::waitKey(0) != 27);
 
-    return mvSLAM::ApplicationErrorCode::AEC_NONE;
+    return static_cast<int>(mvSLAM::ApplicationErrorCode::NONE);
 }
 

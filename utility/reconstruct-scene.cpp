@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     if (argc != 5)
     {
         print_help(argv[0]);
-        return mvSLAM::ApplicationErrorCode::AEC_INVALID_ARGS;
+        return static_cast<int>(mvSLAM::ApplicationErrorCode::INVALID_ARGS);
     }
 
     std::string image1_fn(argv[1]);
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
                    point_indexes))
     {
         std::printf("Reconstruction failed.\n");
-        return mvSLAM::ApplicationErrorCode::AEC_BAD_DATA;
+        return static_cast<int>(mvSLAM::ApplicationErrorCode::BAD_DATA);
     }
     std::cout<<"camera intrinsics:\n"<<camera.get_intrinsics()<<std::endl;
     std::cout<<"camera extrinsics:\n"<<camera.get_extrinsics()<<std::endl;
@@ -84,5 +84,5 @@ int main(int argc, char **argv)
         viewer.spinOnce(100);
     }
 #endif    
-    return mvSLAM::ApplicationErrorCode::AEC_NONE;
+    return static_cast<int>(mvSLAM::ApplicationErrorCode::NONE);
 }

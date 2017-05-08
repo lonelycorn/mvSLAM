@@ -1,12 +1,15 @@
 #pragma once
+#include <cstdint>
+
 namespace mvSLAM
 {
-enum ApplicationErrorCode
+enum class ApplicationErrorCode : int
 {
-    AEC_NONE = 0,           // eveything ok
-    AEC_INVALID_ARGS = 1,   // invalid arguments
-    AEC_IO = 2,             // io exceptions
-    AEC_BAD_DATA = 3,       // data is bad
+    NONE = 0,           // eveything ok
+    INVALID_ARGS = 1,   // invalid arguments
+    BAD_IO = 2,         // IO exceptions
+    BAD_DATA = 3,       // input data is bad
+    HARDWARE_ERROR = 4, // hardware issues
+    UNKNOWN = 0xff,     // unclassified error
 };
-
 }

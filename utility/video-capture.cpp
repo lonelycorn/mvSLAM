@@ -25,7 +25,7 @@ int main(int argc, char **argv)
     if (argc != 4)
     {
         print_help(argv[0]);
-        return mvSLAM::ApplicationErrorCode::AEC_INVALID_ARGS;
+        return static_cast<int>(mvSLAM::ApplicationErrorCode::INVALID_ARGS);
     }
 
     // arg parsing
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     if (interval_ms <= 0)
     {
         std::cerr << "Invalid interval: " << argv[2] << std::endl;
-        return mvSLAM::ApplicationErrorCode::AEC_INVALID_ARGS;
+        return static_cast<int>(mvSLAM::ApplicationErrorCode::INVALID_ARGS);
     }
     /*
     else
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     if (image_count <= 0)
     {
         std::cerr << "Invalid image count: " << argv[3] << std::endl;
-        return mvSLAM::ApplicationErrorCode::AEC_INVALID_ARGS;
+        return static_cast<int>(mvSLAM::ApplicationErrorCode::INVALID_ARGS);
     }
 
     // open video capture and save
@@ -68,7 +68,7 @@ int main(int argc, char **argv)
     if (!vc.isOpened())
     {
         std::cerr << "Cannot open camera device." << std::endl;
-        return mvSLAM::ApplicationErrorCode::AEC_BAD_DATA; // FIXME: really a Hardware failure
+        return static_cast<int>(mvSLAM::ApplicationErrorCode::HARDWARE_ERROR);
     }
     int image_index = 0;
     uint32_t last_capture_time_ms = mvSLAM::get_time_ms();
@@ -114,9 +114,9 @@ int main(int argc, char **argv)
     {
         std::cerr << "Capture terminated early. Saved" << image_index
                 << "images." << std::endl;
-        return mvSLAM::ApplicationErrorCode::AEC_BAD_DATA; // FIXME: really a Hardware failure
+        return static_cast<int>(mvSLAM::ApplicationErrorCode::HARDWARE_ERROR);
     }
 
     vc.release();
-    return mvSLAM::ApplicationErrorCode::AEC_NONE;
+    return static_cast<int>(mvSLAM::ApplicationErrorCode::NONE);
 }
