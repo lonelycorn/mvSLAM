@@ -25,5 +25,8 @@ targets += calibrate_camera
 video_capture = env.mvSLAM_Program('video-capture', ['video-capture.cpp'])
 targets += video_capture
 
+visual_odometer = env.mvSLAM_Program('visual-odometer', ['visual-odometer.cpp'])
+targets += visual_odometer
+
 Return(['targets'])
 

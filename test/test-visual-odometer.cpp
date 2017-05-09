@@ -1,9 +1,11 @@
 #include "unit-test.hpp"
 #include "unit-test-helper.hpp"
-#include <string>
+
 #include <front-end/visual-odometer.hpp>
 #include <front-end/camera-manager.hpp>
 #include <front-end/frame-manager.hpp>
+
+#include <string>
 #include <iostream>
 #include <set>
 
