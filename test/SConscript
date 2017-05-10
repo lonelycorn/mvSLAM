@@ -10,6 +10,16 @@ targets = []
 #targets += run_test_unit_test
 #Alias('test_unit_test', run_test_unit_test)
 
+test_string_manipulation = env.mvSLAM_UnitTest\
+(
+    'test-string-manipulation',
+    [
+        'test-string-manipulation.cpp',
+        env.Object('../source/base/string-manipulation.cpp'),
+    ]
+)
+targets += test_string_manipulation
+
 test_math = env.mvSLAM_UnitTest\
 (
     'test-math',
@@ -184,6 +194,18 @@ test_graph = env.mvSLAM_UnitTest\
     ]
 )
 targets += test_graph
+
+test_parameter_manager = env.mvSLAM_UnitTest\
+(
+    'test-parameter-manager',
+    [
+        'test-parameter-manager.cpp',
+        env.Object('../source/base/debug.cpp'),
+        env.Object('../source/base/string-manipulation.cpp'),
+        env.Object('../source/base/parameter-manager.cpp'),
+    ]
+)
+targets += test_parameter_manager
 
 Return(['targets'])
 
