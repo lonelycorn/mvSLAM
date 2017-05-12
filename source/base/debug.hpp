@@ -8,6 +8,10 @@
 
 namespace mvSLAM
 {
+
+/// dump a variable's name and its value to std::cout. poorman's implementation of reflection.
+#define DEBUG_SHOW_VALUE(x) { std::cout << "[DEBUG_SHOW_VALUE] '" << #x << "' = " << (x) <<std::endl;}
+
 #define LOGGING_FORMAT_STRING_BUFFER_SIZE 1024
 #define LOGGING_TAG_DELIMITER ' '
 
@@ -20,12 +24,14 @@ enum class LoggingLevel
     COUNT = 4,
 };
 
+/// base write
 template <typename OutputStreamType, typename T>
 void __do_stream_write(OutputStreamType &output_stream, T t)
 {
     output_stream << t;
 }
 
+/// recursive write
 template <typename OutputStreamType, typename T, typename ... Args>
 void __do_stream_write(OutputStreamType &output_stream, T t, Args... args)
 {
@@ -65,6 +71,7 @@ void __stream_write_data(OutputStreamType &output_stream, Args... args)
     __do_stream_write(output_stream, ss.str());
 }
 
+/// utilities for logging. DO NOT call directly; use @ref Logger instead.
 class Logging
 {
 public:
@@ -163,7 +170,7 @@ private:
     static std::ostream *m_error_stream;
 };
 
-
+/// OO-style delegate to @ref Logging
 class Logger
 {
 public:
