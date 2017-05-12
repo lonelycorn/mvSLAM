@@ -36,6 +36,12 @@ public:
         // for tracking
         size_t min_tracked_point_match_count; // for pnp
         size_t min_tracked_point_count;
+
+        // for bundle-adjustment
+        ScalarType anchor_stddev_position;
+        ScalarType anchor_stddev_orientation;
+        ScalarType regulator_stddev_position;
+        ScalarType regulator_stddev_orientation;
     };
 
     static Params get_default_params();

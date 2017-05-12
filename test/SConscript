@@ -155,6 +155,8 @@ test_visual_odometer = env.mvSLAM_UnitTest\
         env.Object('../source/vision/pnp-refine.cpp'),
         env.Object('../source/vision/ba.cpp'),
         env.Object('../source/vision/camera.cpp'),
+        env.Object('../source/base/parameter-manager.cpp'),
+        env.Object('../source/base/string-manipulation.cpp'),
         env.Object('../source/base/gtsam.cpp'),
         env.Object('../source/base/math.cpp'),
         env.Object('../source/base/image.cpp'),

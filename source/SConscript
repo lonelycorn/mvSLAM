@@ -6,6 +6,8 @@ mvSLAM_base_files = [
     './base/image.cpp',
     './base/visualization.cpp',
     './base/gtsam.cpp',
+    './base/string-manipulation.cpp',
+    './base/parameter-manager.cpp',
 ]
 
 mvSLAM_os_files = [

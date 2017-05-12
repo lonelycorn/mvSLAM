@@ -2,6 +2,7 @@
 #include <front-end/image-pair.hpp>
 #include <front-end/camera-manager.hpp>
 #include <front-end/frame-manager.hpp>
+#include <base/parameter-manager.hpp>
 #include <base/debug.hpp>
 #include <vision/ba.hpp>
 #include <vision/pnp.hpp>
@@ -10,36 +11,55 @@
 #include <algorithm>
 #include <cassert>
 #include <unordered_set>
+#include <string>
 
 #define DEBUG_VISUAL_ODOMETER
 
 namespace mvSLAM
 {
+static const std::string module_name("VisualOdometer");
 static Logger logger("[VisualOdometer]");
-
-static constexpr ScalarType VO_ANCHOR_STDDEV_POSITION(1e-3);
-static constexpr ScalarType VO_ANCHOR_STDDEV_ORIENTATION(1e-3);
-static constexpr ScalarType VO_REGULATOR_STDDEV_POSITION(1e-2);
-static constexpr ScalarType VO_REGULATOR_STDDEV_ORIENTATION(1e-2);
-static constexpr ScalarType VO_REGULATOR_STDDEV_POSITION_NEW(1e-1);
-static constexpr ScalarType VO_REGULATOR_STDDEV_ORIENTATION_NEW(1e-1);
 
 VisualOdometer::Params
 VisualOdometer::get_default_params()
 {
-    // FIXME: magic numbers... magic numbers EVERYWHERE...
     Params p;
 
-    p.max_match_inlier_distance = 10;
+    p.max_match_inlier_distance = ParameterManager::get_value<int>(
+            module_name, "max_match_inlier_distance", 10);
 
-    p.frame_queue_size = 10;
-    p.min_match_inlier_count = 20;
-    p.max_error = 0.5;
-    p.max_rotation_magnitude = 1e-1;
-    p.max_translation_z = 0.1;
+    p.frame_queue_size = ParameterManager::get_value<int>(
+            module_name, "frame_queue_size", 10);
 
-    p.min_tracked_point_match_count = 7;
-    p.min_tracked_point_count = 10;
+    p.min_match_inlier_count = ParameterManager::get_value<int>(
+            module_name, "min_match_inlier_count", 20);
+
+    p.max_error = ParameterManager::get_value<ScalarType>(
+            module_name, "max_error", 0.5);
+
+    p.max_rotation_magnitude = ParameterManager::get_value<ScalarType>(
+            module_name, "max_rotation_magnitude", 0.1);
+
+    p.max_translation_z = ParameterManager::get_value<ScalarType>(
+            module_name, "max_translation_z", 0.1);
+
+    p.min_tracked_point_match_count = ParameterManager::get_value<int>(
+            module_name, "min_tracked_point_match_count", 7);
+
+    p.min_tracked_point_count = ParameterManager::get_value<int>(
+            module_name, "min_tracked_point_count", 10);
+
+    p.anchor_stddev_position = ParameterManager::get_value<ScalarType>(
+            module_name, "anchor_stddev_position", 0.001);
+
+    p.anchor_stddev_orientation = ParameterManager::get_value<ScalarType>(
+            module_name, "anchor_stddev_orientation", 0.001);
+
+    p.regulator_stddev_position = ParameterManager::get_value<ScalarType>(
+            module_name, "regulator_stddev_position", 0.01);
+
+    p.regulator_stddev_orientation = ParameterManager::get_value<ScalarType>(
+            module_name, "regulator_stddev_orientation", 0.01);
 
     return p;
 }
@@ -464,8 +484,8 @@ VisualOdometer::track(const FrontEndTypes::FramePtr &new_frame)
         Matrix6Type covar = TransformationUncertainty::Identity();
         for (int i = 0; i < 3; ++i)
         {
-            covar(i, i) *= VO_ANCHOR_STDDEV_POSITION;
-            covar(i+3, i+3) *= VO_ANCHOR_STDDEV_ORIENTATION;
+            covar(i, i) *= m_params.anchor_stddev_position;
+            covar(i+3, i+3) *= m_params.anchor_stddev_orientation;
         }
         frame_pose_prior[m_last_frame->id] = covar;
     }
@@ -478,7 +498,7 @@ VisualOdometer::track(const FrontEndTypes::FramePtr &new_frame)
         // regulate previously tracked points
         // FIXME: no regulator for newly triangulated points
         auto pid = p.first;
-        auto covar = Point3Uncertainty::Identity() * sqr(VO_REGULATOR_STDDEV_POSITION);
+        auto covar = Point3Uncertainty::Identity() * sqr(m_params.regulator_stddev_position);
         point_prior[pid] = covar;
     }
 
