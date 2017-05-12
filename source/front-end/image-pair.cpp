@@ -1,22 +1,29 @@
 #include <front-end/image-pair.hpp>
 #include <front-end/camera-manager.hpp>
 #include <vision/sfm.hpp>
+#include <base/parameter-manager.hpp>
 #include <base/debug.hpp>
 #include <base/image.hpp>
 
 #include <algorithm>
 #include <cassert>
+#include <string>
 
 namespace mvSLAM
 {
+static std::string module_name("ImagePair");
 static Logger logger("[ImagePair]", true);
 
 ImagePair::Params
 ImagePair::get_default_params()
 {
     Params p;
-    p.max_match_inlier_distance = 10;
-    p.refine_structure_in_constructor = false;
+
+    p.max_match_inlier_distance = ParameterManager::get_value<ScalarType>(
+            module_name, "max_match_inlier_distance", 10);
+
+    p.refine_structure_in_constructor = ParameterManager::get_value<bool>(
+            module_name, "refine_structure_in_constructor", false);
     return p;
 }
 
