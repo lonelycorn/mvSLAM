@@ -4,11 +4,9 @@ targets = []
 #====================#
 #     TEST UTILS     #
 #====================#
-test_cloud_viewer = env.mvSLAM_Program('test-cloud-viewer', ['test-cloud-viewer.cpp'])
-targets += test_cloud_viewer
 
-test_pcl_visualizer = env.mvSLAM_Program('test-pcl-visualizer', ['test-pcl-visualizer.cpp'])
-targets += test_pcl_visualizer 
+test_visualizer = env.mvSLAM_Program('test-visualizer', ['test-visualizer.cpp'])
+targets += test_visualizer 
 
 test_image_io = env.mvSLAM_Program('test-image-io', ['test-image-io.cpp'])
 targets += test_image_io

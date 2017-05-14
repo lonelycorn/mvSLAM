@@ -4,10 +4,13 @@ mvSLAM_base_files = [
     './base/math.cpp',
     './base/debug.cpp',
     './base/image.cpp',
-    './base/visualization.cpp',
     './base/gtsam.cpp',
     './base/string-manipulation.cpp',
     './base/parameter-manager.cpp',
+]
+
+mvSLAM_visualization_files = [
+    './visualization/visualizer.cpp',
 ]
 
 mvSLAM_os_files = [
@@ -44,6 +47,7 @@ mvSLAM_front_end_files = [
 
 source_files = \
     mvSLAM_base_files + \
+    mvSLAM_visualization_files + \
     mvSLAM_os_files + \
     mvSLAM_vision_files + \
     mvSLAM_back_end_files + \

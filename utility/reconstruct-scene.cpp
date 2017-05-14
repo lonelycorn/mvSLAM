@@ -1,7 +1,7 @@
-#include <pcl/visualization/cloud_viewer.h>
 #include <base/error.hpp>
 #include <base/image.hpp>
-#include <base/visualization.hpp>
+#include <os/time.hpp>
+#include <visualization/visualizer.hpp>
 #include <vision/visual-feature.hpp>
 #include <vision/camera.hpp>
 #include <vision/sfm.hpp>
@@ -63,26 +63,19 @@ int main(int argc, char **argv)
     {
         std::cout<< p.x() <<", "<<p.y()<<", "<<p.z()<<std::endl;
     }
-#if 1
-    // visualize points
-    pcl::PointCloud<pcl::PointXYZ>::Ptr pc =
-        mvSLAM::Point3_to_PointCloud(pointsin1_scaled);
 
-    pcl::visualization::PCLVisualizer viewer("3D Reconstruction");
-    viewer.addPointCloud(pc, "triangulated points");
-    viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-                                            1, "triangulated points");
+    // visualize points
+    mvSLAM::Visualizer viewer("3D Reconstruction", mvSLAM::Visualizer::get_default_params());
+    viewer.set_point_cloud(0, pointsin1_scaled);
 
     // visualize camera poses
-    mvSLAM::add_camera_representation(mvSLAM::SE3(), "1", viewer);
-    mvSLAM::add_camera_representation(pose2in1_scaled, "2", viewer, true);
+    viewer.set_camera_pose(0, mvSLAM::SE3(), 1.0);
+    viewer.set_camera_pose(1, pose2in1_scaled, 0.75);
 
-    mvSLAM::initialize_visualizer(viewer);
-
-    while (!viewer.wasStopped())
+    while (!viewer.is_window_closed())
     {
-        viewer.spinOnce(100);
+        mvSLAM::sleep_ms(1000);
     }
-#endif    
+
     return static_cast<int>(mvSLAM::ApplicationErrorCode::NONE);
 }
