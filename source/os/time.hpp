@@ -22,5 +22,8 @@ timestamp_ms_t get_time_ms();
 /// Get time elapsed since start up, in us
 timestamp_us_t get_time_us();
 
+/// Sleep
+bool sleep_ms(timestamp_ms_t delta);
+
 }
 

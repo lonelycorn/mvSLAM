@@ -2,6 +2,8 @@
 #include <cassert>
 #include <time.h>
 
+#include <unistd.h>
+
 namespace mvSLAM
 {
 
@@ -46,6 +48,11 @@ timestamp_ms_t get_time_ms()
 timestamp_us_t get_time_us()
 {
     return timer.get_time_us();
+}
+
+bool sleep_ms(timestamp_ms_t delta)
+{
+    return (usleep(delta * US_PER_MS) == 0);
 }
 
 }
