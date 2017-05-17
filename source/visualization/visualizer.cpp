@@ -9,13 +9,14 @@
 
 #include <atomic>
 #include <thread>
+#include <random>
 
 namespace mvSLAM
 {
 static const std::string module_name("Visualizer");
 static Logger logger("[Visualizer]", true);
 
-// conversion functions
+// conversion functions for pcl::PointXYZ
 static pcl::PointXYZ
 mvSLAM_to_pcl(const VisualizationTypes::Point3 &p)
 {
@@ -44,44 +45,111 @@ mvSLAM_to_pcl(const std::vector<VisualizationTypes::Point3> &pc)
     return result;
 }
 
-// id strings
-static std::string
-get_point_cloud_id_string(VisualizationTypes::PointCloudId id)
+#if 0
+// conversion functions for pcl::PointXYZRGB
+static pcl::PointXYZRGB
+mvSLAM_to_pcl(const VisualizationTypes::Point3 &p,
+              ScalarType r, ScalarType g, ScalarType b)
 {
-    static const std::string prefix("point_cloud ");
-    return prefix + std::to_string(id);
+    constexpr ScalarType max_intensity(255);
+    pcl::PointXYZRGB result;
+    result.r = static_cast<uint8_t>(r * max_intensity);
+    result.g = static_cast<uint8_t>(g * max_intensity);
+    result.b = static_cast<uint8_t>(b * max_intensity);
+    result.x = p[0];
+    result.y = p[1];
+    result.z = p[2];
+    return result;
 }
 
-static std::string
-get_camera_id_string(VisualizationTypes::CameraId id)
+static pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+mvSLAM_to_pcl(const VisualizationTypes::PointCloud &pc,
+              ScalarType r, ScalarType g, ScalarType b)
 {
-    static const std::string prefix("camera ");
-    return prefix + std::to_string(id);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr result(new pcl::PointCloud<pcl::PointXYZRGB>);
+    for (const auto &p : pc)
+    {
+
+        result->push_back(mvSLAM_to_pcl(p.second, r, g, b));
+    }
+    return result;
 }
+
+static pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+mvSLAM_to_pcl(const std::vector<VisualizationTypes::Point3> &pc,
+              ScalarType r, ScalarType g, ScalarType b)
+{
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr result(new pcl::PointCloud<pcl::PointXYZRGB>);
+    for (const auto &p : pc)
+    {
+        result->push_back(mvSLAM_to_pcl(p, r, g, b));
+    }
+    return result;
+}
+#endif
+
+/// get random number between 0 and 1. TODO: move to base/random
+static ScalarType
+get_random_number()
+{
+    static std::default_random_engine generator;
+    std::uniform_real_distribution<ScalarType> distribution(0.0, 1.0);
+    return distribution(generator);
+}
+
+struct MetaDataPointCloud
+{
+    VisualizationTypes::PointCloudId id;
+    std::string name;
+    ScalarType r, g, b;
+    MetaDataPointCloud(VisualizationTypes::PointCloudId id_):
+        id(id_),
+        name("point_cloud " + std::to_string(id)),
+        r(get_random_number()),
+        g(get_random_number()),
+        b(get_random_number())
+    {
+        logger.info("id = ", id, ", r = ", r, ", g = ", g, ", b = ", b);
+    }
+};
+
+struct MetaDataCamera
+{
+    VisualizationTypes::CameraId id;
+    std::string name_X, name_Y, name_Z;
+    MetaDataCamera(VisualizationTypes::CameraId id_):
+        id(id_),
+        name_X("camera " + std::to_string(id) + " X"),
+        name_Y("camera " + std::to_string(id) + " Y"),
+        name_Z("camera " + std::to_string(id) + " Z")
+    {
+    }
+};
 
 /// Data container for @ref Visualizer.
 struct VisualizerImpl
 {
     const std::string name;
     const Visualizer::Params params;
-    pcl::visualization::PCLVisualizer viewer;
     std::atomic<bool> viewer_thread_should_exit;
 
     Mutex mutex;  // protect everything down below
+    pcl::visualization::PCLVisualizer viewer;
     std::thread viewer_thread;
     std::unordered_map<VisualizationTypes::PointCloudId,
-            std::string> point_cloud_id_to_string;
+            MetaDataPointCloud> meta_data_point_cloud;
     std::unordered_map<VisualizationTypes::CameraId,
-            std::string> camera_id_to_string;
+            MetaDataCamera> meta_data_camera;
 
     VisualizerImpl(const std::string &n, const Visualizer::Params &p):
         name(n),
         params(p),
-        viewer(),
         viewer_thread_should_exit(false),
+        mutex(),
+        viewer(),
         viewer_thread(),
-        point_cloud_id_to_string(),
-        camera_id_to_string()
+        meta_data_point_cloud(),
+        meta_data_camera()
     {
     }
 
@@ -114,6 +182,9 @@ Visualizer::get_default_params()
 
     p.view_update_interval_ms = ParameterManager::get_value(
             module_name, "view_update_interval_ms", 100);
+
+    p.point_size_pixel = ParameterManager::get_value(
+            module_name, "point_size_pixel", 4);
 
     return p;
 }
@@ -150,39 +221,37 @@ Visualizer::set_camera_pose(VisualizationTypes::CameraId id,
 
     Lock lock(m_impl->mutex);
     std::string id_string;
-    if (m_impl->camera_id_to_string.count(id) == 0) // a new camera
+    if (m_impl->meta_data_camera.count(id) == 0) // a new camera
     {
-        id_string = get_camera_id_string(id);
-        m_impl->camera_id_to_string.emplace(id, id_string);
+        m_impl->meta_data_camera.emplace(id, MetaDataCamera(id));
     }
     else
     {
-        id_string = m_impl->camera_id_to_string.at(id);
+        const auto &m = m_impl->meta_data_camera.at(id);
         // delete
-        m_impl->viewer.removeShape(id_string + " X");
-        m_impl->viewer.removeShape(id_string + " Y");
-        m_impl->viewer.removeShape(id_string + " Z");
+        m_impl->viewer.removeShape(m.name_X);
+        m_impl->viewer.removeShape(m.name_Y);
+        m_impl->viewer.removeShape(m.name_Z);
     }
 
+    const auto &m = m_impl->meta_data_camera.at(id);
+    const auto origin = mvSLAM_to_pcl(T_camera_to_world * Point3(0.0, 0.0, 0.0));
     {
-        const auto origin = mvSLAM_to_pcl(T_camera_to_world * Point3(0.0, 0.0, 0.0));
         const auto X = mvSLAM_to_pcl(T_camera_to_world * Point3(scale, 0.0, 0.0));
         double r = 1.0, g = 0.0, b = 0.0;
-        m_impl->viewer.addLine(origin, X, r, g, b, id_string + " X");
+        m_impl->viewer.addLine(origin, X, r, g, b, m.name_X);
     }
     
     {
-        const auto origin = mvSLAM_to_pcl(T_camera_to_world * Point3(0.0, 0.0, 0.0));
         const auto Y = mvSLAM_to_pcl(T_camera_to_world * Point3(0.0, scale, 0.0));
         double r = 0.0, g = 1.0, b = 0.0;
-        m_impl->viewer.addLine(origin, Y, r, g, b, id_string + " Y");
+        m_impl->viewer.addLine(origin, Y, r, g, b, m.name_Y);
     }
 
     {
-        const auto origin = mvSLAM_to_pcl(T_camera_to_world * Point3(0.0, 0.0, 0.0));
         const auto Z = mvSLAM_to_pcl(T_camera_to_world * Point3(0.0, 0.0, scale));
         double r = 0.0, g = 0.0, b = 1.0;
-        m_impl->viewer.addLine(origin, Z, r, g, b, id_string + " Z");
+        m_impl->viewer.addLine(origin, Z, r, g, b, m.name_Z);
     }
 }
 
@@ -192,20 +261,28 @@ __set_point_cloud(VisualizerImpl *m_impl,
         VisualizationTypes::PointCloudId id,
         const PointCloudType &pc)
 {
-    auto pcl_point_cloud = mvSLAM_to_pcl(pc);
+    const auto pcl_point_cloud = mvSLAM_to_pcl(pc);
 
     Lock lock(m_impl->mutex);
-    std::string id_string;
-    if (m_impl->point_cloud_id_to_string.count(id) == 0) // new point cloud
+    if (m_impl->meta_data_point_cloud.count(id) == 0) // new point cloud
     {
-        id_string = get_point_cloud_id_string(id);
-        m_impl->point_cloud_id_to_string.insert({id, id_string});
-        m_impl->viewer.addPointCloud<pcl::PointXYZ>(pcl_point_cloud, id_string);
+        m_impl->meta_data_point_cloud.emplace(id, MetaDataPointCloud(id));
+        const auto &m = m_impl->meta_data_point_cloud.at(id);
+        const pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
+            color_handler(pcl_point_cloud, m.r * 255, m.g * 255, m.b * 255);
+        m_impl->viewer.addPointCloud<pcl::PointXYZ>(pcl_point_cloud,
+                color_handler, m.name);
+        m_impl->viewer.setPointCloudRenderingProperties(
+                pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
+                m_impl->params.point_size_pixel, m.name);
     }
     else // existing point cloud
     {
-        id_string = m_impl->point_cloud_id_to_string.at(id);
-        m_impl->viewer.updatePointCloud<pcl::PointXYZ>(pcl_point_cloud, id_string);
+        const auto &m = m_impl->meta_data_point_cloud.at(id);
+        const pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
+            color_handler(pcl_point_cloud, m.r * 255, m.g * 255, m.b * 255);
+        m_impl->viewer.updatePointCloud<pcl::PointXYZ>(pcl_point_cloud,
+                color_handler, m.name);
     }
 }
 

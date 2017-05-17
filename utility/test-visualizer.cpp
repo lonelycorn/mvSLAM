@@ -58,13 +58,13 @@ int main()
         const auto pc = get_random_point_cloud(point_count);
         viewer.set_point_cloud(pid, pc);
 
-        // FIXME: async update of the drawing is not good...
-        std::cout<<"generating random camrea pose"<<std::endl;
+        std::cout<<"generating random camera pose"<<std::endl;
         const mvSLAM::VisualizationTypes::CameraId cid = i / 2;
         const auto T = get_random_camera_pose(static_cast<mvSLAM::ScalarType>(i / 4.0));
         viewer.set_camera_pose(cid, T, static_cast<mvSLAM::ScalarType>(i / 3.0 + 0.5));
 
         mvSLAM::sleep_ms(2000);
+        //std::getchar();
     }
     return static_cast<int>(mvSLAM::ApplicationErrorCode::NONE);
 }

@@ -18,6 +18,7 @@ public:
     struct Params
     {
         timestamp_ms_t view_update_interval_ms;
+        uint32_t point_size_pixel;
     };
 
     static Params get_default_params();
@@ -46,6 +47,7 @@ public:
     void set_point_cloud(VisualizationTypes::PointCloudId id,
             const std::vector<VisualizationTypes::Point3> &pc);
     
+    /// return true if the GUI is closed.
     bool is_window_closed();
 private:
     VisualizerImpl *m_impl;
