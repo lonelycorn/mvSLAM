@@ -2,6 +2,8 @@
 #include <base/image.hpp>
 #include <base/debug.hpp>
 #include <base/parameter-manager.hpp>
+#include <os/time.hpp>
+#include <visualization/visualizer.hpp>
 #include <front-end/visual-odometer.hpp>
 #include <front-end/camera-manager.hpp>
 #include <front-end/frame-manager.hpp>
@@ -52,9 +54,6 @@ int main(int argc, char **argv)
 
     const std::string directory(argv[1]);
 
-    // TODO: set up visualization
-    //
-
     // read param from config file
     {
         const std::string filename = directory + "system.param";
@@ -69,6 +68,9 @@ int main(int argc, char **argv)
         mvSLAM::CameraManager::load_from_file(filename);
     }
 
+    //  set up visualization
+    mvSLAM::Visualizer viewer("Visual Odometer", mvSLAM::Visualizer::get_default_params());
+
     const std::string image_txt_filename = directory + "/image.txt";
     std::fstream in(image_txt_filename, std::ios_base::in);
     mvSLAM::timestamp_us_t capture_time = 0;
@@ -77,7 +79,6 @@ int main(int argc, char **argv)
     {
         ++capture_time;
         logger.info("===== t = ", capture_time, "=====");
-
 
         std::string filename;
         in >> filename;
@@ -97,6 +98,8 @@ int main(int argc, char **argv)
         if (success)
         {
             logger.info("body pose =\n", vo.get_body_pose());
+            viewer.set_camera_pose(stats.frame_total, vo.get_camera_pose());
+            viewer.set_point_cloud(stats.frame_total, vo.get_tracked_points());
             ++stats.frame_tracked;
         }
 
@@ -113,6 +116,11 @@ int main(int argc, char **argv)
     }
 
     stats.print();
+
+    while (!viewer.is_window_closed())
+    {
+        mvSLAM::sleep_ms(1000);
+    }
 
     return static_cast<int>(mvSLAM::ApplicationErrorCode::NONE);
 }
