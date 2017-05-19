@@ -37,7 +37,9 @@ public:
         normalize_point(const ImagePoint &image_point) const;
 
     const CameraIntrinsics &get_intrinsics() const;
+    const Matrix3Type &get_intrinsics_inverse() const;
     const CameraExtrinsics &get_extrinsics() const;
+    const SE3 &get_extrinsics_inverse() const;
 
     // IO
     bool load_from_file(const std::string &filename);
@@ -47,6 +49,7 @@ private:
     CameraIntrinsics K;
     Matrix3Type K_inv; // cached for speed
     CameraExtrinsics P; // transform from world ref frame to camera ref frame.
+    SE3 P_inv; // cached for speed
 };
 
 }

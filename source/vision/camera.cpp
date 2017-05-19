@@ -13,7 +13,7 @@ PinholeCamera::PinholeCamera(const std::string &filename)
 
 PinholeCamera::PinholeCamera(const CameraIntrinsics &K_,
                              const CameraExtrinsics &P_):
-    K(K_), K_inv(K_.inverse()), P(P_)
+    K(K_), K_inv(K_.inverse()), P(P_), P_inv(P_.inverse())
 {
 }
 
@@ -84,10 +84,22 @@ PinholeCamera::get_intrinsics() const
     return K;
 }
 
+const Matrix3Type &
+PinholeCamera::get_intrinsics_inverse() const
+{
+    return K_inv;
+}
+
 const CameraExtrinsics &
 PinholeCamera::get_extrinsics() const
 {
     return P;
+}
+
+const SE3 &
+PinholeCamera::get_extrinsics_inverse() const
+{
+    return P_inv;
 }
 
 bool
@@ -105,6 +117,7 @@ PinholeCamera::load_from_file(const std::string &filename)
     for (int i = 0; i < 6; ++i)
         in >> se3[i];
     P = SE3::exp(se3);
+    P_inv = P.inverse();
 
     in.close();
     return bool(in);
