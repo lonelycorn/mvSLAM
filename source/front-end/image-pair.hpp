@@ -60,14 +60,14 @@ public:
     // states that are available after reconstruct()
     uint32_t match_inlier_count; // number of inlier matched descriptors
     uint32_t match_inlier_ssd; // SSD of inlier matched descriptors
-    Transformation T_base_to_pair;
+    Transformation T_pair_to_base;
     std::vector<Point3> points; // for inliers only
     std::vector<size_t> visual_feature_index_in_base; // for inliers only
     std::vector<size_t> visual_feature_index_in_pair; // for inliers only
 
     // states that are available after refine()
     ScalarType error; // total error after refinement
-    TransformationEstimate T_base_to_pair_estimate;
+    TransformationEstimate T_pair_to_base_estimate;
     std::vector<Point3Estimate> point_estimates; // for inliers only
 
 protected:

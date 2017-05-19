@@ -36,11 +36,11 @@ ImagePair::ImagePair(const FrontEndTypes::FramePtr &base_frame_,
 
     match_inlier_count(0),
     match_inlier_ssd(-1), // delibrate overflow
-    T_base_to_pair(),
+    T_pair_to_base(),
     points(),
 
     error(infinity),
-    T_base_to_pair_estimate(),
+    T_pair_to_base_estimate(),
     point_estimates(),
 
     m_state(State::INIT),
@@ -137,7 +137,7 @@ ImagePair::reconstruct()
     valid = sfm_solve(base_points,
                       pair_points,
                       K,
-                      T_base_to_pair,
+                      T_pair_to_base,
                       points,
                       point_index_in_match);
     if (!valid)
@@ -157,8 +157,8 @@ ImagePair::reconstruct()
             match_inlier_ssd += sqr(m.distance);
         }
         logger.debug("reconstruct, inliers count = ", match_inlier_count,
-                     ", inlier ssd = ", match_inlier_ssd, ", T_base_to_pair =\n",
-                     T_base_to_pair);
+                     ", inlier ssd = ", match_inlier_ssd, ", T_pair_to_base =\n",
+                     T_pair_to_base);
         m_state = State::RECONSTRUCTED;
     }
     return valid;
@@ -194,9 +194,9 @@ ImagePair::refine()
     valid = sfm_refine(base_point_estimates,
                        pair_point_estimates,
                        K,
-                       T_base_to_pair,
+                       T_pair_to_base,
                        points,
-                       T_base_to_pair_estimate,
+                       T_pair_to_base_estimate,
                        point_estimates,
                        error);
     if (!valid)
@@ -205,8 +205,8 @@ ImagePair::refine()
     }
     else
     {
-        logger.debug("refine, error = ", error, ", T_base_to_pair_estimate.mean() =\n",
-                     T_base_to_pair_estimate.mean());
+        logger.debug("refine, error = ", error, ", T_pair_to_base_estimate.mean() =\n",
+                     T_pair_to_base_estimate.mean());
         m_state = State::REFINED;
     }
     return valid;

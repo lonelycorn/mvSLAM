@@ -9,6 +9,7 @@
 #include <iostream>
 #include <set>
 
+#define DEBUG_OUTPUT
 using namespace unit_test;
 
 UNIT_TEST(visual_odometer_initialization)
@@ -32,8 +33,7 @@ UNIT_TEST(visual_odometer_initialization)
         auto frame_id = mvSLAM::FrameManager::get_instance().add_frame(time, image);
         ASSERT_TRUE(frame_id != mvSLAM::Id::INVALID);
 
-        mvSLAM::Transformation T;
-        bool success = vo.add_frame_by_id(frame_id, T);
+        bool success = vo.add_frame_by_id(frame_id);
 
         ASSERT_TRUE(!success);
     }
@@ -49,8 +49,7 @@ UNIT_TEST(visual_odometer_initialization)
         auto frame_id = mvSLAM::FrameManager::get_instance().add_frame(time, image);
         ASSERT_TRUE(frame_id != mvSLAM::Id::INVALID);
 
-        mvSLAM::Transformation T;
-        bool success = vo.add_frame_by_id(frame_id, T);
+        bool success = vo.add_frame_by_id(frame_id);
 
         ASSERT_TRUE(success);
     }
@@ -68,7 +67,6 @@ UNIT_TEST(visual_odometer_tracking)
     mvSLAM::CameraManager::load_from_file("../data/tsukuba/camera.config");
 
     mvSLAM::VisualOdometer::Params vo_params = mvSLAM::VisualOdometer::get_default_params();
-    //vo_params.max_match_inlier_distance = 15;
     mvSLAM::VisualOdometer vo(vo_params);
 
     for (size_t i = 0; i < total_frame_count; ++i)
@@ -82,15 +80,14 @@ UNIT_TEST(visual_odometer_tracking)
         auto frame_id = mvSLAM::FrameManager::get_instance().add_frame(time, image);
         ASSERT_TRUE(frame_id != mvSLAM::Id::INVALID);
 
-        mvSLAM::Transformation pose;
-        bool result = vo.add_frame_by_id(frame_id, pose);
+        bool result = vo.add_frame_by_id(frame_id);
         if (i == 0)
         {
             ASSERT_TRUE(!result);
-            ASSERT_TRUE(check_similar_SE3(pose, mvSLAM::Transformation(), tolerance));
         }
         else
         {
+            auto pose = vo.get_body_pose();
 #ifdef DEBUG_OUTPUT
             std::cout<<"========== i = "<<i<<" ============"<<std::endl;
             std::cout<<"result = "<<result<<", pose = \n"<<pose<<std::endl;

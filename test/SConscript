@@ -118,6 +118,7 @@ test_image_pair = env.mvSLAM_UnitTest\
     'test-image-pair',
     [
         'test-image-pair.cpp',
+        env.Object('./unit-test-helper.cpp'),
         env.Object('../source/front-end/image-pair.cpp'),
         env.Object('../source/front-end/frame-manager.cpp'),
         env.Object('../source/front-end/camera-manager.cpp'),

@@ -9,7 +9,7 @@ namespace mvSLAM
 
 using PointIdToPoint2Estimate = std::unordered_map<Id::Type, Point2Estimate>;
 
-/** bundle adjustment on both frame poses and points.
+/** bundle adjustment on both frame poses and points, in world ref frame.
  * @param [in] ci   intrisics of the camera
  * @param [in] frame_id a set of unique identifier of all related frames.
  * @param [in] point_id a set of unique identifier of all related points.

@@ -1,4 +1,5 @@
 #include "unit-test.hpp"
+#include "unit-test-helper.hpp"
 #include <string>
 #include <front-end/frame-manager.hpp>
 #include <front-end/image-pair.hpp>
@@ -9,6 +10,7 @@ using namespace unit_test;
 
 UNIT_TEST(image_pair)
 {
+    const mvSLAM::ScalarType tolerance(1e-3);
     const std::string directory("../data/tsukuba/");
     const std::string extension(".jpg");
     const std::string pair_frame_filename(directory + std::to_string(2) + extension);
@@ -35,6 +37,13 @@ UNIT_TEST(image_pair)
     auto p = mvSLAM::ImagePair::get_default_params();
     p.refine_structure_in_constructor = true;
     mvSLAM::ImagePair ip(base_frame, pair_frame, p);
+
+    {
+        mvSLAM::SO3 R; // use Identity
+        mvSLAM::Vector3Type t{1, 0, 0}; // pure translation in X
+        mvSLAM::SE3 T_2_to_1(R, t);
+        ASSERT_TRUE(check_similar_SE3(T_2_to_1, ip.T_pair_to_base, tolerance));
+    }
 
     PASS();
 }

@@ -91,13 +91,12 @@ int main(int argc, char **argv)
         auto frame_id = mvSLAM::FrameManager::get_instance().add_frame(capture_time, image);
         logger.info("frame id = ", frame_id);
 
-        mvSLAM::Transformation T;
-        bool success = vo.add_frame_by_id(frame_id, T);
-        logger.info("transformation =\n", T);        
+        bool success = vo.add_frame_by_id(frame_id);
 
         ++stats.frame_total;
         if (success)
         {
+            logger.info("body pose =\n", vo.get_body_pose());
             ++stats.frame_tracked;
         }
 

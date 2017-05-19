@@ -65,13 +65,13 @@ VisualOdometer::get_default_params()
 }
 
 VisualOdometer::VisualOdometer(const Params &p):
+    m_params(p),
     m_mutex(),
     m_state(State::INITIALIZING),
-    m_params(p),
     m_frame_queue(),
     m_image_pair_queue(),
     m_last_frame(nullptr),
-    m_transformation(), // defaults to Identity
+    T_init_frame_to_last_frame(), // defaults to Identity
     m_point_id_to_point3(),
     m_point_id_to_last_frame_vf_idx(),
     m_last_frame_vf_idx_to_point_id()
@@ -89,8 +89,7 @@ VisualOdometer::~VisualOdometer()
 }
 
 bool
-VisualOdometer::add_frame(const FrontEndTypes::FramePtr &new_frame,
-                          Transformation &T_new_frame_to_init)
+VisualOdometer::add_frame(const FrontEndTypes::FramePtr &new_frame)
 {
     assert(new_frame && (new_frame->id != Id::INVALID));
 
@@ -123,27 +122,14 @@ VisualOdometer::add_frame(const FrontEndTypes::FramePtr &new_frame,
         assert(false); // unknown state
     }
 
-    if (found_transform)
-    {
-        T_new_frame_to_init = m_transformation;
-    }
     return found_transform;
 }
 
 bool
-VisualOdometer::add_frame_by_id(FrontEndTypes::FrameId new_frame_id,
-                                Transformation &T_new_frame_to_init)
+VisualOdometer::add_frame_by_id(FrontEndTypes::FrameId new_frame_id)
 {
     auto new_frame = FrameManager::get_instance().get_frame(new_frame_id);
-    return add_frame(new_frame, T_new_frame_to_init);
-}
-
-Transformation
-VisualOdometer::get_transformation() const
-{
-    Lock lock(m_mutex);
-    assert(initialized());
-    return m_transformation;
+    return add_frame(new_frame);
 }
 
 void
@@ -154,7 +140,7 @@ VisualOdometer::reset()
     m_frame_queue.clear();
     m_image_pair_queue.clear();
     m_last_frame.reset();
-    m_transformation = Transformation();
+    T_init_frame_to_last_frame = Transformation();
     m_point_id_to_point3.clear();
     m_point_id_to_last_frame_vf_idx.clear();
     m_last_frame_vf_idx_to_point_id.clear();
@@ -164,6 +150,51 @@ bool
 VisualOdometer::initialized() const
 {
     return (State::TRACKING == m_state);
+}
+
+Transformation
+VisualOdometer::get_body_pose() const
+{
+    Lock lock(m_mutex);
+    assert(initialized());
+    // T_B2_to_W = T_B1_to_W * T_B2_to_B1
+    // T_C2_to_W = T_C1_to_W * T_C2_to_C1
+    // T_C1_to_W = T_B1_to_W * T_C_to_B
+    // T_C2_to_W = T_C2_to_W * T_C_to_B
+    //
+    // let B1, C1 be the corresponding ref frames of last initialization,
+    // and B2, C2 the corresponding ref frames of latest frame, we have
+    // T_B2_to_W = T_B1_to_W * T_C_to_B * T_C2_to_C1 * T_B_to_C
+    //           = T_B_to_C.inverse() * T_C1_to_C2.inverse() * T_B_to_C
+    const auto &P = CameraManager::get_camera().get_extrinsics();
+    const auto &P_inv = CameraManager::get_camera().get_extrinsics_inverse();
+    return P_inv * T_init_frame_to_last_frame.inverse() * P;
+}
+
+Transformation
+VisualOdometer::get_camera_pose() const
+{
+    Lock lock(m_mutex);
+    assert(initialized());
+    const auto &P_inv = CameraManager::get_camera().get_extrinsics_inverse();
+    return P_inv * T_init_frame_to_last_frame.inverse();
+}
+
+std::vector<Point3>
+VisualOdometer::get_tracked_points() const
+{
+    Lock lcok(m_mutex);
+    assert(initialized());
+
+    const auto &P_inv = CameraManager::get_camera().get_extrinsics_inverse();
+    std::vector<Point3> result;
+    result.reserve(m_point_id_to_point3.size());
+    for (const auto &p : m_point_id_to_point3)
+    {
+        result.emplace_back(P_inv * p.second);
+    }
+
+    return result;
 }
 
 bool
@@ -228,7 +259,7 @@ VisualOdometer::initialize(const FrontEndTypes::FramePtr &new_frame)
         // now we have found a good image pair. initialize data structures for tracking
         m_last_frame = ip.pair_frame;
         assert(m_last_frame->id == new_frame->id);
-        m_transformation = ip.T_base_to_pair_estimate.mean(); // from initialization to last frame
+        T_init_frame_to_last_frame = ip.T_pair_to_base_estimate.mean().inverse(); // from prev frame to this frame
         // add all triangulated points
         size_t point_count = ip.point_estimates.size();
         for (size_t i = 0; i < point_count; ++i)
@@ -285,13 +316,13 @@ VisualOdometer::check_image_pair(const ImagePair &ip) const
         logger.debug("\tlarge refinement error: ", ip.error, " > ", m_params.max_error);
         return false;
     }
-    Vector3Type so3 = ip.T_base_to_pair_estimate.mean().rotation().ln();
+    Vector3Type so3 = ip.T_pair_to_base_estimate.mean().rotation().ln();
     if (so3.squaredNorm() > sqr(m_params.max_rotation_magnitude))
     {
         logger.debug("\tlarge rotation magnitude: ", so3.norm(), " > ", m_params.max_rotation_magnitude);
         return false;
     }
-    Vector3Type t = ip.T_base_to_pair_estimate.mean().translation();
+    Vector3Type t = ip.T_pair_to_base_estimate.mean().translation();
     if (std::abs(t[2]) > m_params.max_translation_z)
     {
         logger.debug("\tlarge z-translation: ", std::abs(t[2]), " > ", m_params.max_translation_z);
@@ -337,7 +368,7 @@ VisualOdometer::track(const FrontEndTypes::FramePtr &new_frame)
     }
 
     // PnP to find new frame pose
-    Transformation new_frame_transformation; // T from new ref frame to init ref frame
+    Transformation T_new_frame_to_init_frame; // T from new ref frame to init ref frame
     std::unordered_set<PointId> outlier_point_id;
     {
         // ID of all tracked points
@@ -368,13 +399,13 @@ VisualOdometer::track(const FrontEndTypes::FramePtr &new_frame)
         if (!pnp_solve(matched_world_points,
                        matched_image_points,
                        CameraManager::get_camera().get_intrinsics(),
-                       new_frame_transformation,
+                       T_new_frame_to_init_frame, // camera to world
                        inlier_point_indexes))
         {
             logger.info("cannot track new frame pose.");
             return false;
         }
-        logger.debug("PnP found ", inlier_point_indexes.size(), " inliers; new frame transformation:\n", new_frame_transformation);
+        logger.debug("PnP found ", inlier_point_indexes.size(), " inliers; new frame transformation:\n", T_new_frame_to_init_frame);
 
         // remove inliers from outlier_point_id
         for (auto idx : inlier_point_indexes)
@@ -388,7 +419,8 @@ VisualOdometer::track(const FrontEndTypes::FramePtr &new_frame)
     ScalarType scale(0.0);
     {
         // FIXME: we should also use the point location to calculate the scale, in a similar way to poin registration.
-        auto T_new_frame_to_last_frame = new_frame_transformation * m_transformation.inverse();
+        auto T_new_frame_to_last_frame = T_init_frame_to_last_frame * T_new_frame_to_init_frame;
+        // image_pair.T_pair_to_base.translation().norm() == 1
         scale = T_new_frame_to_last_frame.translation().norm();
         logger.debug("scale = ", scale);
     }
@@ -409,7 +441,7 @@ VisualOdometer::track(const FrontEndTypes::FramePtr &new_frame)
             if (m_last_frame_vf_idx_to_point_id.count(vf_idx_in_base) == 0) // this is a newly triangulated point
             {
                 pid = generate_point_id();
-                new_point_id_to_point3[pid] = m_transformation * (point_in_base_ref_frame * scale);
+                new_point_id_to_point3[pid] = T_init_frame_to_last_frame * (point_in_base_ref_frame * scale);
             }
             else
             {
@@ -474,8 +506,8 @@ VisualOdometer::track(const FrontEndTypes::FramePtr &new_frame)
     }
 
     // frame pose guess
-    frame_pose_guess[m_last_frame->id] = m_transformation;
-    frame_pose_guess[new_frame->id] = new_frame_transformation;
+    frame_pose_guess[m_last_frame->id] = T_init_frame_to_last_frame.inverse();
+    frame_pose_guess[new_frame->id] = T_new_frame_to_init_frame;
 
     // frame pose prior
     {
@@ -554,11 +586,11 @@ VisualOdometer::track(const FrontEndTypes::FramePtr &new_frame)
         p.second = point_estimate[pid].mean();
     }
     // NOTE: throwing away the covar
-    new_frame_transformation = frame_pose_estimate[new_frame->id].mean();
+    T_new_frame_to_init_frame = frame_pose_estimate[new_frame->id].mean();
 
     // update internal states
     m_last_frame = new_frame;
-    std::swap(m_transformation, new_frame_transformation);
+    T_init_frame_to_last_frame = T_new_frame_to_init_frame.inverse();
     std::swap(m_point_id_to_point3, new_point_id_to_point3);
     std::swap(m_point_id_to_last_frame_vf_idx, new_point_id_to_new_frame_vf_idx);
     m_last_frame_vf_idx_to_point_id.swap(new_frame_vf_idx_to_new_point_id);

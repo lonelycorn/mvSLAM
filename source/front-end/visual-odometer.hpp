@@ -51,26 +51,36 @@ public:
 
     /** Update visual odometer with a new frame.
      * @param [in] new_frame
-     * @param [out] T_new_frame_to_init pose of the new frame expressed
-     *      in the initialization reference frame.
      * @return true if the pose of the frame could be found
      */
-    bool add_frame(const FrontEndTypes::FramePtr &new_frame,
-                   Transformation &T_new_frame_to_init);
-    /// similar to @ref add_frame. provided for convenience
-    bool add_frame_by_id(FrontEndTypes::FrameId new_frame_id,
-                         Transformation & T_new_frame_to_init);
+    bool add_frame(const FrontEndTypes::FramePtr &new_frame);
 
-    /** Get latest transformation since last initialization
-     * NOTE: only call after initialized
-     */
-    Transformation get_transformation() const;
+    /// similar to @ref add_frame. provided for convenience
+    bool add_frame_by_id(FrontEndTypes::FrameId new_frame_id);
+
 
     /// reset to initial state. keep the same params.
     void reset();
 
     /// return true if initialized.
     bool initialized() const;
+
+    /** transformation from the BODY ref frame of latest frame to the BODY
+     * ref frame of last initialization, i.e. T_body_to_world
+     * NOTE: only call after initialized.
+     */
+    Transformation get_body_pose() const;
+
+    /** transformation from the CAMERA ref frame of latest frame to the BODY
+     * ref frame of last initialization, i.e. T_camera_to_world
+     * NOTE: only call after initialized.
+     */
+    Transformation get_camera_pose() const;
+
+    /** point positions expressed in the BODY ref frame of last initialization.
+     * NOTE: only call after initialized.
+     */
+    std::vector<Point3> get_tracked_points() const;
 
 private:
 
@@ -85,6 +95,8 @@ private:
      */
     bool track(const FrontEndTypes::FramePtr &new_frame);
 
+    const Params m_params;
+
     mutable Mutex m_mutex;
 
     enum class State
@@ -93,9 +105,6 @@ private:
         TRACKING, ///< normal operation
     };
     State m_state;
-
-    // TODO: declare as const
-    Params m_params;
 
     // Truely, we should use the descriptor as the key to index everything.
     // however, that requires a good hash function for 256-bit integer,
@@ -111,8 +120,11 @@ private:
 
     // use when TRACKING
     FrontEndTypes::FramePtr m_last_frame;
-    /// motion from last initialization to latest frame. i.e. T_last_frame_to_init_frame
-    Transformation m_transformation;
+    /** Transformation from the camera ref frame of last initialization to
+     * the camera ref frame of the latest frame. i.e. T_C0_to_Cn
+     * Saving this instead of its inverse to save time converting points.
+     */
+    Transformation T_init_frame_to_last_frame;
     /// coordinates of tracked points in init ref frame.
     std::unordered_map<PointId, Point3> m_point_id_to_point3;
     /// indexes of the reconstructed points in latest frame's VisualFeature
