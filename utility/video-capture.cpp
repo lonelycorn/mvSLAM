@@ -1,6 +1,5 @@
 #include <base/error.hpp>
 #include <base/opencv.hpp>
-//#include <base/image.hpp>
 #include <os/time.hpp>
 #include <opencv2/highgui.hpp>
 
@@ -9,6 +8,7 @@
 
 #include <cstdio>
 #include <string>
+#include <fstream>
 
 void print_help(const char *cmdline)
 {
@@ -42,7 +42,6 @@ int main(int argc, char **argv)
                 << "'" << std::endl;
     }
 
-
     const uint32_t interval_ms = std::stod(argv[2]) * 1000;
     if (interval_ms <= 0)
     {
@@ -70,6 +69,10 @@ int main(int argc, char **argv)
         std::cerr << "Cannot open camera device." << std::endl;
         return static_cast<int>(mvSLAM::ApplicationErrorCode::HARDWARE_ERROR);
     }
+
+    // open file to dump all image filenames
+    std::ofstream image_filenames(output_directory + "image.txt");
+
     int image_index = 0;
     uint32_t last_capture_time_ms = mvSLAM::get_time_ms();
     while (image_index < image_count)
@@ -90,9 +93,10 @@ int main(int argc, char **argv)
         auto now_ms = mvSLAM::get_time_ms();
         if (now_ms - last_capture_time_ms >= interval_ms)
         {
-            const std::string image_fn = output_directory + std::to_string(image_index) + image_fn_extension;
+            const std::string image_fn = std::to_string(image_index) + image_fn_extension;
             ++image_index;
-            cv::imwrite(image_fn, image);
+            cv::imwrite(output_directory + image_fn, image);
+            image_filenames << image_fn << std::endl;
             last_capture_time_ms = now_ms;
         }
 
