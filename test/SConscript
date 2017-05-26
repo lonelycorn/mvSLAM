@@ -10,6 +10,17 @@ targets = []
 #targets += run_test_unit_test
 #Alias('test_unit_test', run_test_unit_test)
 
+test_kalman_filter = env.mvSLAM_UnitTest\
+(
+    'test-kalman-filter',
+    [
+        'test-kalman-filter.cpp',
+        env.Object('./unit-test-helper.cpp'),
+        env.Object('../source/base/math.cpp'),
+    ]
+)
+targets += test_kalman_filter
+
 test_string_manipulation = env.mvSLAM_UnitTest\
 (
     'test-string-manipulation',
