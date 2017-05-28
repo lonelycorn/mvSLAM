@@ -89,7 +89,7 @@ int main(int argc, char **argv)
         filename = directory + "/" + filename;
         logger.info("read image file :'", filename, "'");
         auto image = mvSLAM::load_image_grayscale(filename);
-        auto frame_id = mvSLAM::FrameManager::get_instance().add_frame(capture_time, image);
+        auto frame_id = mvSLAM::FrameManager::add_frame(capture_time, image);
         logger.info("frame id = ", frame_id);
 
         bool success = vo.add_frame_by_id(frame_id);

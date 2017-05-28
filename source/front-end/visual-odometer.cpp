@@ -128,7 +128,7 @@ VisualOdometer::add_frame(const FrontEndTypes::FramePtr &new_frame)
 bool
 VisualOdometer::add_frame_by_id(FrontEndTypes::FrameId new_frame_id)
 {
-    auto new_frame = FrameManager::get_instance().get_frame(new_frame_id);
+    auto new_frame = FrameManager::get_frame(new_frame_id);
     return add_frame(new_frame);
 }
 

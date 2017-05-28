@@ -22,28 +22,28 @@ UNIT_TEST(frame_manager)
         // check if successfully read the image
         ASSERT_TRUE((image.rows > 0) && (image.cols > 0));
 
-        auto frame_id = mvSLAM::FrameManager::get_instance().add_frame(time, image);
+        auto frame_id = mvSLAM::FrameManager::add_frame(time, image);
         ASSERT_TRUE(frame_id != mvSLAM::Id::INVALID);
         ASSERT_TRUE(allocated_frame_id.count(frame_id) == 0);
         allocated_frame_id.insert(frame_id);
 
-        auto frame_ptr = mvSLAM::FrameManager::get_instance().get_frame(frame_id);
+        auto frame_ptr = mvSLAM::FrameManager::get_frame(frame_id);
         ASSERT_TRUE(frame_ptr->id == frame_id);
         ASSERT_TRUE(frame_ptr->capture_time == time);
         ASSERT_TRUE(frame_ptr->visual_feature.size() > 0);
 
 
-        ASSERT_TRUE(mvSLAM::FrameManager::get_instance().size() == static_cast<size_t>(i));
+        ASSERT_TRUE(mvSLAM::FrameManager::size() == static_cast<size_t>(i));
     }
 
     // erase frames
-    size_t count = mvSLAM::FrameManager::get_instance().size();
+    size_t count = mvSLAM::FrameManager::size();
     for (auto it = allocated_frame_id.begin(); it != allocated_frame_id.end(); ++it)
     {
-        bool success = mvSLAM::FrameManager::get_instance().erase_frame(*it);
+        bool success = mvSLAM::FrameManager::erase_frame(*it);
         ASSERT_TRUE(success);
         --count;
-        ASSERT_TRUE(count == mvSLAM::FrameManager::get_instance().size());
+        ASSERT_TRUE(count == mvSLAM::FrameManager::size());
     }
     PASS();
 }

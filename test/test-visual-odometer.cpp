@@ -30,7 +30,7 @@ UNIT_TEST(visual_odometer_initialization)
         auto image = mvSLAM::load_image_grayscale(filename);
         ASSERT_TRUE((image.rows > 0) && (image.cols > 0)); // check if successfully read the image
 
-        auto frame_id = mvSLAM::FrameManager::get_instance().add_frame(time, image);
+        auto frame_id = mvSLAM::FrameManager::add_frame(time, image);
         ASSERT_TRUE(frame_id != mvSLAM::Id::INVALID);
 
         bool success = vo.add_frame_by_id(frame_id);
@@ -46,7 +46,7 @@ UNIT_TEST(visual_odometer_initialization)
         auto image = mvSLAM::load_image_grayscale(filename);
         ASSERT_TRUE((image.rows > 0) && (image.cols > 0)); // check if successfully read the image
 
-        auto frame_id = mvSLAM::FrameManager::get_instance().add_frame(time, image);
+        auto frame_id = mvSLAM::FrameManager::add_frame(time, image);
         ASSERT_TRUE(frame_id != mvSLAM::Id::INVALID);
 
         bool success = vo.add_frame_by_id(frame_id);
@@ -77,7 +77,7 @@ UNIT_TEST(visual_odometer_tracking)
         auto image = mvSLAM::load_image_grayscale(filename);
         ASSERT_TRUE((image.rows > 0) && (image.cols > 0)); // check if successfully read the image
 
-        auto frame_id = mvSLAM::FrameManager::get_instance().add_frame(time, image);
+        auto frame_id = mvSLAM::FrameManager::add_frame(time, image);
         ASSERT_TRUE(frame_id != mvSLAM::Id::INVALID);
 
         bool result = vo.add_frame_by_id(frame_id);

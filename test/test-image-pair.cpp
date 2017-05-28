@@ -21,8 +21,8 @@ UNIT_TEST(image_pair)
         const std::string filename(directory + std::to_string(index) + extension);
         mvSLAM::timestamp_us_t time(index);
         auto image = mvSLAM::load_image_grayscale(filename);
-        auto frame_id = mvSLAM::FrameManager::get_instance().add_frame(time, image);
-        base_frame = mvSLAM::FrameManager::get_instance().get_frame(frame_id);
+        auto frame_id = mvSLAM::FrameManager::add_frame(time, image);
+        base_frame = mvSLAM::FrameManager::get_frame(frame_id);
     }
 
     {
@@ -30,8 +30,8 @@ UNIT_TEST(image_pair)
         const std::string filename(directory + std::to_string(index) + extension);
         mvSLAM::timestamp_us_t time(index);
         auto image = mvSLAM::load_image_grayscale(filename);
-        auto frame_id = mvSLAM::FrameManager::get_instance().add_frame(time, image);
-        pair_frame = mvSLAM::FrameManager::get_instance().get_frame(frame_id);
+        auto frame_id = mvSLAM::FrameManager::add_frame(time, image);
+        pair_frame = mvSLAM::FrameManager::get_frame(frame_id);
     }
 
     auto p = mvSLAM::ImagePair::get_default_params();
