@@ -1,5 +1,6 @@
 #include "unit-test.hpp"
 #include <string>
+#include <os/time.hpp>
 #include <front-end/frame-manager.hpp>
 #include <iostream>
 #include <set>
@@ -8,6 +9,8 @@ using namespace unit_test;
 
 UNIT_TEST(frame_manager)
 {
+    const mvSLAM::ScalarType tolerance = 1e-1;
+    const mvSLAM::ScalarType fps = 10;
     const std::string directory("../data/tsukuba/");
     const std::string extension("jpg");
     std::set<mvSLAM::FrontEndTypes::FrameId> allocated_frame_id;
@@ -16,7 +19,7 @@ UNIT_TEST(frame_manager)
     for (int i = 1; i <= 5; ++i)
     {
         std::string filename = directory + std::to_string(i) + "." + extension;
-        mvSLAM::timestamp_us_t time = i;
+        mvSLAM::timestamp_us_t time = i * MS_PER_S / fps;
 
         auto image = mvSLAM::load_image_grayscale(filename);
         // check if successfully read the image
@@ -34,7 +37,10 @@ UNIT_TEST(frame_manager)
 
 
         ASSERT_TRUE(mvSLAM::FrameManager::size() == static_cast<size_t>(i));
+        std::cout<<"capture time: " << time <<", current fps: " << mvSLAM::FrameManager::get_fps()<<std::endl;
     }
+
+    ASSERT_EQUAL(mvSLAM::FrameManager::get_fps(), fps, tolerance);
 
     // erase frames
     size_t count = mvSLAM::FrameManager::size();

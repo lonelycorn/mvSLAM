@@ -32,6 +32,9 @@ public:
     /// Get the number of frames on record.
     static size_t size();
 
+    /// Get frame rate estimate.
+    static ScalarType get_fps();
+
 };
 
 }
