@@ -1,4 +1,4 @@
-#include <base/math.hpp>
+#include <math/lie-group.hpp>
 
 namespace mvSLAM
 {

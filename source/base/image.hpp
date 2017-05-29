@@ -1,6 +1,5 @@
 #pragma once
 #include <base/opencv.hpp>
-#include <base/math.hpp>
 #include <vector>
 
 namespace mvSLAM

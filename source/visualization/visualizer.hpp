@@ -1,5 +1,4 @@
 #pragma once
-#include <base/space.hpp>
 #include <os/time.hpp>
 #include <visualization/data-types.hpp>
 

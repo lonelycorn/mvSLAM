@@ -1,6 +1,6 @@
 #pragma once
 #include <system-config.hpp>
-#include <base/math.hpp>
+#include <math/lie-group.hpp>
 #include <vector>
 
 namespace unit_test

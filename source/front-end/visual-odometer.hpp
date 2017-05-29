@@ -1,6 +1,5 @@
 #pragma once
 #include <os/mutex.hpp>
-#include <base/space.hpp>
 #include <front-end/data-type.hpp>
 #include <front-end/image-pair.hpp>
 #include <unordered_map>

@@ -1,5 +1,4 @@
 #pragma once
-#include <base/space.hpp>
 #include <front-end/data-type.hpp>
 
 namespace mvSLAM

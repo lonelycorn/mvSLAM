@@ -1,10 +1,9 @@
 #pragma once
 
-#include <cstdint>
 #include <unordered_map>
 
-#include <base/math.hpp>
-#include <base/space.hpp>
+#include <math/matrix.hpp>
+#include <math/space.hpp>
 
 namespace mvSLAM
 {

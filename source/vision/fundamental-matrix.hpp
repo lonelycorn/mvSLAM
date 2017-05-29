@@ -1,6 +1,7 @@
 #pragma once
-#include <base/math.hpp>
+#include <math/matrix.hpp>
 #include <vector>
+
 namespace mvSLAM
 {
 /** Compute fundamental matrix from the give point pairs.

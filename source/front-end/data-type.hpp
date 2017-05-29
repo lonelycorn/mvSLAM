@@ -1,6 +1,6 @@
 #pragma once
 #include <system-config.hpp>
-#include <base/space.hpp>
+#include <math/space.hpp>
 #include <vision/visual-feature.hpp>
 #include <os/time.hpp>
 

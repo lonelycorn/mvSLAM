@@ -4,7 +4,7 @@
 
 #include <system-config.hpp>
 #include <base/error.hpp>
-#include <base/space.hpp>
+#include <math/space.hpp>
 #include <visualization/data-types.hpp>
 #include <visualization/visualizer.hpp>
 

@@ -1,8 +1,8 @@
 #pragma once
 #include <system-config.hpp>
-#include <Eigen/Core>
+#include <math/matrix.hpp>
+#include <math/utility.hpp>
 #include <base/opencv.hpp>
-#include <base/debug.hpp>
 
 namespace mvSLAM
 {

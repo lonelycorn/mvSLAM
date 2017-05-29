@@ -25,7 +25,7 @@ test_kalman_filter = env.mvSLAM_UnitTest\
     [
         'test-kalman-filter.cpp',
         env.Object('./unit-test-helper.cpp'),
-        env.Object('../source/base/math.cpp'),
+        env.Object('../source/math/lie-group.cpp'),
     ]
 )
 targets += test_kalman_filter
@@ -40,15 +40,15 @@ test_string_manipulation = env.mvSLAM_UnitTest\
 )
 targets += test_string_manipulation
 
-test_math = env.mvSLAM_UnitTest\
+test_lie_group = env.mvSLAM_UnitTest\
 (
-    'test-math',
+    'test-lie-group',
     [
-        'test-math.cpp',
-        env.Object('../source/base/math.cpp'),
+        'test-lie-group.cpp',
+        env.Object('../source/math/lie-group.cpp'),
     ]
 )
-targets += test_math
+targets += test_lie_group 
 
 test_svd = env.mvSLAM_UnitTest\
 (
@@ -65,7 +65,7 @@ test_camera = env.mvSLAM_UnitTest\
     [
         'test-camera.cpp',
         env.Object('../source/vision/camera.cpp'), # depends on the object file, so that it is only compiled once
-        env.Object('../source/base/math.cpp'),
+        env.Object('../source/math/lie-group.cpp'),
     ]
 )
 targets += test_camera
@@ -82,7 +82,7 @@ test_sfm = env.mvSLAM_UnitTest\
         env.Object('../source/vision/camera.cpp'),
         env.Object('../source/vision/fundamental-matrix.cpp'),
         env.Object('../source/vision/estimator-RANSAC.cpp'),
-        env.Object('../source/base/math.cpp'),
+        env.Object('../source/math/lie-group.cpp'),
         env.Object('../source/base/debug.cpp'),
         env.Object('../source/base/gtsam.cpp'),
     ]
@@ -99,7 +99,7 @@ test_pnp = env.mvSLAM_UnitTest\
         env.Object('../source/vision/pnp-refine.cpp'),
         env.Object('../source/vision/ba.cpp'),
         env.Object('../source/vision/camera.cpp'),
-        env.Object('../source/base/math.cpp'),
+        env.Object('../source/math/lie-group.cpp'),
         env.Object('../source/base/debug.cpp'),
         env.Object('../source/base/gtsam.cpp'),
     ]
@@ -151,7 +151,7 @@ test_image_pair = env.mvSLAM_UnitTest\
         env.Object('../source/base/gtsam.cpp'),
         env.Object('../source/base/string-manipulation.cpp'),
         env.Object('../source/base/parameter-manager.cpp'),
-        env.Object('../source/base/math.cpp'),
+        env.Object('../source/math/lie-group.cpp'),
         env.Object('../source/base/image.cpp'),
         env.Object('../source/base/debug.cpp'),
         env.Object('../source/os/mutex.cpp'),
@@ -181,7 +181,7 @@ test_visual_odometer = env.mvSLAM_UnitTest\
         env.Object('../source/base/parameter-manager.cpp'),
         env.Object('../source/base/string-manipulation.cpp'),
         env.Object('../source/base/gtsam.cpp'),
-        env.Object('../source/base/math.cpp'),
+        env.Object('../source/math/lie-group.cpp'),
         env.Object('../source/base/image.cpp'),
         env.Object('../source/base/debug.cpp'),
         env.Object('../source/os/mutex.cpp'),
@@ -198,7 +198,7 @@ test_camera_manager = env.mvSLAM_UnitTest\
         env.Object('unit-test-helper.cpp'),
         env.Object('../source/front-end/camera-manager.cpp'),
         env.Object('../source/vision/camera.cpp'),
-        env.Object('../source/base/math.cpp'),
+        env.Object('../source/math/lie-group.cpp'),
         env.Object('../source/base/debug.cpp'),
         env.Object('../source/os/mutex.cpp'),
     ]
@@ -215,7 +215,7 @@ test_graph = env.mvSLAM_UnitTest\
         env.Object('../source/back-end/graph.cpp'),
         env.Object('../source/back-end/data-type.cpp'),
         env.Object('../source/base/gtsam.cpp'),
-        env.Object('../source/base/math.cpp'),
+        env.Object('../source/math/lie-group.cpp'),
     ]
 )
 targets += test_graph

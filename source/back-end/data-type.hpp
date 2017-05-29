@@ -1,7 +1,7 @@
 #pragma once
 
 #include <system-config.hpp>
-#include <base/space.hpp>
+#include <math/space.hpp>
 
 namespace mvSLAM
 {

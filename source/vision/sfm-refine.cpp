@@ -1,7 +1,6 @@
 #include <cassert>
 
 #include <base/debug.hpp>
-#include <base/space.hpp>
 #include <vision/ba.hpp>
 #include <vision/sfm.hpp>
 

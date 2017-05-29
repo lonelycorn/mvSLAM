@@ -1,13 +1,18 @@
 Import("env")
 
 mvSLAM_base_files = [
-    './base/math.cpp',
     './base/debug.cpp',
     './base/image.cpp',
     './base/gtsam.cpp',
     './base/string-manipulation.cpp',
     './base/parameter-manager.cpp',
 ]
+
+mvSLAM_math_files = [
+    './math/lie-group.cpp',
+    './math/space.cpp',
+]
+
 
 mvSLAM_visualization_files = [
     './visualization/visualizer.cpp',
@@ -47,6 +52,7 @@ mvSLAM_front_end_files = [
 
 source_files = \
     mvSLAM_base_files + \
+    mvSLAM_math_files + \
     mvSLAM_visualization_files + \
     mvSLAM_os_files + \
     mvSLAM_vision_files + \

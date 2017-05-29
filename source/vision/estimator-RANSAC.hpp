@@ -1,6 +1,6 @@
 #pragma once
 #include <system-config.hpp>
-#include <base/math.hpp>
+#include <math/matrix.hpp>
 #include <cstdint>
 #include <vector>
 

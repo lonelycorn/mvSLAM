@@ -3,9 +3,8 @@
 #include <vector>
 #include <iostream>
 
-#include <base/space.hpp>
 #include <base/debug.hpp>
-#include <base/svd.hpp>
+#include <math/svd.hpp>
 #include <vision/camera.hpp>
 #include <vision/estimator-RANSAC.hpp>
 #include <vision/sfm.hpp>

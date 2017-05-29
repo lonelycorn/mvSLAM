@@ -1,49 +1,10 @@
 #pragma once
-#include <system-config.hpp>
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-#include <cmath>
+#include <math/matrix.hpp>
+#include <math/utility.hpp>
 #include <iostream>
 
 namespace mvSLAM
 {
-
-using Matrix2Type = Eigen::Matrix<ScalarType, 2, 2>;
-using Vector2Type = Eigen::Matrix<ScalarType, 2, 1>;
-
-using Matrix3Type = Eigen::Matrix<ScalarType, 3, 3>;
-using Vector3Type = Eigen::Matrix<ScalarType, 3, 1>;
-
-using Matrix6Type = Eigen::Matrix<ScalarType, 6, 6>;
-using Vector6Type = Eigen::Matrix<ScalarType, 6, 1>;
-
-using Matrix4Type = Eigen::Matrix<ScalarType, 4, 4>;
-using Matrix3x4Type = Eigen::Matrix<ScalarType, 3, 4>;
-using Vector4Type = Eigen::Matrix<ScalarType, 4, 1>;
-
-/** square of the give value
- */
-template <class T>
-T sqr(const T &v)
-{
-    return v * v;
-}
-
-/** constrain the value with specified lower and upper bounds.
- */
-template <class T>
-T constrain(const T &v, const T &&lower, const T &&upper)
-{
-    return ((v < lower) ? lower : ((v > upper) ? upper : v));
-}
-
-/** before C++14, std::min is not constexpr
- */
-template <class T>
-constexpr const T &constexpr_min(const T &a, const T &b)
-{
-    return (a < b) ? a : b;
-}
 
 /** get the skew symmetric matrix for the given vector.
  *  Example:
@@ -91,13 +52,14 @@ public:
         Rz << std::cos(yaw), -std::sin(yaw), 0.0,
               std::sin(yaw),  std::cos(yaw), 0.0,
               0.0, 0.0, 1.0;
-        _R = Rz * Ry * Rx;
+        _R = Rz * Ry * Rx; // FIXME: using RIGHT-multiply here to be consistent with get_{roll, pitch, yaw}
     }
 
     /** Construct using so3.
      */
     SO3(const Vector3Type &so3): _R(rodrigues(so3)) {}
 
+    /// Dtor
     ~SO3() {}
 
     SO3(const SO3 &) = default;
@@ -214,7 +176,6 @@ private:
     Matrix3Type _R;
 };
 
-
 class SE3
 {
 public:
@@ -250,7 +211,8 @@ public:
 
     SE3 inverse() const
     {
-        return SE3(_R.inverse(), -(_R.get_matrix().transpose() * _t));
+        const auto RT = _R.inverse();
+        return SE3(RT, -(RT * _t));
     }
 
     void reset()
@@ -277,7 +239,7 @@ public:
      */
     Matrix6Type adjoint() const
     {
-        assert(false);
+        assert(false); // FIXME: not implemented yet
     }
 
     Vector6Type ln() const

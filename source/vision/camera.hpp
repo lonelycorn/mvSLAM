@@ -1,8 +1,10 @@
 #pragma once
-#include <base/math.hpp>
 #include <base/image.hpp>
-#include <base/space.hpp>
+#include <math/matrix.hpp>
+#include <math/space.hpp>
+#include <string>
 #include <vector>
+
 namespace mvSLAM
 {
 using CameraExtrinsics = SE3;

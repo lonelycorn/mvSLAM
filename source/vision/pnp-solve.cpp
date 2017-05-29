@@ -1,5 +1,4 @@
 #include <base/debug.hpp>
-#include <base/math.hpp>
 #include <base/opencv.hpp>
 #include <vision/pnp.hpp>
 

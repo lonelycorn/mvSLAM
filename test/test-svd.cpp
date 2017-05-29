@@ -1,6 +1,6 @@
 #include <Eigen/Core>
-#include <base/math.hpp>
-#include <base/svd.hpp>
+#include <math/matrix.hpp>
+#include <math/svd.hpp>
 #include "unit-test.hpp"
 
 using namespace unit_test;
