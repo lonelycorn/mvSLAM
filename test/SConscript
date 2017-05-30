@@ -10,227 +10,253 @@ targets = []
 #targets += run_test_unit_test
 #Alias('test_unit_test', run_test_unit_test)
 
-test_signal_processing = env.mvSLAM_UnitTest\
-(
-    'test-signal-processing',
-    [
+#==============#
+#     MATH     #
+#==============#
+targets += env.mvSLAM_UnitTest(
+    target='test-signal-processing',
+    source=[
         'test-signal-processing.cpp',
     ]
 )
-targets += test_signal_processing
 
-test_kalman_filter = env.mvSLAM_UnitTest\
-(
-    'test-kalman-filter',
-    [
+targets += env.mvSLAM_UnitTest(
+    target='test-kalman-filter',
+    source=[
         'test-kalman-filter.cpp',
-        env.Object('./unit-test-helper.cpp'),
-        env.Object('../source/math/lie-group.cpp'),
+        './unit-test-helper.cpp',
+        '../source/math/lie-group.cpp',
     ]
 )
-targets += test_kalman_filter
 
-test_string_manipulation = env.mvSLAM_UnitTest\
-(
-    'test-string-manipulation',
-    [
-        'test-string-manipulation.cpp',
-        env.Object('../source/base/string-manipulation.cpp'),
-    ]
-)
-targets += test_string_manipulation
-
-test_lie_group = env.mvSLAM_UnitTest\
-(
-    'test-lie-group',
-    [
+targets += env.mvSLAM_UnitTest(
+    target='test-lie-group',
+    source=[
         'test-lie-group.cpp',
-        env.Object('../source/math/lie-group.cpp'),
+        '../source/math/lie-group.cpp',
     ]
 )
-targets += test_lie_group 
 
-test_svd = env.mvSLAM_UnitTest\
-(
-    'test-svd',
-    [
+targets += env.mvSLAM_UnitTest(
+    target='test-svd',
+    source=[
         'test-svd.cpp',
+    ],
+    external_libs=[
+        'mvSLAM_external_opencv',
     ]
 )
-targets += test_svd
 
-test_camera = env.mvSLAM_UnitTest\
-(
-    'test-camera',
-    [
-        'test-camera.cpp',
-        env.Object('../source/vision/camera.cpp'), # depends on the object file, so that it is only compiled once
-        env.Object('../source/math/lie-group.cpp'),
+#==============#
+#     BASE     #
+#==============#
+
+targets += env.mvSLAM_UnitTest(
+    target='test-string-manipulation',
+    source=[
+        'test-string-manipulation.cpp',
+        '../source/base/string-manipulation.cpp',
     ]
 )
-targets += test_camera
 
-test_sfm = env.mvSLAM_UnitTest\
-(
-    'test-sfm',
-    [
-        'test-sfm.cpp',
-        env.Object('unit-test-helper.cpp'),
-        env.Object('../source/vision/sfm-solve.cpp'),
-        env.Object('../source/vision/sfm-refine.cpp'),
-        env.Object('../source/vision/ba.cpp'),
-        env.Object('../source/vision/camera.cpp'),
-        env.Object('../source/vision/fundamental-matrix.cpp'),
-        env.Object('../source/vision/estimator-RANSAC.cpp'),
-        env.Object('../source/math/lie-group.cpp'),
-        env.Object('../source/base/debug.cpp'),
-        env.Object('../source/base/gtsam.cpp'),
-    ]
-)
-targets += test_sfm
-
-test_pnp = env.mvSLAM_UnitTest\
-(
-    'test-pnp',
-    [
-        'test-pnp.cpp',
-        env.Object('unit-test-helper.cpp'),
-        env.Object('../source/vision/pnp-solve.cpp'),
-        env.Object('../source/vision/pnp-refine.cpp'),
-        env.Object('../source/vision/ba.cpp'),
-        env.Object('../source/vision/camera.cpp'),
-        env.Object('../source/math/lie-group.cpp'),
-        env.Object('../source/base/debug.cpp'),
-        env.Object('../source/base/gtsam.cpp'),
-    ]
-)
-targets += test_pnp
-
-test_directory_iterator = env.mvSLAM_UnitTest\
-(
-    'test-directory-iterator',
-    [
-        'test-directory-iterator.cpp',
-        env.Object('../source/os/directory-iterator.cpp'),
-    ]
-)
-env.Depends(test_directory_iterator, env.Glob('../data/tsukuba/*'))
-targets += test_directory_iterator
-
-test_frame_manager = env.mvSLAM_UnitTest\
-(
-    'test-frame-manager',
-    [
-        'test-frame-manager.cpp',
-        env.Object('../source/front-end/frame-manager.cpp'),
-        env.Object('../source/front-end/data-type.cpp'),
-        env.Object('../source/vision/visual-feature.cpp'),
-        env.Object('../source/base/image.cpp'),
-        env.Object('../source/base/debug.cpp'),
-        env.Object('../source/os/mutex.cpp'),
-    ]
-)
-env.Depends(test_frame_manager, env.Glob('../data/tsukuba/*'))
-targets += test_frame_manager
-
-test_image_pair = env.mvSLAM_UnitTest\
-(
-    'test-image-pair',
-    [
-        'test-image-pair.cpp',
-        env.Object('./unit-test-helper.cpp'),
-        env.Object('../source/front-end/image-pair.cpp'),
-        env.Object('../source/front-end/frame-manager.cpp'),
-        env.Object('../source/front-end/camera-manager.cpp'),
-        env.Object('../source/front-end/data-type.cpp'),
-        env.Object('../source/vision/visual-feature.cpp'),
-        env.Object('../source/vision/sfm-solve.cpp'),
-        env.Object('../source/vision/sfm-refine.cpp'),
-        env.Object('../source/vision/ba.cpp'),
-        env.Object('../source/vision/camera.cpp'),
-        env.Object('../source/base/gtsam.cpp'),
-        env.Object('../source/base/string-manipulation.cpp'),
-        env.Object('../source/base/parameter-manager.cpp'),
-        env.Object('../source/math/lie-group.cpp'),
-        env.Object('../source/base/image.cpp'),
-        env.Object('../source/base/debug.cpp'),
-        env.Object('../source/os/mutex.cpp'),
-    ]
-)
-env.Depends(test_image_pair, env.Glob('../data/tsukuba/*'))
-targets += test_image_pair
-
-test_visual_odometer = env.mvSLAM_UnitTest\
-(
-    'test-visual-odometer',
-    [
-        'test-visual-odometer.cpp',
-        env.Object('unit-test-helper.cpp'),
-        env.Object('../source/front-end/visual-odometer.cpp'),
-        env.Object('../source/front-end/image-pair.cpp'),
-        env.Object('../source/front-end/frame-manager.cpp'),
-        env.Object('../source/front-end/camera-manager.cpp'),
-        env.Object('../source/front-end/data-type.cpp'),
-        env.Object('../source/vision/visual-feature.cpp'),
-        env.Object('../source/vision/sfm-solve.cpp'),
-        env.Object('../source/vision/sfm-refine.cpp'),
-        env.Object('../source/vision/pnp-solve.cpp'),
-        env.Object('../source/vision/pnp-refine.cpp'),
-        env.Object('../source/vision/ba.cpp'),
-        env.Object('../source/vision/camera.cpp'),
-        env.Object('../source/base/parameter-manager.cpp'),
-        env.Object('../source/base/string-manipulation.cpp'),
-        env.Object('../source/base/gtsam.cpp'),
-        env.Object('../source/math/lie-group.cpp'),
-        env.Object('../source/base/image.cpp'),
-        env.Object('../source/base/debug.cpp'),
-        env.Object('../source/os/mutex.cpp'),
-    ]
-)
-env.Depends(test_visual_odometer, env.Glob('../data/tsukuba/*'))
-targets += test_visual_odometer 
-
-test_camera_manager = env.mvSLAM_UnitTest\
-(
-    'test-camera-manager',
-    [
-        'test-camera-manager.cpp',
-        env.Object('unit-test-helper.cpp'),
-        env.Object('../source/front-end/camera-manager.cpp'),
-        env.Object('../source/vision/camera.cpp'),
-        env.Object('../source/math/lie-group.cpp'),
-        env.Object('../source/base/debug.cpp'),
-        env.Object('../source/os/mutex.cpp'),
-    ]
-)
-env.Depends(test_camera_manager, env.Glob('../data/camera_config/sample.txt'))
-targets += test_camera_manager 
-
-test_graph = env.mvSLAM_UnitTest\
-(
-    'test-graph',
-    [
-        'test-graph.cpp',
-        env.Object('unit-test-helper.cpp'),
-        env.Object('../source/back-end/graph.cpp'),
-        env.Object('../source/back-end/data-type.cpp'),
-        env.Object('../source/base/gtsam.cpp'),
-        env.Object('../source/math/lie-group.cpp'),
-    ]
-)
-targets += test_graph
-
-test_parameter_manager = env.mvSLAM_UnitTest\
-(
-    'test-parameter-manager',
-    [
+targets += env.mvSLAM_UnitTest(
+    target='test-parameter-manager',
+    source=[
         'test-parameter-manager.cpp',
-        env.Object('../source/base/debug.cpp'),
-        env.Object('../source/base/string-manipulation.cpp'),
-        env.Object('../source/base/parameter-manager.cpp'),
+        '../source/base/debug.cpp',
+        '../source/base/string-manipulation.cpp',
+        '../source/base/parameter-manager.cpp',
     ]
 )
-targets += test_parameter_manager
+
+#================#
+#     VISION     #
+#================#
+
+targets += env.mvSLAM_UnitTest(
+    target='test-camera',
+    source=[
+        'test-camera.cpp',
+        '../source/vision/camera.cpp',
+        '../source/math/lie-group.cpp',
+    ]
+)
+
+targets += env.mvSLAM_UnitTest(
+    target='test-sfm',
+    source=[
+        'test-sfm.cpp',
+        'unit-test-helper.cpp',
+        '../source/vision/sfm-solve.cpp',
+        '../source/vision/sfm-refine.cpp',
+        '../source/vision/ba.cpp',
+        '../source/vision/camera.cpp',
+        '../source/vision/fundamental-matrix.cpp',
+        '../source/vision/estimator-RANSAC.cpp',
+        '../source/base/debug.cpp',
+        '../source/base/gtsam.cpp',
+    ],
+    internal_libs=[
+        'mvSLAM_math',
+    ],
+    external_libs=[
+        'mvSLAM_external_opencv',
+        'mvSLAM_external_gtsam',
+        'mvSLAM_external_boost',
+    ]
+)
+
+targets += env.mvSLAM_UnitTest(
+    target='test-pnp',
+    source=[
+        'test-pnp.cpp',
+        'unit-test-helper.cpp',
+        '../source/vision/pnp-solve.cpp',
+        '../source/vision/pnp-refine.cpp',
+        '../source/vision/ba.cpp',
+        '../source/vision/camera.cpp',
+        '../source/base/debug.cpp',
+        '../source/base/gtsam.cpp',
+    ],
+    internal_libs=[
+        'mvSLAM_math',
+    ],
+    external_libs=[
+        'mvSLAM_external_opencv',
+        'mvSLAM_external_gtsam',
+        'mvSLAM_external_boost',
+    ]
+)
+
+#============#
+#     OS     #
+#============#
+targets += env.mvSLAM_UnitTest(
+    target='test-directory-iterator',
+    source=[
+        'test-directory-iterator.cpp',
+        '../source/os/directory-iterator.cpp',
+    ]
+)
+env.Depends('test-directory-iterator', env.Glob('../data/tsukuba/*'))
+
+#===================#
+#     FRONT END     #
+#===================#
+targets += env.mvSLAM_UnitTest(
+    target='test-frame-manager',
+    source=[
+        'test-frame-manager.cpp',
+        '../source/front-end/frame-manager.cpp',
+        '../source/front-end/data-type.cpp',
+        '../source/vision/visual-feature.cpp',
+        '../source/base/image.cpp',
+        '../source/base/debug.cpp',
+        '../source/os/mutex.cpp',
+    ],
+    external_libs=[
+        'mvSLAM_external_opencv',
+        'mvSLAM_external_system',
+    ]
+)
+env.Depends('test-frame-manager', env.Glob('../data/tsukuba/*'))
+
+targets += env.mvSLAM_UnitTest(
+    target='test-camera-manager',
+    source=[
+        'test-camera-manager.cpp',
+        'unit-test-helper.cpp',
+        '../source/front-end/camera-manager.cpp',
+        '../source/vision/camera.cpp',
+        '../source/base/debug.cpp',
+        '../source/os/mutex.cpp',
+    ],
+    internal_libs=[
+        'mvSLAM_math',
+    ],
+    external_libs=[
+        'mvSLAM_external_system',
+    ]
+)
+env.Depends('test-camera-manager', env.Glob('../data/camera_config/sample.txt'))
+
+targets += env.mvSLAM_UnitTest(
+    target='test-image-pair',
+    source=[
+        'test-image-pair.cpp',
+        './unit-test-helper.cpp',
+        '../source/front-end/image-pair.cpp',
+        '../source/front-end/frame-manager.cpp',
+        '../source/front-end/camera-manager.cpp',
+        '../source/front-end/data-type.cpp',
+        '../source/vision/visual-feature.cpp',
+        '../source/vision/sfm-solve.cpp',
+        '../source/vision/sfm-refine.cpp',
+        '../source/vision/ba.cpp',
+        '../source/vision/camera.cpp',
+        '../source/os/mutex.cpp',
+    ],
+    internal_libs=[
+        'mvSLAM_base',
+        'mvSLAM_math',
+    ],
+    external_libs=[
+        'mvSLAM_external_opencv',
+        'mvSLAM_external_gtsam',
+        'mvSLAM_external_boost',
+        'mvSLAM_external_system',
+    ]
+)
+env.Depends('test-image-pair', env.Glob('../data/tsukuba/*'))
+
+targets += env.mvSLAM_UnitTest(
+    target='test-visual-odometer',
+    source=[
+        'test-visual-odometer.cpp',
+        'unit-test-helper.cpp',
+        '../source/front-end/visual-odometer.cpp',
+        '../source/front-end/image-pair.cpp',
+        '../source/front-end/frame-manager.cpp',
+        '../source/front-end/camera-manager.cpp',
+        '../source/front-end/data-type.cpp',
+        '../source/os/mutex.cpp',
+    ],
+    internal_modules=[
+        'mvSLAM_vision',
+    ],
+    internal_libs=[
+        'mvSLAM_base',
+        'mvSLAM_math',
+    ],
+    external_libs=[
+        'mvSLAM_external_opencv',
+        'mvSLAM_external_gtsam',
+        'mvSLAM_external_boost',
+        'mvSLAM_external_system',
+    ]
+)
+env.Depends('test-visual-odometer', env.Glob('../data/tsukuba/*'))
+
+#==================#
+#     BACK END     #
+#==================#
+targets += env.mvSLAM_UnitTest(
+    target='test-graph',
+    source=[
+        'test-graph.cpp',
+        'unit-test-helper.cpp',
+        '../source/back-end/graph.cpp',
+        '../source/back-end/data-type.cpp',
+        '../source/base/gtsam.cpp',
+    ],
+    internal_libs=[
+        'mvSLAM_math',
+    ],
+    external_libs=[
+        'mvSLAM_external_gtsam',
+        'mvSLAM_external_boost',
+    ]
+)
 
 Return(['targets'])
 

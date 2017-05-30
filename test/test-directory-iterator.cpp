@@ -6,7 +6,7 @@
 
 using namespace unit_test;
 
-UNIT_TEST(sfm_two_images)
+UNIT_TEST(directory_estimator)
 {
     const std::string directory("../data/tsukuba");
     const std::string extension("jpg");

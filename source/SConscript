@@ -1,30 +1,49 @@
 Import("env")
 
-mvSLAM_base_files = [
-    './base/debug.cpp',
-    './base/image.cpp',
-    './base/gtsam.cpp',
-    './base/string-manipulation.cpp',
-    './base/parameter-manager.cpp',
-]
+#============================#
+#     INTERNAL LIBRARIES     #
+#============================#
+internal_libs = []
 
-mvSLAM_math_files = [
-    './math/lie-group.cpp',
-    './math/space.cpp',
-]
+internal_libs += env.mvSLAM_Library(
+    target='mvSLAM_math',
+    source=[
+        './math/lie-group.cpp',
+        './math/space.cpp',
+    ]
+)
 
+internal_libs += env.mvSLAM_Library(
+    target='mvSLAM_base',
+    source=[
+        './base/debug.cpp',
+        './base/image.cpp',
+        './base/gtsam.cpp',
+        './base/string-manipulation.cpp',
+        './base/parameter-manager.cpp',
+    ]
+)
 
-mvSLAM_visualization_files = [
-    './visualization/visualizer.cpp',
-]
+internal_libs += env.mvSLAM_Library(
+    target='mvSLAM_os',
+    source=[
+        './os/time.cpp',
+        './os/event.cpp',
+        './os/mutex.cpp',
+        './os/directory-iterator.cpp',
+    ]
+)
 
-mvSLAM_os_files = [
-    './os/time.cpp',
-    './os/event.cpp',
-    './os/mutex.cpp',
-    './os/directory-iterator.cpp',
-]
+internal_libs += env.mvSLAM_Library(
+    target='mvSLAM_visualization',
+    source=[
+        './visualization/visualizer.cpp',
+    ]
+)
 
+#==========================#
+#     INTERNAL MODULES     #
+#==========================#
 mvSLAM_vision_files = [
     './vision/camera.cpp',
     './vision/visual-feature.cpp',
@@ -50,18 +69,10 @@ mvSLAM_front_end_files = [
     './front-end/visual-odometer.cpp',
 ]
 
-source_files = \
-    mvSLAM_base_files + \
-    mvSLAM_math_files + \
-    mvSLAM_visualization_files + \
-    mvSLAM_os_files + \
-    mvSLAM_vision_files + \
-    mvSLAM_back_end_files + \
-    mvSLAM_front_end_files
+internal_modules = {
+    "mvSLAM_vision" : [env.Object(s) for s in mvSLAM_vision_files],
+    "mvSLAM_front_end" : [env.Object(s) for s in mvSLAM_front_end_files],
+    "mvSLAM_back_end" : [env.Object(s) for s in mvSLAM_back_end_files],
+}
 
-targets = []
-for source_file in source_files:
-    object_file = env.Object(source_file)
-    targets.append(object_file)
-
-Return(["targets"])
+Return(["internal_libs", "internal_modules"])

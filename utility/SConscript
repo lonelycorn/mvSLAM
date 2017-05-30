@@ -5,26 +5,129 @@ targets = []
 #     TEST UTILS     #
 #====================#
 
-test_visualizer = env.mvSLAM_Program('test-visualizer', ['test-visualizer.cpp'])
-targets += test_visualizer 
+targets += env.mvSLAM_Program(
+    target='test-visualizer',
+    source=[
+        'test-visualizer.cpp',
+    ],
+    internal_libs=[
+        'mvSLAM_visualization',
+        'mvSLAM_os',
+        'mvSLAM_base',
+        'mvSLAM_math',
+    ],
+    external_libs=[
+        'mvSLAM_external_vtk',
+        'mvSLAM_external_pcl',
+        'mvSLAM_external_system',
+        'mvSLAM_external_boost',
+    ]
+)
 
-test_image_io = env.mvSLAM_Program('test-image-io', ['test-image-io.cpp'])
-targets += test_image_io
 
-test_visual_feature = env.mvSLAM_Program('test-visual-feature', ['test-visual-feature.cpp'])
-targets += test_visual_feature
+targets += env.mvSLAM_Program(
+    target='test-image-io',
+    source=[
+        'test-image-io.cpp',
+    ],
+    internal_libs=[
+        'mvSLAM_base',
+    ],
+    external_libs=[
+        'mvSLAM_external_opencv',
+    ]
+)
 
-reconstruct_scene = env.mvSLAM_Program('reconstruct-scene', ['reconstruct-scene.cpp'])
-targets += reconstruct_scene
+targets += env.mvSLAM_Program(
+    target='test-visual-feature',
+    source=[
+        'test-visual-feature.cpp',
+        '../source/vision/visual-feature.cpp',
+    ],
+    internal_libs=[
+        'mvSLAM_base',
+    ],
+    external_libs=[
+        'mvSLAM_external_opencv',
+    ]
+)
 
-calibrate_camera = env.mvSLAM_Program('calibrate-camera', ['calibrate-camera.cpp'])
-targets += calibrate_camera
+targets += env.mvSLAM_Program(
+    target='reconstruct-scene',
+    source=[
+        'reconstruct-scene.cpp',
+    ],
+    internal_modules=[
+        'mvSLAM_vision',
+    ],
+    internal_libs=[
+        'mvSLAM_visualization',
+        'mvSLAM_os',
+        'mvSLAM_base',
+        'mvSLAM_math',
+    ],
+    external_libs=[
+        'mvSLAM_external_gtsam',
+        'mvSLAM_external_opencv',
+        'mvSLAM_external_vtk',
+        'mvSLAM_external_pcl',
+        'mvSLAM_external_boost',
+        'mvSLAM_external_system',
+    ]
+)
 
-video_capture = env.mvSLAM_Program('video-capture', ['video-capture.cpp'])
-targets += video_capture
+targets += env.mvSLAM_Program(
+    target='calibrate-camera',
+    source=[
+        'calibrate-camera.cpp',
+        '../source/vision/camera.cpp',
+    ],
+    internal_libs=[
+        'mvSLAM_os',
+        'mvSLAM_base',
+        'mvSLAM_math',
+    ],
+    external_libs=[
+        'mvSLAM_external_opencv',
+    ]
+)
 
-visual_odometer = env.mvSLAM_Program('visual-odometer', ['visual-odometer.cpp'])
-targets += visual_odometer
+targets += env.mvSLAM_Program(
+    target='video-capture',
+    source=[
+        'video-capture.cpp',
+        '../source/os/time.cpp',
+    ],
+    external_libs=[
+        'mvSLAM_external_opencv',
+    ]
+)
+
+targets += env.mvSLAM_Program(
+    target='visual-odometer',
+    source=[
+        'visual-odometer.cpp',
+    ],
+    internal_modules=[
+        'mvSLAM_front_end',
+        'mvSLAM_vision',
+    ],
+    internal_libs=[
+        'mvSLAM_visualization',
+        'mvSLAM_os',
+        'mvSLAM_base',
+        'mvSLAM_math',
+    ],
+    external_libs=[
+        'mvSLAM_external_gtsam',
+        'mvSLAM_external_opencv',
+        'mvSLAM_external_vtk',
+        'mvSLAM_external_pcl',
+        'mvSLAM_external_boost',
+        'mvSLAM_external_system',
+    ]
+)
+
 
 Return(['targets'])
 
