@@ -1,7 +1,7 @@
 #include <base/debug.hpp>
 #include <base/parameter-manager.hpp>
 #include <os/mutex.hpp>
-#include <visualization/data-types.hpp>
+#include <visualization/data-type.hpp>
 #include <visualization/visualizer.hpp>
 
 #include <pcl/point_cloud.h>

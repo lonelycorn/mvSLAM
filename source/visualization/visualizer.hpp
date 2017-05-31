@@ -1,6 +1,6 @@
 #pragma once
 #include <os/time.hpp>
-#include <visualization/data-types.hpp>
+#include <visualization/data-type.hpp>
 
 #include <string>
 #include <vector>

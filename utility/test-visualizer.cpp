@@ -4,8 +4,7 @@
 
 #include <system-config.hpp>
 #include <base/error.hpp>
-#include <math/space.hpp>
-#include <visualization/data-types.hpp>
+#include <visualization/data-type.hpp>
 #include <visualization/visualizer.hpp>
 
 mvSLAM::VisualizationTypes::PointCloud
