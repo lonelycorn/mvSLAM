@@ -3,7 +3,7 @@
 #include <base/debug.hpp>
 #include <base/parameter-manager.hpp>
 #include <os/time.hpp>
-#include <visualization/visualizer.hpp>
+#include <visualization/visualizer-3d.hpp>
 #include <front-end/visual-odometer.hpp>
 #include <front-end/camera-manager.hpp>
 #include <front-end/frame-manager.hpp>
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
     }
 
     //  set up visualization
-    mvSLAM::Visualizer viewer("Visual Odometer", mvSLAM::Visualizer::get_default_params());
+    mvSLAM::Visualizer3d viewer("Visual Odometer", mvSLAM::Visualizer3d::get_default_params());
 
     const std::string image_txt_filename = directory + "/image.txt";
     std::fstream in(image_txt_filename, std::ios_base::in);

@@ -37,7 +37,7 @@ internal_libs += env.mvSLAM_Library(
 internal_libs += env.mvSLAM_Library(
     target='mvSLAM_visualization',
     source=[
-        './visualization/visualizer.cpp',
+        './visualization/visualizer-3d.cpp',
     ]
 )
 

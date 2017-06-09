@@ -8,10 +8,10 @@
 namespace mvSLAM
 {
 
-/// Forwared declaration
-class VisualizerImpl;
+/// Forward declaration
+class Visualizer3dImpl;
 
-class Visualizer
+class Visualizer3d
 {
 public:
     struct Params
@@ -22,8 +22,8 @@ public:
 
     static Params get_default_params();
 
-    Visualizer(const std::string &name, const Params &params);
-    ~Visualizer();
+    Visualizer3d(const std::string &name, const Params &params);
+    ~Visualizer3d();
     
     /** Visualize camera pose.
      * @param [in] id   unique ID of the camera.
@@ -49,7 +49,7 @@ public:
     /// return true if the GUI is closed.
     bool is_window_closed();
 private:
-    VisualizerImpl *m_impl;
+    Visualizer3dImpl *m_impl;
 };
 
 }

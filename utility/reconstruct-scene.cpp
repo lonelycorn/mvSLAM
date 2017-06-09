@@ -1,7 +1,7 @@
 #include <base/error.hpp>
 #include <base/image.hpp>
 #include <os/time.hpp>
-#include <visualization/visualizer.hpp>
+#include <visualization/visualizer-3d.hpp>
 #include <vision/visual-feature.hpp>
 #include <vision/camera.hpp>
 #include <vision/sfm.hpp>
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     }
 
     // visualize points
-    mvSLAM::Visualizer viewer("3D Reconstruction", mvSLAM::Visualizer::get_default_params());
+    mvSLAM::Visualizer3d viewer("3D Reconstruction", mvSLAM::Visualizer3d::get_default_params());
     viewer.set_point_cloud(0, pointsin1_scaled);
 
     // visualize camera poses

@@ -5,7 +5,7 @@
 #include <system-config.hpp>
 #include <base/error.hpp>
 #include <visualization/data-type.hpp>
-#include <visualization/visualizer.hpp>
+#include <visualization/visualizer-3d.hpp>
 
 mvSLAM::VisualizationTypes::PointCloud
 get_random_point_cloud(const int point_count)
@@ -44,8 +44,8 @@ get_random_camera_pose(mvSLAM::ScalarType x)
 
 int main()
 {
-    const auto params = mvSLAM::Visualizer::get_default_params();
-    mvSLAM::Visualizer viewer("whooja", params);
+    const auto params = mvSLAM::Visualizer3d::get_default_params();
+    mvSLAM::Visualizer3d viewer("whooja", params);
 
     for (int i = 0; i < 8; ++i)
     {

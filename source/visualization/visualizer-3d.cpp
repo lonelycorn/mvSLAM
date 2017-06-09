@@ -1,20 +1,20 @@
 #include <base/debug.hpp>
 #include <base/parameter-manager.hpp>
 #include <os/mutex.hpp>
-#include <visualization/data-type.hpp>
-#include <visualization/visualizer.hpp>
+#include <visualization/visualizer-3d.hpp>
 
 #include <pcl/point_cloud.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
+#include <cassert>
 #include <atomic>
 #include <thread>
 #include <random>
 
 namespace mvSLAM
 {
-static const std::string module_name("Visualizer");
-static Logger logger("[Visualizer]", true);
+static const std::string module_name("Visualizer3d");
+static Logger logger("[Visualizer3d]", true);
 
 // conversion functions for pcl::PointXYZ
 static pcl::PointXYZ
@@ -126,14 +126,14 @@ struct MetaDataCamera
     }
 };
 
-/// Data container for @ref Visualizer.
-struct VisualizerImpl
+/// Data container for @ref Visualizer3d.
+struct Visualizer3dImpl
 {
     const std::string name;
-    const Visualizer::Params params;
+    const Visualizer3d::Params params;
     std::atomic<bool> viewer_thread_should_exit;
 
-    Mutex mutex;  // protect everything down below
+    Mutex mutex;  // protects everything down below
     pcl::visualization::PCLVisualizer viewer;
     std::thread viewer_thread;
     std::unordered_map<VisualizationTypes::PointCloudId,
@@ -141,7 +141,7 @@ struct VisualizerImpl
     std::unordered_map<VisualizationTypes::CameraId,
             MetaDataCamera> meta_data_camera;
 
-    VisualizerImpl(const std::string &n, const Visualizer::Params &p):
+    Visualizer3dImpl(const std::string &n, const Visualizer3d::Params &p):
         name(n),
         params(p),
         viewer_thread_should_exit(false),
@@ -153,19 +153,20 @@ struct VisualizerImpl
     {
     }
 
-    ~VisualizerImpl() = default;
+    ~Visualizer3dImpl() = default;
 };
 
 static void
-run_viewer_thread(VisualizerImpl *v)
+run_viewer_thread(Visualizer3dImpl *v)
 {
+    assert(v);
     logger.info("thread start");
     while (!v->viewer_thread_should_exit.load() &&
            !v->viewer.wasStopped())
     {
         // FIXME: temp fix for race conditions. really all the modifications should
         // happen in the same thread context. That means we need to have an async
-        // queue, and add items to the queue in Visualizer API's, and pop and process
+        // queue, and add items to the queue in Visualizer3d API's, and pop and process
         // items here.
         Lock lock(v->mutex);
         v->viewer.spinOnce(v->params.view_update_interval_ms);
@@ -175,8 +176,8 @@ run_viewer_thread(VisualizerImpl *v)
     logger.info("thread stop");
 }
 
-Visualizer::Params
-Visualizer::get_default_params()
+Visualizer3d::Params
+Visualizer3d::get_default_params()
 {
     Params p;
 
@@ -189,10 +190,10 @@ Visualizer::get_default_params()
     return p;
 }
 
-Visualizer::Visualizer(const std::string &name, const Params &params):
-    m_impl(new VisualizerImpl(name, params))
+Visualizer3d::Visualizer3d(const std::string &name, const Params &params):
+    m_impl(new Visualizer3dImpl(name, params))
 {
-    logger.info("constructor, ", name);
+    logger.info("constructor, ", m_impl->name);
 
     Lock lock(m_impl->mutex);
 
@@ -203,17 +204,20 @@ Visualizer::Visualizer(const std::string &name, const Params &params):
     m_impl->viewer_thread = std::thread(run_viewer_thread, m_impl);
 }
 
-Visualizer::~Visualizer()
+Visualizer3d::~Visualizer3d()
 {
-    // m_impl's dtor is called after this dtor
-    logger.info("desctructor");
+    logger.info("destructor, ", m_impl->name);
     // terminate viewer thread and wait
     m_impl->viewer_thread_should_exit = true;
-    m_impl->viewer_thread.join();
+    m_impl->viewer_thread.join(); // FIXME: will this cause a race condition?
+
+    // m_impl's dtor is called here
+    delete(m_impl);
+    m_impl = nullptr;
 }
 
 void
-Visualizer::set_camera_pose(VisualizationTypes::CameraId id,
+Visualizer3d::set_camera_pose(VisualizationTypes::CameraId id,
         const Transformation &T_camera_to_world,
         ScalarType scale)
 {
@@ -257,7 +261,7 @@ Visualizer::set_camera_pose(VisualizationTypes::CameraId id,
 
 template <typename PointCloudType>
 static void
-__set_point_cloud(VisualizerImpl *m_impl,
+__set_point_cloud(Visualizer3dImpl *m_impl,
         VisualizationTypes::PointCloudId id,
         const PointCloudType &pc)
 {
@@ -268,6 +272,7 @@ __set_point_cloud(VisualizerImpl *m_impl,
     {
         m_impl->meta_data_point_cloud.emplace(id, MetaDataPointCloud(id));
         const auto &m = m_impl->meta_data_point_cloud.at(id);
+        // NOTE: a color handler is a must for rendering colored point cloud
         const pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
             color_handler(pcl_point_cloud, m.r * 255, m.g * 255, m.b * 255);
         m_impl->viewer.addPointCloud<pcl::PointXYZ>(pcl_point_cloud,
@@ -287,21 +292,21 @@ __set_point_cloud(VisualizerImpl *m_impl,
 }
 
 void
-Visualizer::set_point_cloud(VisualizationTypes::PointCloudId id,
+Visualizer3d::set_point_cloud(VisualizationTypes::PointCloudId id,
         const VisualizationTypes::PointCloud &pc)
 {
     __set_point_cloud(m_impl, id, pc);
 }
 
 void
-Visualizer::set_point_cloud(VisualizationTypes::PointCloudId id,
+Visualizer3d::set_point_cloud(VisualizationTypes::PointCloudId id,
         const std::vector<VisualizationTypes::Point3> &pc)
 {
     __set_point_cloud(m_impl, id, pc);
 }
 
 bool
-Visualizer::is_window_closed()
+Visualizer3d::is_window_closed()
 {
     Lock lock(m_impl->mutex);
     return m_impl->viewer.wasStopped();
