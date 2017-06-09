@@ -1,7 +1,7 @@
 #pragma once
-#include <base/image.hpp>
 #include <math/matrix.hpp>
-#include <math/space.hpp>
+#include <base/image.hpp>
+#include <base/data-type.hpp>
 #include <string>
 #include <vector>
 

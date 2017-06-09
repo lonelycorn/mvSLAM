@@ -1,19 +1,7 @@
 #pragma once
-#include <math/lie-group.hpp>
-#include <iostream>
-#include <cstddef>
-
 namespace mvSLAM
 {
-
-class Id
-{
-public:
-    using Type = std::size_t;
-    static constexpr Type INVALID = static_cast<Type>(-1);
-};
-
-
+/// Random variables with Gaussian distribution.
 template <typename MeanType, typename CovarType>
 class StateEstimate 
 {
@@ -40,8 +28,10 @@ public:
 
     const CovarType &info() const
     {
+        // NOTE: we may want to cache this value
         return _covar.inverse();
     }
+
     /**
      * @brief Ctor.
      * @note we may want to use information matrix instead
@@ -50,27 +40,19 @@ public:
         _mean(mean), _covar(covar)
     {
     }
+
     /// Default ctor.
     StateEstimate():
         _mean(), _covar(CovarType::Identity())
     {
     }
-    ~StateEstimate() {}
+    ~StateEstimate()
+    {
+    }
+
 private:
     MeanType _mean;
     CovarType _covar;
 };
-
-using Transformation = SE3;
-using TransformationUncertainty = Matrix6Type;
-using TransformationEstimate = StateEstimate<Transformation, TransformationUncertainty>;
-
-using Point3 = Vector3Type;
-using Point3Uncertainty = Matrix3Type;
-using Point3Estimate = StateEstimate<Point3, Point3Uncertainty>;
-
-using Point2 = Vector2Type;
-using Point2Uncertainty = Matrix2Type;
-using Point2Estimate = StateEstimate<Point2, Point2Uncertainty>;
 
 }

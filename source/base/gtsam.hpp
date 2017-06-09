@@ -1,5 +1,5 @@
 #pragma once
-#include <math/space.hpp>
+#include <base/data-type.hpp>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/geometry/Point3.h>
 #include <gtsam/geometry/Point2.h>

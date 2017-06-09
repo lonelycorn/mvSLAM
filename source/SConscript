@@ -9,7 +9,6 @@ internal_libs += env.mvSLAM_Library(
     target='mvSLAM_math',
     source=[
         './math/lie-group.cpp',
-        './math/space.cpp',
     ]
 )
 
@@ -21,6 +20,7 @@ internal_libs += env.mvSLAM_Library(
         './base/gtsam.cpp',
         './base/string-manipulation.cpp',
         './base/parameter-manager.cpp',
+        './base/data-type.cpp',
     ]
 )
 

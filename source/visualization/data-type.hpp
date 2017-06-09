@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 #include <math/matrix.hpp>
-#include <math/space.hpp>
+#include <base/data-type.hpp>
 
 namespace mvSLAM
 {

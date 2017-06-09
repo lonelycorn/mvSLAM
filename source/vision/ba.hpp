@@ -1,5 +1,5 @@
 #pragma once
-#include <math/space.hpp>
+#include <base/data-type.hpp>
 #include <vision/camera.hpp>
 #include <unordered_set>
 #include <unordered_map>
