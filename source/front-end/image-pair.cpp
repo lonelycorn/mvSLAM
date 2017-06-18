@@ -37,30 +37,32 @@ ImagePair::ImagePair(const FrontEndTypes::FramePtr &base_frame_,
     match_inlier_count(0),
     match_inlier_ssd(-1), // delibrate overflow
     T_pair_to_base(),
-    points(),
+    matched_points(),
 
     error(infinity),
-    T_pair_to_base_estimate(),
-    point_estimates(),
+    T_pair_to_base_covar(),
+    matched_points_covar(),
 
     m_state(State::INIT),
-    m_params(params),
-    matches_base_to_pair(),
-    point_index_in_match()
+    m_params(params)
 {
     assert(base_frame->id != pair_frame->id);
+    assert(base_frame->id != Id::INVALID);
+    assert(pair_frame->id != Id::INVALID);
+
     logger.info("constructor, base frame id = ", base_frame_->id,
                 ", pair frame id = ", pair_frame_->id);
 
     // a vector of {trainIdx, queryIdx, distance}
-    matches_base_to_pair= VisualFeature::match_visual_features(
+    auto matches_base_to_pair = VisualFeature::match_visual_features(
             base_frame->visual_feature,
             pair_frame->visual_feature,
             m_params.max_match_inlier_distance);
 
-    logger.debug(matches_base_to_pair.size(), " matches found");
+    logger.debug(matches_base_to_pair.size(), " matches found, ",
+                 "using inlier dist = ", m_params.max_match_inlier_distance);
 
-    reconstruct();
+    reconstruct(matches_base_to_pair);
 
     if (valid && m_params.refine_structure_in_constructor)
     {
@@ -75,6 +77,11 @@ ImagePair::~ImagePair()
 bool
 ImagePair::update(const FrontEndTypes::FramePtr &new_frame)
 {
+    if ((new_frame->id == base_frame->id) ||
+        (new_frame->id == pair_frame->id))
+    {
+        return false;
+    }
     // perform light-weight reconstruction only
     auto params = m_params;
     params.refine_structure_in_constructor = false;
@@ -106,7 +113,7 @@ ImagePair::update(const FrontEndTypes::FramePtr &new_frame)
 }
 
 bool
-ImagePair::reconstruct()
+ImagePair::reconstruct(const VisualFeatureConfig::MatchResultType &matches_base_to_pair)
 {
     assert(State::INIT == m_state);
 
@@ -134,26 +141,28 @@ ImagePair::reconstruct()
 
     // reconstruct structure
     const CameraIntrinsics &K = CameraManager::get_camera().get_intrinsics();
+    std::vector<Point3> points;
+    std::vector<size_t> point_indexes; // point indexes in matches_base_to_pair
     valid = sfm_solve(base_points,
                       pair_points,
                       K,
                       T_pair_to_base,
                       points,
-                      point_index_in_match);
+                      point_indexes);
     if (!valid)
     {
         logger.info("reconstruct, failed");
     }
     else
     {
-        match_inlier_count = point_index_in_match.size();
-        visual_feature_index_in_base.reserve(match_inlier_count);
-        visual_feature_index_in_pair.reserve(match_inlier_count);
-        for (auto idx : point_index_in_match)
+        match_inlier_count = point_indexes.size();
+        matched_points.reserve(match_inlier_count);
+        for (auto idx : point_indexes)
         {
             const auto &m = matches_base_to_pair[idx];
-            visual_feature_index_in_base.push_back(m.trainIdx);
-            visual_feature_index_in_pair.push_back(m.queryIdx);
+
+            matched_points.emplace_back(points[idx], m.trainIdx, m.queryIdx);
+
             match_inlier_ssd += sqr(m.distance);
         }
         logger.debug("reconstruct, inliers count = ", match_inlier_count,
@@ -175,22 +184,30 @@ ImagePair::refine()
     base_point_estimates.reserve(match_inlier_count);
     {
         std::vector<Point2Estimate> point_estimates = base_frame->visual_feature.get_point_estimates();
-        for (auto idx : visual_feature_index_in_base)
+        for (const auto &mp : matched_points)
         {
-            base_point_estimates.push_back(point_estimates[idx]);
+            base_point_estimates.push_back(point_estimates[mp.vf_idx_in_base]);
         }
     }
     std::vector<Point2Estimate> pair_point_estimates;
     pair_point_estimates.reserve(match_inlier_count);
     {
         std::vector<Point2Estimate> point_estimates = pair_frame->visual_feature.get_point_estimates();
-        for (auto idx : visual_feature_index_in_pair)
+        for (const auto &mp : matched_points)
         {
-            pair_point_estimates.push_back(point_estimates[idx]);
+            pair_point_estimates.push_back(point_estimates[mp.vf_idx_in_pair]);
         }
+    }
+    std::vector<Point3> points;
+    points.reserve(match_inlier_count);
+    for (const auto &mp : matched_points)
+    {
+        points.push_back(mp.position);
     }
 
     const CameraIntrinsics &K = CameraManager::get_camera().get_intrinsics();
+    std::vector<Point3Estimate> point_estimates;
+    TransformationEstimate T_pair_to_base_estimate;
     valid = sfm_refine(base_point_estimates,
                        pair_point_estimates,
                        K,
@@ -205,6 +222,14 @@ ImagePair::refine()
     }
     else
     {
+        T_pair_to_base = T_pair_to_base_estimate.mean();
+        T_pair_to_base_covar = T_pair_to_base_estimate.covar();
+        matched_points_covar.reserve(match_inlier_count);
+        for (size_t i = 0; i < match_inlier_count; ++i)
+        {
+            matched_points[i].position = point_estimates[i].mean();
+            matched_points_covar.emplace_back(point_estimates[i].covar());
+        }
         logger.debug("refine, error = ", error, ", T_pair_to_base_estimate.mean() =\n",
                      T_pair_to_base_estimate.mean());
         m_state = State::REFINED;

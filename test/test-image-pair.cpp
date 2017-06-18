@@ -13,7 +13,6 @@ UNIT_TEST(image_pair)
     const mvSLAM::ScalarType tolerance(1e-3);
     const std::string directory("../data/tsukuba/");
     const std::string extension(".jpg");
-    const std::string pair_frame_filename(directory + std::to_string(2) + extension);
     mvSLAM::FrontEndTypes::FramePtr base_frame, pair_frame;
 
     {

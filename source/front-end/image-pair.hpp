@@ -8,21 +8,19 @@ namespace mvSLAM
 class ImagePair
 {
 public:
-    /*
+
     struct MatchedPoint
     {
-        Point3 point;
+        Point3 position;
         size_t vf_idx_in_base;
         size_t vf_idx_in_pair;
+        /// ctor
+        MatchedPoint(Point3 &p, size_t viib, size_t viip):
+            position(p), vf_idx_in_base(viib), vf_idx_in_pair(viip)
+        {
+        }
     };
 
-    struct MatchedPointEstimate
-    {
-        Point3Estimate point;
-        size_t vf_idx_in_base;
-        size_t vf_idx_in_pair;
-    };
-    */
     struct Params
     {
         /// max distance for a match to be considered as an inlier.
@@ -49,6 +47,9 @@ public:
      */
     bool update(const FrontEndTypes::FramePtr &new_frame);
 
+    /** Refine and get the matched point estimate
+     *@return true if successfully refined; false otherwise.
+     */
     bool refine();
 
     // TODO: encapsulate these members
@@ -60,17 +61,16 @@ public:
     uint32_t match_inlier_count; // number of inlier matched descriptors
     uint32_t match_inlier_ssd; // SSD of inlier matched descriptors
     Transformation T_pair_to_base;
-    std::vector<Point3> points; // for inliers only
-    std::vector<size_t> visual_feature_index_in_base; // for inliers only
-    std::vector<size_t> visual_feature_index_in_pair; // for inliers only
+    std::vector<MatchedPoint> matched_points; // inliers only
 
     // states that are available after refine()
     ScalarType error; // total error after refinement
-    TransformationEstimate T_pair_to_base_estimate;
-    std::vector<Point3Estimate> point_estimates; // for inliers only
+    TransformationUncertainty T_pair_to_base_covar;
+    std::vector<Point3Uncertainty> matched_points_covar;
+
 
 protected:
-    bool reconstruct();
+    bool reconstruct(const VisualFeatureConfig::MatchResultType &matches_base_to_pair);
 
     enum State
     {
@@ -81,7 +81,6 @@ protected:
     State m_state;
     Params m_params;
     VisualFeatureConfig::MatchResultType matches_base_to_pair; // raw matches
-    std::vector<size_t> point_index_in_match; // original indexes in @ref matches_base_to_pair of all the inlier points
 };
 
 }
