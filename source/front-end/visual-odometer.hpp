@@ -33,7 +33,7 @@ public:
         ScalarType max_translation_z;
 
         // for tracking
-        size_t min_tracked_point_match_count; // for pnp
+        size_t min_pnp_point_count;
         size_t min_tracked_point_count;
 
         // for bundle-adjustment
@@ -82,54 +82,104 @@ public:
     std::vector<Point3> get_tracked_points() const;
 
 private:
-
-    /** Try to find a good image pair to start tracking
-     */
-    bool initialize(const FrontEndTypes::FramePtr &new_frame);
-
-    /// return true if @p ip is good for initialization
-    bool check_image_pair(const ImagePair &ip) const;
-
-    /** Try to find the pose of @p new_frame.
-     */
-    bool track(const FrontEndTypes::FramePtr &new_frame);
-
-    const Params m_params;
-
-    mutable Mutex m_mutex;
+    // TODO: maybe move these into FrontEndTypes
+    using PointId = Id::Type;
+    PointId generate_point_id();
 
     enum class State
     {
         INITIALIZING, ///< trying to find a good image pair
         TRACKING, ///< normal operation
     };
+
+    struct TrackedPoint
+    {
+        /// unique identifier
+        PointId id;
+        /// position of tracked point in init __CAMERA__ ref frame
+        Point3 position;
+        /// index in the VisualFeature in the latest frame
+        size_t vf_idx_last_frame;
+        TrackedPoint(PointId i, const Point3 &p, size_t v):
+            id(i), position(p), vf_idx_last_frame(v)
+        {
+        }
+    };
+
+    /** Try to find a good image pair to start tracking
+     */
+    bool initialize();
+
+    /// return true if @p ip is good for initialization
+    bool check_image_pair(const ImagePair &ip) const;
+
+    /** Try to find the pose of @p new_frame.
+     */
+    bool track();
+
+    /** Solve PnP on the new image pair.
+     * @param [in] ip
+     * @param [out] pnp_tracked_points
+     * @param [out] pnp_new_frame_vf_idx_to_point_id
+     * @param [out] T_new_frame_to_init_frame
+     * @param [out] scale
+     * @return true if success; otherwise false, and the states are not changed.
+     */
+    bool track_pnp(
+            const ImagePair &ip,
+            std::unordered_map<PointId, TrackedPoint> &pnp_tracked_points,
+            std::unordered_map<size_t, PointId> &pnp_new_frame_vf_idx_to_point_id,
+            Transformation &T_new_frame_to_init_frame,
+            ScalarType &scale) const;
+
+    /** Refine the 3D reconstruction.
+     * @param [in] ip
+     * @param [in] tracked_points
+     * @param [in] new_frame_vf_idx_to_point_id
+     * @param [in] last_frame_vf_idx_to_point_id
+     * @param [in] T_new_frame_to_last_frame
+     * @param [out] tracked_point_estimate
+     * @param [out] T_new_frame_to_init_frame_estimate
+     * @param [out] final_error
+     */
+    void track_refine(
+            const ImagePair &ip,
+            const std::unordered_map<PointId, TrackedPoint> &tracked_points,
+            const std::unordered_map<size_t, PointId> &new_frame_vf_idx_to_point_id,
+            const std::unordered_map<size_t, PointId> &last_frame_vf_idx_to_point_id,
+            const Transformation &T_new_frame_to_init_frame,
+            std::unordered_map<PointId, Point3Estimate> &tracked_point_estimate,
+            TransformationEstimate &T_new_frame_to_init_frame_estimate,
+            ScalarType &final_error) const;
+
+    const Params m_params;
+
+    mutable Mutex m_mutex;
+
     State m_state;
 
     // Truely, we should use the descriptor as the key to index everything.
     // however, that requires a good hash function for 256-bit integer,
     // or a KD-tree.
 
-    // TODO: maybe move these into FrontEndTypes
-    using PointId = Id::Type;
-    PointId generate_point_id();
 
-    // use when INITIALIZING
     std::deque<FrontEndTypes::FramePtr> m_frame_queue;
+
+    // use only when INITIALIZING
     std::deque<ImagePair> m_image_pair_queue;
 
-    // use when TRACKING
-    FrontEndTypes::FramePtr m_last_frame;
     /** Transformation from the camera ref frame of last initialization to
      * the camera ref frame of the latest frame. i.e. T_C0_to_Cn
      * Saving this instead of its inverse to save time converting points.
      */
-    Transformation T_init_frame_to_last_frame;
-    /// coordinates of tracked points in init ref frame.
-    std::unordered_map<PointId, Point3> m_point_id_to_point3;
-    /// indexes of the reconstructed points in latest frame's VisualFeature
-    std::unordered_map<PointId, size_t> m_point_id_to_last_frame_vf_idx;
-    /// inverse mapping of @ref m_point_id_to_last_frame_vf_idx;
+    Transformation T_last_frame_to_init_frame;
+
+    /// tracked points
+    std::unordered_map<PointId, TrackedPoint> m_tracked_points;
+
+    /// mapping from last frame visual feature index to point id
     std::unordered_map<size_t, PointId> m_last_frame_vf_idx_to_point_id;
+
 };
 
 };
