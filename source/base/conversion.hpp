@@ -30,7 +30,7 @@ int convert_to_int(const std::string &v)
     return std::stoi(v);
 }
 
-/*===== to int ======*/
+/*===== to ScalarType ======*/
 template <typename T>
 ScalarType convert_to_ScalarType(const T &v)
 {
@@ -48,10 +48,12 @@ ScalarType convert_to_ScalarType(const std::string &v)
 template <typename NumericType>
 bool convert_to_bool(const NumericType &v)
 {
+    // NOTE: in C++ anything non-zero is "true". We are using a different
+    // definition here.
     return (v > 0);
 }
 
-/// return true if @p v is a positive scalar, or equavalence of "true"
+/// return true if @p v_ is a positive scalar, or equavalence of "true"
 template <> inline
 bool convert_to_bool(const std::string &v_)
 {
@@ -85,6 +87,7 @@ struct Conversion<T, T>
     }
 };
 
+/// to int
 template <typename FromType>
 struct Conversion<int, FromType>
 {
@@ -94,19 +97,21 @@ struct Conversion<int, FromType>
     }
 };
 
+/// to ScalarType
 template <typename FromType>
 struct Conversion<ScalarType, FromType>
 {
-    static inline int convert(const FromType &v)
+    static inline ScalarType convert(const FromType &v)
     {
         return convert_to_ScalarType(v);
     }
 };
 
+/// to bool
 template <typename FromType>
 struct Conversion<bool, FromType>
 {
-    static inline int convert(const FromType &v)
+    static inline bool convert(const FromType &v)
     {
         return convert_to_bool(v);
     }
