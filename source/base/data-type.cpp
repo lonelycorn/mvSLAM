@@ -5,7 +5,7 @@ constexpr Id::Type Id::INVALID;
 
 KeyPointImage::KeyPointImage():
     id(Id::INVALID),
-    key_points(),
+    keypoints(),
     image()
 {
 }

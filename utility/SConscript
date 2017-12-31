@@ -6,9 +6,32 @@ targets = []
 #====================#
 
 targets += env.mvSLAM_Program(
-    target='test-visualizer',
+    target='test-visualizer-2d',
     source=[
-        'test-visualizer.cpp',
+        'test-visualizer-2d.cpp',
+    ],
+    internal_modules=[
+        'mvSLAM_vision',
+    ],
+    internal_libs=[
+        'mvSLAM_visualization',
+        'mvSLAM_base',
+        'mvSLAM_os',
+        'mvSLAM_math',
+    ],
+    external_libs=[
+        'mvSLAM_external_gtsam',
+        'mvSLAM_external_opencv',
+        'mvSLAM_external_boost',
+        'mvSLAM_external_system',
+    ]
+)
+
+
+targets += env.mvSLAM_Program(
+    target='test-visualizer-3d',
+    source=[
+        'test-visualizer-3d.cpp',
     ],
     internal_libs=[
         'mvSLAM_visualization',

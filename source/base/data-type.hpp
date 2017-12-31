@@ -34,7 +34,7 @@ using Point2Cloud = std::unordered_map<Id::Type, Point2>;
 struct KeyPointImage
 {
     Id::Type id;
-    Point2Cloud key_points;
+    Point2Cloud keypoints;
     ImageGrayscale image;
 
     KeyPointImage();
@@ -44,7 +44,11 @@ struct KeyPointImagePair
 {
     KeyPointImage base;
     KeyPointImage pair;
-    
+    // base, pair
+    std::vector<std::pair<size_t, size_t> > raw_matches;
+    // base, pair
+    std::vector<std::pair<size_t, size_t> > inlier_matches;
+
     KeyPointImagePair();
 };
 

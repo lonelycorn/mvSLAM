@@ -1,7 +1,6 @@
 #pragma once
 
 #include <unordered_map>
-
 #include <math/matrix.hpp>
 #include <base/data-type.hpp>
 
@@ -16,6 +15,9 @@ struct VisualizationTypes
 
     using PointCloudId = Id::Type;
     using PointCloud = std::unordered_map<PointId, Point3>;
+
+    using KeyFrame = mvSLAM::KeyPointImage;
+    using MatchedImagePair = mvSLAM::KeyPointImagePair;
 };
 
 }
