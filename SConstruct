@@ -77,8 +77,14 @@ env.Append(CPPPATH=[
     "/usr/include/boost/",
 ])
 env.Append(CPPDEFINES=[
+    # FIXME: Eigen's SVD may not be as stable as OpenCV's implementation.
     "USE_OPENCV_SVD",
     "USE_OPENCV_ESSENTIAL_MATRIX",
+    # FIXME: The following two defines disable the vectorization, so that we don't need
+    # to worry about Eigen's special requirement on memory alignment. However this would
+    # slow down the system.
+    "EIGEN_DONT_VECTORIZE",
+    "EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT",
 ])
 env.Append(LIBPATH=[
     "/usr/lib",
